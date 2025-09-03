@@ -177,12 +177,7 @@ export default function TVDisplay() {
                       className="w-8 h-8 md:w-12 md:h-12 object-contain"
                     />
                   </div>
-                  <div className={isMobile ? "hidden md:block" : ""}>
-                    <h1 className="text-xl md:text-3xl font-display font-bold tracking-wide">DEVI JEWELLERS</h1>
-                    <p className="text-gold-200 text-xs md:text-sm">Premium Gold & Silver Collection</p>
-                  </div>
-                </div>
-                
+                                  
                 {/* Date and Time */}
                 <div className="text-right bg-black bg-opacity-30 px-3 py-1 md:px-6 md:py-3 rounded-lg backdrop-blur-sm">
                   <div className="text-sm md:text-lg font-semibold text-gold-200">
