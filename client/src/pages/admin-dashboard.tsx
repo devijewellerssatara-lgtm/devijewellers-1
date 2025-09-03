@@ -58,6 +58,7 @@ export default function AdminDashboard() {
       try {
         // Try to update existing settings
         if (settings?.id) {
+         throw new Error("No existing settings found. Please check your backend.");
           return await settingsApi.updateDisplay(settings.id, data);
         } else {
           // If no settings exist, create new ones
