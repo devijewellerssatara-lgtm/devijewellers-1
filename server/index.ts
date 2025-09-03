@@ -1,24 +1,7 @@
-// Add this at the beginning of your async IIFE
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-  console.error("DATABASE_URL environment variable is required");
-  process.exit(1);
-}
-
-// You can add a simple health check to verify database connection
-app.get("/api/health", async (req, res) => {
-  try {
-    const client = postgres(connectionString);
-    await client`SELECT 1`;
-    await client.end();
-    res.json({ status: "healthy", database: "connected" });
-  } catch (error) {
-    res.status(500).json({ status: "unhealthy", database: "disconnected", error: error.message });
-  }
-});
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import postgres from "postgres";
 
 const app = express();
 app.use(express.json());
@@ -52,6 +35,31 @@ app.use((req, res, next) => {
   });
 
   next();
+});
+
+// Health check endpoint
+app.get("/api/health", async (req, res) => {
+  try {
+    const connectionString = process.env.DATABASE_URL;
+    if (!connectionString) {
+      return res.status(500).json({ 
+        status: "unhealthy", 
+        database: "disconnected", 
+        error: "DATABASE_URL not set" 
+      });
+    }
+
+    const client = postgres(connectionString);
+    await client`SELECT 1`;
+    await client.end();
+    res.json({ status: "healthy", database: "connected" });
+  } catch (error) {
+    res.status(500).json({ 
+      status: "unhealthy", 
+      database: "disconnected", 
+      error: error.message 
+    });
+  }
 });
 
 (async () => {
