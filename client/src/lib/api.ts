@@ -1,4 +1,3 @@
-import { apiRequest } from "./queryClient";
 import type { 
   GoldRate, 
   InsertGoldRate, 
@@ -9,10 +8,44 @@ import type {
   BannerSettings 
 } from "@shared/schema";
 
+// Helper function for API requests
+const apiRequest = async (method: string, url: string, data?: any): Promise<Response> => {
+  const options: RequestInit = {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  };
+
+  if (data && method !== 'GET' && method !== 'HEAD') {
+    options.body = JSON.stringify(data);
+  }
+
+  const response = await fetch(url, options);
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`API Error (${response.status}):`, errorText);
+    
+    // Try to parse error as JSON, otherwise use text
+    let errorMessage = `HTTP error! status: ${response.status}`;
+    try {
+      const errorJson = JSON.parse(errorText);
+      errorMessage = errorJson.message || errorMessage;
+    } catch {
+      errorMessage = errorText || errorMessage;
+    }
+    
+    throw new Error(errorMessage);
+  }
+
+  return response;
+};
+
 // Gold Rates API
 export const ratesApi = {
   getCurrent: async (): Promise<GoldRate | null> => {
-    const response = await fetch("/api/rates/current");
+    const response = await apiRequest("GET", "/api/rates/current");
     return response.json();
   },
 
@@ -22,16 +55,12 @@ export const ratesApi = {
   }
 };
 
-// Display Settings API
+// Display Settings API - FIXED: Use only PUT since backend doesn't have POST
 export const settingsApi = {
   getDisplay: async (): Promise<DisplaySettings> => {
-    const response = await fetch("/api/settings/display");
-    return response.json();
-  },
-
-  createDisplay: async (settings: InsertDisplaySettings): Promise<DisplaySettings> => {
-    const response = await apiRequest("POST", "/api/settings/display", settings);
-    return response.json();
+    const response = await apiRequest("GET", "/api/settings/display");
+    const data = await response.json();
+    return data || {};
   },
 
   updateDisplay: async (id: number, settings: Partial<InsertDisplaySettings>): Promise<DisplaySettings> => {
@@ -39,10 +68,11 @@ export const settingsApi = {
     return response.json();
   }
 };
+
 // Media API
 export const mediaApi = {
   getAll: async (activeOnly = false): Promise<MediaItem[]> => {
-    const response = await fetch(`/api/media?active=${activeOnly}`);
+    const response = await apiRequest("GET", `/api/media?active=${activeOnly}`);
     return response.json();
   },
 
@@ -56,6 +86,11 @@ export const mediaApi = {
       method: "POST",
       body: formData
     });
+    
+    if (!response.ok) {
+      throw new Error(`Upload failed: ${response.status}`);
+    }
+    
     return response.json();
   },
 
@@ -66,16 +101,13 @@ export const mediaApi = {
 
   delete: async (id: number): Promise<void> => {
     await apiRequest("DELETE", `/api/media/${id}`);
-  },
-
-  reorder: async (updates: { id: number; order_index: number }[]): Promise<void> => {
-    await apiRequest("POST", "/api/media/reorder", { updates });
   }
 };
+
 // Promo API
 export const promoApi = {
   getAll: async (activeOnly = false): Promise<PromoImage[]> => {
-    const response = await fetch(`/api/promo?active=${activeOnly}`);
+    const response = await apiRequest("GET", `/api/promo?active=${activeOnly}`);
     return response.json();
   },
 
@@ -90,6 +122,11 @@ export const promoApi = {
       method: "POST",
       body: formData
     });
+    
+    if (!response.ok) {
+      throw new Error(`Upload failed: ${response.status}`);
+    }
+    
     return response.json();
   },
 
@@ -106,7 +143,7 @@ export const promoApi = {
 // Banner API
 export const bannerApi = {
   getCurrent: async (): Promise<BannerSettings | null> => {
-    const response = await fetch("/api/banner");
+    const response = await apiRequest("GET", "/api/banner");
     return response.json();
   },
 
@@ -118,6 +155,11 @@ export const bannerApi = {
       method: "POST",
       body: formData
     });
+    
+    if (!response.ok) {
+      throw new Error(`Upload failed: ${response.status}`);
+    }
+    
     return response.json();
   }
 };
@@ -125,7 +167,7 @@ export const bannerApi = {
 // System API
 export const systemApi = {
   getInfo: async () => {
-    const response = await fetch("/api/system/info");
+    const response = await apiRequest("GET", "/api/system/info");
     return response.json();
   }
 };
