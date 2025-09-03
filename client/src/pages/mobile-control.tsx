@@ -26,15 +26,15 @@ export default function MobileControl() {
   const form = useForm<z.infer<typeof insertGoldRateSchema>>({
     resolver: zodResolver(insertGoldRateSchema),
     defaultValues: {
-      gold_24k_sale: currentRates?.gold_24k_sale || 74850,
-      gold_24k_purchase: currentRates?.gold_24k_purchase || 73200,
-      gold_22k_sale: currentRates?.gold_22k_sale || 68620,
-      gold_22k_purchase: currentRates?.gold_22k_purchase || 67100,
-      gold_18k_sale: currentRates?.gold_18k_sale || 56140,
-      gold_18k_purchase: currentRates?.gold_18k_purchase || 54900,
-      silver_per_kg_sale: currentRates?.silver_per_kg_sale || 92500,
-      silver_per_kg_purchase: currentRates?.silver_per_kg_purchase || 90800,
-      is_active: true
+      gold_24k_sale: currentRates?.gold_24k_sale ?? 0,
+      gold_24k_purchase: currentRates?.gold_24k_purchase ?? 0,
+      gold_22k_sale: currentRates?.gold_22k_sale ?? 0,
+      gold_22k_purchase: currentRates?.gold_22k_purchase ?? 0,
+      gold_18k_sale: currentRates?.gold_18k_sale ?? 0,
+      gold_18k_purchase: currentRates?.gold_18k_purchase ?? 0,
+      silver_per_kg_sale: currentRates?.silver_per_kg_sale ?? 0,
+      silver_per_kg_purchase: currentRates?.silver_per_kg_purchase ?? 0,
+      is_active: true,
     }
   });
 
