@@ -46,10 +46,10 @@ export const mediaApi = {
     return response.json();
   },
 
-  upload: async (files: FileList, options: { duration: number; autoActivate: boolean }): Promise<MediaItem[]> => {
+  upload: async (files: FileList, options: { duration_seconds: number; autoActivate: boolean }): Promise<MediaItem[]> => {
     const formData = new FormData();
     Array.from(files).forEach(file => formData.append('files', file));
-    formData.append('duration', options.duration.toString());
+    formData.append('duration_seconds', options.duration_seconds.toString());
     formData.append('autoActivate', options.autoActivate.toString());
 
     const response = await fetch("/api/media/upload", {
