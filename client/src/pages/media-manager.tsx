@@ -17,7 +17,7 @@ import { Trash2, Edit, Play, Pause, Eye, EyeOff } from "lucide-react";
 export default function MediaManager() {
   const { toast } = useToast();
   const [uploadSettings, setUploadSettings] = useState({
-    duration: 30,
+    duration_seconds: 30,
     autoActivate: true
   });
 
@@ -32,7 +32,7 @@ export default function MediaManager() {
     mutationFn: async ({ files, settings }: { files: File[]; settings: typeof uploadSettings }) => {
       const formData = new FormData();
       files.forEach(file => formData.append('files', file));
-      formData.append('duration', settings.duration.toString());
+      formData.append('duration_seconds', settings.duration_seconds.toString());
       formData.append('autoActivate', settings.autoActivate.toString());
       
       const response = await fetch('/api/media/upload', {
@@ -181,14 +181,14 @@ export default function MediaManager() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Default Duration (seconds)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Default duration_seconds (seconds)</label>
                   <Input
                     type="number"
                     min="5"
                     max="120"
-                    value={uploadSettings.duration}
-                    onChange={(e) => setUploadSettings(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
-                    data-testid="input-default-duration"
+                    value={uploadSettings.duration_seconds}
+                    onChange={(e) => setUploadSettings(prev => ({ ...prev, duration_seconds: parseInt(e.target.value) }))}
+                    data-testid="input-default-duration_seconds"
                   />
                 </div>
                 
