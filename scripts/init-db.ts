@@ -40,7 +40,7 @@ async function initDatabase() {
       text_color TEXT DEFAULT '#212529',
       rate_number_font_size TEXT DEFAULT 'text-4xl',
       show_media BOOLEAN DEFAULT true,
-      rates_display_duration INTEGER DEFAULT 15,
+      rates_display_duration_seconds INTEGER DEFAULT 15,
       refresh_interval INTEGER DEFAULT 30,
       created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
