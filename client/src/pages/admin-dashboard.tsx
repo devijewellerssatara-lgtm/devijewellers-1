@@ -52,7 +52,7 @@ export default function AdminDashboard() {
     }
   }, [settings, form]);
 
-  / Update settings mutation
+ // Update settings mutation
 const updateSettingsMutation = useMutation({
   mutationFn: async (data: z.infer<typeof insertDisplaySettingsSchema>) => {
     try {
@@ -68,23 +68,26 @@ const updateSettingsMutation = useMutation({
       throw error;
     }
   },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/settings/display"] });
-      toast({
-        title: "Success",
-        description: "Settings updated successfully!"
-      });
-    },
-    onError: (error: Error) => {
-      console.error("Mutation error:", error);
-      toast({
-        title: "Error",
-        description: `Failed to update settings: ${error.message}`,
-        variant: "destructive"
-      });
-    }
-  });
-
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ["/api/settings/display"] });
+    toast({
+      title: "Success",
+      description: "Settings updated successfully!"
+    });
+  },
+  onError: (error: Error) => {
+    console.error("Mutation error:", error);
+    const errorMessage = error.message.includes("Network Error") 
+      ? "Network connection failed. Please check your internet connection."
+      : `Failed to update settings: ${error.message}`;
+    
+    toast({
+      title: "Error",
+      description: errorMessage,
+      variant: "destructive"
+    });
+  }
+});
   const onSubmit = (data: z.infer<typeof insertDisplaySettingsSchema>) => {
     updateSettingsMutation.mutate(data);
   };
