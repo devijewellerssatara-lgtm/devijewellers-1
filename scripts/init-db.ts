@@ -31,7 +31,8 @@ async function initDatabase() {
       silver_per_kg_purchase REAL NOT NULL,
       is_active BOOLEAN DEFAULT true,
       created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
+    )
+    ;
 
     CREATE TABLE IF NOT EXISTS display_settings (
       id SERIAL PRIMARY KEY,
@@ -43,7 +44,8 @@ async function initDatabase() {
       rates_display_duration_seconds INTEGER DEFAULT 15,
       refresh_interval INTEGER DEFAULT 30,
       created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
+    )
+    ;
 
     CREATE TABLE IF NOT EXISTS media_items (
       id SERIAL PRIMARY KEY,
@@ -56,7 +58,8 @@ async function initDatabase() {
       file_size INTEGER,
       mime_type TEXT,
       created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
+    )
+    ;
 
     CREATE TABLE IF NOT EXISTS promo_images (
       id SERIAL PRIMARY KEY,
@@ -68,7 +71,8 @@ async function initDatabase() {
       is_active BOOLEAN DEFAULT true,
       file_size INTEGER,
       created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
+    )
+    ;
 
     CREATE TABLE IF NOT EXISTS banner_settings (
       id SERIAL PRIMARY KEY,
@@ -76,7 +80,7 @@ async function initDatabase() {
       banner_height INTEGER DEFAULT 120,
       is_active BOOLEAN DEFAULT true,
       created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
+    )
   `;
 
   // Insert default data if tables are empty
