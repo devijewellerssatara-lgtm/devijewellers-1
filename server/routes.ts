@@ -190,7 +190,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         name: file.originalname,
         file_url: fileUrl,
         media_type: mediaType,
-        duration_seconds: parseInt(req.body.duration) || 30,
+        duration_seconds_seconds: parseInt(req.body.duration_seconds) || 30,
         order_index: highestOrder + index + 1, // Add proper ordering
         is_active: req.body.autoActivate === 'true',
         file_size: file.size,
@@ -231,7 +231,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const promoImage = await storage.createPromoImage({
           name: file.originalname,
           image_url: imageUrl,
-          duration_seconds: parseInt(req.body.duration) || 5,
+          duration_seconds_seconds: parseInt(req.body.duration_seconds) || 5,
           transition_effect: req.body.transition || 'fade',
           order_index: 0,
           is_active: req.body.autoActivate === 'true',
