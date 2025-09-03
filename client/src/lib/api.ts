@@ -85,20 +85,16 @@ export const settingsApi = {
     }
   },
 
-  updateDisplay: async (id: number, settings: Partial<InsertDisplaySettings>): Promise<DisplaySettings> => {
-    try {
-      if (!id || isNaN(id)) {
-        throw new Error("Invalid settings ID");
-      }
-      
-      const response = await apiRequest("PUT", `/api/settings/display/${id}`, settings);
-      return response.json();
-    } catch (error) {
-      console.error("Failed to update display settings:", error);
-      throw new Error(`Update failed: ${error.message}`);
-    }
+  // Simplify the updateDisplay method
+updateDisplay: async (data: Partial<InsertDisplaySettings>): Promise<DisplaySettings> => {
+  try {
+    const response = await apiRequest("PUT", "/api/settings/display", data);
+    return response.json();
+  } catch (error) {
+    console.error("Failed to update display settings:", error);
+    throw new Error(`Update failed: ${error.message}`);
   }
-};
+}
 // Media API
 export const mediaApi = {
   getAll: async (activeOnly = false): Promise<MediaItem[]> => {
