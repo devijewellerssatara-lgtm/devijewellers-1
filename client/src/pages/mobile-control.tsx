@@ -13,6 +13,18 @@ import { ratesApi } from "@/lib/api";
 import { queryClient } from "@/lib/queryClient";
 import { insertGoldRateSchema } from "@shared/schema";
 
+// Create a custom schema that converts strings to numbers
+const goldRateFormSchema = insertGoldRateSchema.extend({
+  gold_24k_sale: z.coerce.number().min(0),
+  gold_24k_purchase: z.coerce.number().min(0),
+  gold_22k_sale: z.coerce.number().min(0),
+  gold_22k_purchase: z.coerce.number().min(0),
+  gold_18k_sale: z.coerce.number().min(0),
+  gold_18k_purchase: z.coerce.number().min(0),
+  silver_per_kg_sale: z.coerce.number().min(0),
+  silver_per_kg_purchase: z.coerce.number().min(0),
+});
+
 export default function MobileControl() {
   const { toast } = useToast();
 
@@ -22,9 +34,9 @@ export default function MobileControl() {
     queryFn: ratesApi.getCurrent
   });
 
-  // Form setup
-  const form = useForm<z.infer<typeof insertGoldRateSchema>>({
-    resolver: zodResolver(insertGoldRateSchema),
+  // Form setup with custom schema
+  const form = useForm<z.infer<typeof goldRateFormSchema>>({
+    resolver: zodResolver(goldRateFormSchema),
     defaultValues: {
       gold_24k_sale: currentRates?.gold_24k_sale ?? 0,
       gold_24k_purchase: currentRates?.gold_24k_purchase ?? 0,
@@ -41,24 +53,33 @@ export default function MobileControl() {
   // Update rates mutation
   const updateRatesMutation = useMutation({
     mutationFn: ratesApi.create,
-    onSuccess: () => {
+    onSuccess: (result) => {
+      console.log('Mutation successful:', result);
       queryClient.invalidateQueries({ queryKey: ["/api/rates/current"] });
       toast({
         title: "Success",
         description: "Rates updated successfully! Changes will appear on TV display."
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Mutation error:', error);
       toast({
         title: "Error",
-        description: "Failed to update rates. Please try again.",
+        description: `Failed to update rates: ${error.message}`,
         variant: "destructive"
       });
     }
   });
 
-  const onSubmit = (data: z.infer<typeof insertGoldRateSchema>) => {
-    updateRatesMutation.mutate(data);
+  const onSubmit = (data: z.infer<typeof goldRateFormSchema>) => {
+    // Data is already converted to numbers by zod's coerce.number()
+    const submitData = {
+      ...data,
+      is_active: true
+    };
+    
+    console.log('Submitting data:', submitData);
+    updateRatesMutation.mutate(submitData);
   };
 
   // Update form values when current rates change
@@ -92,21 +113,17 @@ export default function MobileControl() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-jewelry-primary/10 to-jewelry-secondary/10">
       {/* Mobile Header */}
-      <div className="mobile-nav text-white p-4">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gold-500 rounded-full flex items-center justify-center">
-            <i className="fas fa-gem text-white"></i>
-          </div>
-          <div>
-            <h1 className="text-xl font-bold">DEVI JEWELLERS</h1>
-            <p className="text-gold-200 text-sm">Rate Control Panel</p>
-          </div>
-        </div>
+      <div className="bg-gradient-to-r from-gold-600 to-gold-700 text-black p-4 flex justify-center">
+        <img 
+          src="/logo.png" 
+          alt="Devi Jewellers Logo"
+          className="h-40 w-[350px] object-contain"
+        />
       </div>
 
       <div className="p-4 space-y-6">
         {/* Quick Status Card */}
-        <Card className="border-l-4 border-jewelry-accent">
+        <Card className="border-l-4 border border-black">
           <CardContent className="pt-4">
             <div className="flex items-center justify-between">
               <div>
@@ -118,16 +135,15 @@ export default function MobileControl() {
                   }
                 </p>
               </div>
-              <div className="w-3 h-3 bg-jewelry-accent rounded-full animate-pulse"></div>
+              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
             </div>
           </CardContent>
         </Card>
 
         {/* Rate Update Form */}
-        <Card>
-          <CardHeader className="bg-gradient-to-r from-gold-500 to-gold-600 text-white">
-            <CardTitle className="flex items-center">
-              <i className="fas fa-coins mr-2"></i>
+        <Card className="w-full bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-black py-4 text-lg border-2 border-black rounded-lg">
+          <CardHeader className="bg-gradient-to-r from-gold-500 to-gold-600 text-black">
+            <CardTitle className="flex items-center text-lg">
               Update Gold & Silver Rates
             </CardTitle>
           </CardHeader>
@@ -137,7 +153,7 @@ export default function MobileControl() {
                 {/* 24K Gold */}
                 <div className="p-4 border-b border-gray-100">
                   <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
-                    <i className="fas fa-star text-gold-500 mr-2"></i>24K Gold (Per 10 GMS)
+                    <span className="text-gold-500 mr-2">★</span>24K Gold (Per 10 GMS)
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     <FormField
@@ -147,7 +163,13 @@ export default function MobileControl() {
                         <FormItem>
                           <FormLabel>Sale Rate</FormLabel>
                           <FormControl>
-                            <Input type="number" {...field} data-testid="input-gold-24k-sale" />
+                            <Input 
+                              type="number"
+                              step="50"
+                              min="0"
+                              {...field}
+                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -160,7 +182,13 @@ export default function MobileControl() {
                         <FormItem>
                           <FormLabel>Purchase Rate</FormLabel>
                           <FormControl>
-                            <Input type="number" {...field} data-testid="input-gold-24k-purchase" />
+                            <Input 
+                              type="number"
+                              step="50"
+                              min="0"
+                              {...field}
+                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -172,7 +200,7 @@ export default function MobileControl() {
                 {/* 22K Gold */}
                 <div className="p-4 border-b border-gray-100">
                   <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
-                    <i className="fas fa-medal text-gold-600 mr-2"></i>22K Gold (Per 10 GMS)
+                    <span className="text-gold-600 mr-2">◆</span>22K Gold (Per 10 GMS)
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     <FormField
@@ -182,7 +210,13 @@ export default function MobileControl() {
                         <FormItem>
                           <FormLabel>Sale Rate</FormLabel>
                           <FormControl>
-                            <Input type="number" {...field} data-testid="input-gold-22k-sale" />
+                            <Input 
+                              type="number"
+                              step="50"
+                              min="0"
+                              {...field}
+                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -195,7 +229,13 @@ export default function MobileControl() {
                         <FormItem>
                           <FormLabel>Purchase Rate</FormLabel>
                           <FormControl>
-                            <Input type="number" {...field} data-testid="input-gold-22k-purchase" />
+                            <Input 
+                              type="number"
+                              step="50"
+                              min="0"
+                              {...field}
+                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -207,7 +247,7 @@ export default function MobileControl() {
                 {/* 18K Gold */}
                 <div className="p-4 border-b border-gray-100">
                   <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
-                    <i className="fas fa-crown text-gold-700 mr-2"></i>18K Gold (Per 10 GMS)
+                    <span className="text-gold-700 mr-2">♦</span>18K Gold (Per 10 GMS)
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     <FormField
@@ -217,7 +257,13 @@ export default function MobileControl() {
                         <FormItem>
                           <FormLabel>Sale Rate</FormLabel>
                           <FormControl>
-                            <Input type="number" {...field} data-testid="input-gold-18k-sale" />
+                            <Input 
+                              type="number"
+                              step="50"
+                              min="0"
+                              {...field}
+                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -230,7 +276,13 @@ export default function MobileControl() {
                         <FormItem>
                           <FormLabel>Purchase Rate</FormLabel>
                           <FormControl>
-                            <Input type="number" {...field} data-testid="input-gold-18k-purchase" />
+                            <Input 
+                              type="number"
+                              step="50"
+                              min="0"
+                              {...field}
+                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -242,7 +294,7 @@ export default function MobileControl() {
                 {/* Silver */}
                 <div className="p-4">
                   <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
-                    <i className="fas fa-circle text-gray-400 mr-2"></i>Silver (Per KG)
+                    <span className="text-gray-400 mr-2">●</span>Silver (Per KG)
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     <FormField
@@ -252,7 +304,13 @@ export default function MobileControl() {
                         <FormItem>
                           <FormLabel>Sale Rate</FormLabel>
                           <FormControl>
-                            <Input type="number" {...field} data-testid="input-silver-sale" />
+                            <Input 
+                              type="number"
+                              step="50"
+                              min="0"
+                              {...field}
+                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -265,7 +323,13 @@ export default function MobileControl() {
                         <FormItem>
                           <FormLabel>Purchase Rate</FormLabel>
                           <FormControl>
-                            <Input type="number" {...field} data-testid="input-silver-purchase" />
+                            <Input 
+                              type="number"
+                              step="50"
+                              min="0"
+                              {...field}
+                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -276,9 +340,8 @@ export default function MobileControl() {
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white py-4 text-lg"
+                  className="w-full bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-black py-4 text-lg border-2 border-black rounded-lg hover:from-yellow-500 hover:to-yellow-600 transition-colors duration-300"
                   disabled={updateRatesMutation.isPending}
-                  data-testid="button-update-rates"
                 >
                   {updateRatesMutation.isPending ? (
                     <>
@@ -287,7 +350,6 @@ export default function MobileControl() {
                     </>
                   ) : (
                     <>
-                      <i className="fas fa-save mr-2"></i>
                       Update Rates on TV Display
                     </>
                   )}
@@ -298,26 +360,25 @@ export default function MobileControl() {
         </Card>
 
         {/* Current Rates Display */}
-        <Card>
+        <Card className="w-full bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-black py-4 text-lg border-2 border-black rounded-lg">
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <i className="fas fa-eye text-blue-500 mr-2"></i>
+            <CardTitle className="flex items-center text-lg">
               Currently Displayed Rates
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between" data-testid="display-gold-24k-sale">
+            <div className="space-y-3 text-xl">
+              <div className="flex justify-between">
                 <span>24K Gold Sale:</span>
-                <span className="font-semibold text-blue-600">₹{currentRates?.gold_24k_sale}</span>
+                <span className="font-semibold border-2 border-black rounded-md px-2 py-1">₹{currentRates?.gold_24k_sale}</span>
               </div>
-              <div className="flex justify-between" data-testid="display-gold-22k-sale">
+              <div className="flex justify-between">
                 <span>22K Gold Sale:</span>
-                <span className="font-semibold text-blue-600">₹{currentRates?.gold_22k_sale}</span>
+                <span className="font-semibold border-2 border-black rounded-md px-2 py-1">₹{currentRates?.gold_22k_sale}</span>
               </div>
-              <div className="flex justify-between" data-testid="display-silver-sale">
+              <div className="flex justify-between">
                 <span>Silver Sale:</span>
-                <span className="font-semibold text-blue-600">₹{currentRates?.silver_per_kg_sale}</span>
+                <span className="font-semibold border-2 border-black rounded-md px-2 py-1">₹{currentRates?.silver_per_kg_sale}</span>
               </div>
             </div>
           </CardContent>
