@@ -52,23 +52,22 @@ export default function AdminDashboard() {
     }
   }, [settings, form]);
 
-  // Update settings mutation
-  const updateSettingsMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof insertDisplaySettingsSchema>) => {
-      try {
-        // Try to update existing settings
-        if (settings?.id) {
-         throw new Error("No existing settings found. Please check your backend.");
-          return await settingsApi.updateDisplay(settings.id, data);
-        } else {
-          // If no settings exist, create new ones
-          return await settingsApi.createDisplay(data);
-        }
-      } catch (error) {
-        console.error("Settings mutation error:", error);
-        throw error;
+  / Update settings mutation
+const updateSettingsMutation = useMutation({
+  mutationFn: async (data: z.infer<typeof insertDisplaySettingsSchema>) => {
+    try {
+      // Try to update existing settings
+      if (settings?.id) {
+        return await settingsApi.updateDisplay(settings.id, data);
+      } else {
+        // If no settings exist, create new ones
+        return await settingsApi.createDisplay(data);
       }
-    },
+    } catch (error) {
+      console.error("Settings mutation error:", error);
+      throw error;
+    }
+  },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/settings/display"] });
       toast({
