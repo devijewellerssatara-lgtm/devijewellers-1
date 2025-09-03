@@ -39,40 +39,44 @@ export const settingsApi = {
     return response.json();
   }
 };
-// Media API - Fix the upload function
-export const mediaApi = {
-  getAll: async (activeOnly = false): Promise<MediaItem[]> => {
-    const response = await fetch(`/api/media?active=${activeOnly}`);
-    return response.json();
-  },
-
-  upload: async (files: FileList, settings: { duration: number; autoActivate: boolean }): Promise<MediaItem[]> => {
-    const formData = new FormData();
-    Array.from(files).forEach(file => formData.append('files', file));
-    formData.append('duration', settings.duration.toString());
-    formData.append('autoActivate', settings.autoActivate.toString());
-
-    const response = await fetch("/api/media/upload", {
-      method: "POST",
-      body: formData
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Upload failed: ${response.statusText}`);
+// In routes.ts - Update the media upload endpoint
+app.post("/api/media/upload", uploadMedia.array('files', 10), async (req, res) => {
+  try {
+    const files = req.files as Express.Multer.File[];
+    if (!files || files.length === 0) {
+      return res.status(400).json({ message: "No files uploaded" });
     }
-    
-    return response.json();
-  },
 
-  update: async (id: number, updates: Partial<MediaItem>): Promise<MediaItem> => {
-    const response = await apiRequest("PUT", `/api/media/${id}`, updates);
-    return response.json();
-  },
+    const createdItems = [];
+    for (const file of files) {
+      const mediaType = file.mimetype.startsWith('image/') ? 'image' : 'video';
+      const fileUrl = `/uploads/media/${file.filename}`;
+      
+      // Get the highest order index to place new items at the end
+      const allMedia = await storage.getMediaItems(false);
+      const highestOrder = allMedia.reduce((max, item) => 
+        Math.max(max, item.order_index || 0), 0);
+      
+      const mediaItem = await storage.createMediaItem({
+        name: file.originalname,
+        file_url: fileUrl,
+        media_type: mediaType,
+        duration_seconds: parseInt(req.body.duration) || 30,
+        order_index: highestOrder + 1,
+        is_active: req.body.autoActivate === 'true',
+        file_size: file.size,
+        mime_type: file.mimetype
+      });
+      
+      createdItems.push(mediaItem);
+    }
 
-  delete: async (id: number): Promise<void> => {
-    await apiRequest("DELETE", `/api/media/${id}`);
+    res.status(201).json(createdItems);
+  } catch (error) {
+    console.error("Upload error:", error);
+    res.status(500).json({ message: "Failed to upload media files" });
   }
-};
+});
 // Promo API
 export const promoApi = {
   getAll: async (activeOnly = false): Promise<PromoImage[]> => {
