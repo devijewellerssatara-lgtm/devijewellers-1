@@ -40,7 +40,7 @@ export default function AdminDashboard() {
       text_color: "#212529",
       rate_number_font_size: "text-4xl",
       show_media: true,
-      rates_display_duration_seconds: 15,
+      rates_display_duration: 15,
       refresh_interval: 30
     }
   });
@@ -52,10 +52,21 @@ export default function AdminDashboard() {
     }
   }, [settings, form]);
 
- // Update the mutation function
+ // Update settings mutation
 const updateSettingsMutation = useMutation({
   mutationFn: async (data: z.infer<typeof insertDisplaySettingsSchema>) => {
-    return await settingsApi.updateDisplay(data);
+    try {
+      // Try to update existing settings
+      if (settings?.id) {
+        return await settingsApi.updateDisplay(settings.id, data);
+      } else {
+        // If no settings exist, create new ones
+        return await settingsApi.createDisplay(data);
+      }
+    } catch (error) {
+      console.error("Settings mutation error:", error);
+      throw error;
+    }
   },
   onSuccess: () => {
     queryClient.invalidateQueries({ queryKey: ["/api/settings/display"] });
@@ -77,6 +88,10 @@ const updateSettingsMutation = useMutation({
     });
   }
 });
+  const onSubmit = (data: z.infer<typeof insertDisplaySettingsSchema>) => {
+    updateSettingsMutation.mutate(data);
+  };
+
   const colorPresets = [
     { name: "Gold Theme", colors: { background: "#FFF8E1", text: "#212529", accent: "#FFC107" } },
     { name: "Blue Theme", colors: { background: "#E3F2FD", text: "#1565C0", accent: "#2196F3" } },
@@ -323,7 +338,7 @@ const updateSettingsMutation = useMutation({
                   
                   <FormField
                     control={form.control}
-                    name="rates_display_duration_seconds"
+                    name="rates_display_duration"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Rates Display Duration (seconds)</FormLabel>
