@@ -37,7 +37,7 @@ export const mediaItems = sqliteTable("media_items", {
   name: text("name").notNull(),
   file_url: text("file_url").notNull(),
   media_type: text("media_type").notNull(), // 'image' or 'video'
-  duration_seconds_seconds: integer("duration_seconds_seconds").default(30),
+  duration_seconds: integer("duration_seconds").default(30),
   order_index: integer("order_index").default(0),
   is_active: integer("is_active", { mode: "boolean" }).default(true),
   file_size: integer("file_size"),
@@ -50,7 +50,7 @@ export const promoImages = sqliteTable("promo_images", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   image_url: text("image_url").notNull(),
-  duration_seconds_seconds: integer("duration_seconds_seconds").default(5),
+  duration_seconds: integer("duration_seconds").default(5),
   transition_effect: text("transition_effect").default("fade"),
   order_index: integer("order_index").default(0),
   is_active: integer("is_active", { mode: "boolean" }).default(true),
