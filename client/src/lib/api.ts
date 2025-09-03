@@ -75,26 +75,17 @@ export const settingsApi = {
     }
   },
 
-  createDisplay: async (settings: InsertDisplaySettings): Promise<DisplaySettings> => {
+  updateDisplay: async (data: Partial<InsertDisplaySettings>): Promise<DisplaySettings> => {
     try {
-      const response = await apiRequest("POST", "/api/settings/display", settings);
+      const response = await apiRequest("PUT", "/api/settings/display", data);
       return response.json();
     } catch (error) {
-      console.error("Failed to create display settings:", error);
-      throw new Error(`Create failed: ${error.message}`);
+      console.error("Failed to update display settings:", error);
+      throw new Error(`Update failed: ${error.message}`);
     }
-  },
-
-  // Simplify the updateDisplay method
-updateDisplay: async (data: Partial<InsertDisplaySettings>): Promise<DisplaySettings> => {
-  try {
-    const response = await apiRequest("PUT", "/api/settings/display", data);
-    return response.json();
-  } catch (error) {
-    console.error("Failed to update display settings:", error);
-    throw new Error(`Update failed: ${error.message}`);
   }
-}
+}; // <-- This closing brace was likely missing
+
 // Media API
 export const mediaApi = {
   getAll: async (activeOnly = false): Promise<MediaItem[]> => {
