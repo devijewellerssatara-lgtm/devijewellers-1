@@ -138,6 +138,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // In routes.ts - add this route
+app.post("/api/settings/display", async (req, res) => {
+  try {
+    const validatedData = insertDisplaySettingsSchema.parse(req.body);
+    // You need to implement createDisplaySettings in your storage
+    const newSettings = await storage.createDisplaySettings(validatedData);
+    res.status(201).json(newSettings);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ message: "Invalid settings data", errors: error.errors });
+    } else {
+      res.status(500).json({ message: "Failed to create settings" });
+    }
+  }
+});
   app.put("/api/settings/display/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
