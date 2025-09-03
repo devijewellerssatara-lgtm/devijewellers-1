@@ -64,9 +64,9 @@ export default function TVDisplay() {
   useEffect(() => {
     if (!settings?.show_media || mediaItems.length === 0) return;
 
-    const ratesDisplayTime = (settings?.rates_display_duration || 15) * 1000;
+    const ratesDisplayTime = (settings?.rates_display_duration_seconds || 15) * 1000;
     const currentMedia = mediaItems[currentMediaIndex];
-    const mediaDisplayTime = (currentMedia?.duration_seconds || 30) * 1000;
+    const mediaDisplayTime = (currentMedia?.duration_seconds_seconds || 30) * 1000;
 
     const interval = setInterval(() => {
       if (showingRates) {
@@ -85,11 +85,11 @@ export default function TVDisplay() {
     if (promoImages.length <= 1) return;
 
     const currentPromo = promoImages[currentPromoIndex];
-    const duration = (currentPromo?.duration_seconds || 5) * 1000;
+    const duration_seconds = (currentPromo?.duration_seconds_seconds || 5) * 1000;
 
     const interval = setInterval(() => {
       setCurrentPromoIndex((prev) => (prev + 1) % promoImages.length);
-    }, duration);
+    }, duration_seconds);
 
     return () => clearInterval(interval);
   }, [currentPromoIndex, promoImages]);
@@ -131,7 +131,7 @@ export default function TVDisplay() {
 
   const animationVariants = currentPromo ? getAnimationVariants(currentPromo.transition_effect || 'fade') : getAnimationVariants('fade');
   const transitionProps = {
-    duration: 0.8,
+    duration_seconds: 0.8,
     ease: currentPromo?.transition_effect === 'bounce' ? [0.34, 1.56, 0.64, 1] : "easeInOut" as const,
   };
 
@@ -163,7 +163,7 @@ export default function TVDisplay() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.05 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
+            transition={{ duration_seconds: 0.5, ease: "easeInOut" }}
             className="flex-1 flex flex-col"
           >
             {/* Header with Company Logo - Mobile optimized */}
@@ -359,7 +359,7 @@ export default function TVDisplay() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration_seconds: 0.5 }}
               className="w-full h-full flex items-center justify-center bg-black"
             >
               {currentMedia.media_type === "image" ? (
