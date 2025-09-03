@@ -55,20 +55,50 @@ export const ratesApi = {
   }
 };
 
-// Display Settings API - FIXED: Use only PUT since backend doesn't have POST
+// Display Settings API - FIXED with proper error handling
 export const settingsApi = {
-  getDisplay: async (): Promise<DisplaySettings> => {
-    const response = await apiRequest("GET", "/api/settings/display");
-    const data = await response.json();
-    return data || {};
+  getDisplay: async (): Promise<DisplaySettings | null> => {
+    try {
+      const response = await apiRequest("GET", "/api/settings/display");
+      const data = await response.json();
+      
+      // Handle case where backend returns empty object or null
+      if (!data || Object.keys(data).length === 0) {
+        return null;
+      }
+      
+      return data as DisplaySettings;
+    } catch (error) {
+      console.error("Failed to fetch display settings:", error);
+      // Return null instead of throwing to allow UI to handle gracefully
+      return null;
+    }
+  },
+
+  createDisplay: async (settings: InsertDisplaySettings): Promise<DisplaySettings> => {
+    try {
+      const response = await apiRequest("POST", "/api/settings/display", settings);
+      return response.json();
+    } catch (error) {
+      console.error("Failed to create display settings:", error);
+      throw new Error(`Create failed: ${error.message}`);
+    }
   },
 
   updateDisplay: async (id: number, settings: Partial<InsertDisplaySettings>): Promise<DisplaySettings> => {
-    const response = await apiRequest("PUT", `/api/settings/display/${id}`, settings);
-    return response.json();
+    try {
+      if (!id || isNaN(id)) {
+        throw new Error("Invalid settings ID");
+      }
+      
+      const response = await apiRequest("PUT", `/api/settings/display/${id}`, settings);
+      return response.json();
+    } catch (error) {
+      console.error("Failed to update display settings:", error);
+      throw new Error(`Update failed: ${error.message}`);
+    }
   }
 };
-
 // Media API
 export const mediaApi = {
   getAll: async (activeOnly = false): Promise<MediaItem[]> => {
