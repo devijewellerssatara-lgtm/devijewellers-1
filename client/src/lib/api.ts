@@ -29,12 +29,16 @@ export const settingsApi = {
     return response.json();
   },
 
+  createDisplay: async (settings: InsertDisplaySettings): Promise<DisplaySettings> => {
+    const response = await apiRequest("POST", "/api/settings/display", settings);
+    return response.json();
+  },
+
   updateDisplay: async (id: number, settings: Partial<InsertDisplaySettings>): Promise<DisplaySettings> => {
     const response = await apiRequest("PUT", `/api/settings/display/${id}`, settings);
     return response.json();
   }
 };
-
 // Media API
 export const mediaApi = {
   getAll: async (activeOnly = false): Promise<MediaItem[]> => {
