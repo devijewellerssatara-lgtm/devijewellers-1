@@ -79,10 +79,10 @@ export const promoApi = {
     return response.json();
   },
 
-  upload: async (files: FileList, options: { duration: number; transition: string; autoActivate: boolean }): Promise<PromoImage[]> => {
+  upload: async (files: FileList, options: { duration_seconds: number; transition: string; autoActivate: boolean }): Promise<PromoImage[]> => {
     const formData = new FormData();
     Array.from(files).forEach(file => formData.append('files', file));
-    formData.append('duration', options.duration.toString());
+    formData.append('duration_seconds', options.duration_seconds.toString());
     formData.append('transition', options.transition);
     formData.append('autoActivate', options.autoActivate.toString());
 
