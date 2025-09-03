@@ -323,7 +323,7 @@ const updateSettingsMutation = useMutation({
                   
                   <FormField
                     control={form.control}
-                    name="rates_display_duration"
+                    name="rates_display_duration_seconds"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Rates Display Duration (seconds)</FormLabel>
