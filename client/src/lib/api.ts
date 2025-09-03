@@ -39,23 +39,28 @@ export const settingsApi = {
     return response.json();
   }
 };
-// Media API
+// Media API - Fix the upload function
 export const mediaApi = {
   getAll: async (activeOnly = false): Promise<MediaItem[]> => {
     const response = await fetch(`/api/media?active=${activeOnly}`);
     return response.json();
   },
 
-  upload: async (files: FileList, options: { duration: number; autoActivate: boolean }): Promise<MediaItem[]> => {
+  upload: async (files: FileList, settings: { duration: number; autoActivate: boolean }): Promise<MediaItem[]> => {
     const formData = new FormData();
     Array.from(files).forEach(file => formData.append('files', file));
-    formData.append('duration', options.duration.toString());
-    formData.append('autoActivate', options.autoActivate.toString());
+    formData.append('duration', settings.duration.toString());
+    formData.append('autoActivate', settings.autoActivate.toString());
 
     const response = await fetch("/api/media/upload", {
       method: "POST",
       body: formData
     });
+    
+    if (!response.ok) {
+      throw new Error(`Upload failed: ${response.statusText}`);
+    }
+    
     return response.json();
   },
 
@@ -68,7 +73,6 @@ export const mediaApi = {
     await apiRequest("DELETE", `/api/media/${id}`);
   }
 };
-
 // Promo API
 export const promoApi = {
   getAll: async (activeOnly = false): Promise<PromoImage[]> => {
