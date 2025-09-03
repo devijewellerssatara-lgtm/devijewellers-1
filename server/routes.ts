@@ -169,70 +169,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/media/upload", uploadMedia.array('files', 10), async (req, res) => {
-    try {
-      const files = req.files as Express.Multer.File[];
-      if (!files || files.length === 0) {
-        return res.status(400).json({ message: "No files uploaded" });
-      }
-
-      const createdItems = [];
-      for (const file of files) {
-        const mediaType = file.mimetype.startsWith('image/') ? 'image' : 'video';
-        const fileUrl = `/uploads/media/${file.filename}`;
-        
-        const mediaItem = await storage.createMediaItem({
-          name: file.originalname,
-          file_url: fileUrl,
-          media_type: mediaType,
-          duration_seconds: parseInt(req.body.duration) || 30,
-          order_index: 0,
-          is_active: req.body.autoActivate === 'true',
-          file_size: file.size,
-          mime_type: file.mimetype
-        });
-        
-        createdItems.push(mediaItem);
-      }
-
-      res.status(201).json(createdItems);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to upload media files" });
+  try {
+    const files = req.files as Express.Multer.File[];
+    if (!files || files.length === 0) {
+      return res.status(400).json({ message: "No files uploaded" });
     }
-  });
 
-  app.put("/api/media/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const validatedData = insertMediaItemSchema.partial().parse(req.body);
-      const updatedItem = await storage.updateMediaItem(id, validatedData);
-      if (updatedItem) {
-        res.json(updatedItem);
-      } else {
-        res.status(404).json({ message: "Media item not found" });
-      }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ message: "Invalid media data", errors: error.errors });
-      } else {
-        res.status(500).json({ message: "Failed to update media item" });
-      }
+    const createdItems = [];
+    
+    // Get the highest order index to place new items at the end
+    const allMedia = await storage.getMediaItems(false);
+    const highestOrder = allMedia.reduce((max, item) => 
+      Math.max(max, item.order_index || 0), 0);
+    
+    for (const [index, file] of files.entries()) {
+      const mediaType = file.mimetype.startsWith('image/') ? 'image' : 'video';
+      const fileUrl = `/uploads/media/${file.filename}`;
+      
+      const mediaItem = await storage.createMediaItem({
+        name: file.originalname,
+        file_url: fileUrl,
+        media_type: mediaType,
+        duration_seconds: parseInt(req.body.duration) || 30,
+        order_index: highestOrder + index + 1, // Add proper ordering
+        is_active: req.body.autoActivate === 'true',
+        file_size: file.size,
+        mime_type: file.mimetype
+      });
+      
+      createdItems.push(mediaItem);
     }
-  });
 
-  app.delete("/api/media/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const deleted = await storage.deleteMediaItem(id);
-      if (deleted) {
-        res.json({ message: "Media item deleted successfully" });
-      } else {
-        res.status(404).json({ message: "Media item not found" });
-      }
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete media item" });
-    }
-  });
-
+    res.status(201).json(createdItems);
+  } catch (error) {
+    console.error("Upload error:", error);
+    res.status(500).json({ message: "Failed to upload media files" });
+  }
+});
   // Promo Images Routes
   app.get("/api/promo", async (req, res) => {
     try {
