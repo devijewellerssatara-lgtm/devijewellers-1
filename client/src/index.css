@@ -110,6 +110,29 @@
   --ring: hsl(280, 100%, 50%);
 }
 
+/* Responsive text utilities */
+@media (max-width: 768px) {
+  .text-sm-2xl { font-size: 1.5rem; line-height: 2rem; }
+  .text-sm-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+  .text-sm-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+  .text-sm-5xl { font-size: 3rem; line-height: 1; }
+  .text-sm-6xl { font-size: 3.75rem; line-height: 1; }
+}
+
+@media (max-width: 1024px) {
+  .text-md-2xl { font-size: 1.5rem; line-height: 2rem; }
+  .text-md-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+  .text-md-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+  .text-md-5xl { font-size: 3rem; line-height: 1; }
+  .text-md-6xl { font-size: 3.75rem; line-height: 1; }
+}
+
+/* Ensure proper video playback on mobile */
+video {
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
+}
 @layer base {
   * {
     @apply border-border;
