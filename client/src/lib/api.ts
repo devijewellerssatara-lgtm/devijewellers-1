@@ -55,33 +55,44 @@ export const ratesApi = {
   }
 };
 
-// Display Settings API - FIXED with proper error handling
+// Display Settings API - Improved Error Handling
 export const settingsApi = {
   getDisplay: async (): Promise<DisplaySettings | null> => {
     try {
       const response = await apiRequest("GET", "/api/settings/display");
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Fetch failed (${response.status}): ${errorText}`);
+      }
+
       const data = await response.json();
-      
+
       // Handle case where backend returns empty object or null
       if (!data || Object.keys(data).length === 0) {
         return null;
       }
-      
+
       return data as DisplaySettings;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to fetch display settings:", error);
-      // Return null instead of throwing to allow UI to handle gracefully
-      return null;
+      return null; // allow UI to fallback gracefully
     }
   },
 
   createDisplay: async (settings: InsertDisplaySettings): Promise<DisplaySettings> => {
     try {
       const response = await apiRequest("POST", "/api/settings/display", settings);
-      return response.json();
-    } catch (error) {
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Create failed (${response.status}): ${errorText}`);
+      }
+
+      return (await response.json()) as DisplaySettings;
+    } catch (error: any) {
       console.error("Failed to create display settings:", error);
-      throw new Error(`Create failed: ${error.message}`);
+      throw new Error(error.message || "Create failed: Unknown error");
     }
   },
 
@@ -90,12 +101,18 @@ export const settingsApi = {
       if (!id || isNaN(id)) {
         throw new Error("Invalid settings ID");
       }
-      
+
       const response = await apiRequest("PUT", `/api/settings/display/${id}`, settings);
-      return response.json();
-    } catch (error) {
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Update failed (${response.status}): ${errorText}`);
+      }
+
+      return (await response.json()) as DisplaySettings;
+    } catch (error: any) {
       console.error("Failed to update display settings:", error);
-      throw new Error(`Update failed: ${error.message}`);
+      throw new Error(error.message || "Update failed: Unknown error");
     }
   }
 };
