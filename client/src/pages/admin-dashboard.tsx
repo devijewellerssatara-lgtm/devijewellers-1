@@ -6,9 +6,22 @@ import { z } from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { settingsApi, systemApi } from "@/lib/api";
 import { queryClient } from "@/lib/queryClient";
@@ -18,7 +31,11 @@ export default function AdminDashboard() {
   const { toast } = useToast();
 
   // Get current settings
-  const { data: settings, isLoading, error } = useQuery({
+  const {
+    data: settings,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["/api/settings/display"],
     queryFn: settingsApi.getDisplay,
     retry: 2,
@@ -28,7 +45,7 @@ export default function AdminDashboard() {
   const { data: systemInfo } = useQuery({
     queryKey: ["/api/system/info"],
     queryFn: systemApi.getInfo,
-    refetchInterval: 30000
+    refetchInterval: 30000,
   });
 
   // Form setup
@@ -41,62 +58,84 @@ export default function AdminDashboard() {
       rate_number_font_size: "text-4xl",
       show_media: true,
       rates_display_duration_seconds: 15,
-      refresh_interval: 30
-    }
+      refresh_interval: 30,
+    },
   });
 
   // Update form when settings load
   React.useEffect(() => {
     if (settings) {
-      form.reset(settings);
+      // Clean the settings data to ensure proper types and exclude id/created_date
+      const cleanedSettings = {
+        orientation: settings.orientation || "horizontal",
+        background_color: settings.background_color || "#FFF8E1",
+        text_color: settings.text_color || "#212529",
+        rate_number_font_size: settings.rate_number_font_size || "text-4xl",
+        show_media: settings.show_media ?? true,
+        rates_display_duration_seconds: settings.rates_display_duration_seconds || 15,
+        refresh_interval: settings.refresh_interval || 30,
+      };
+      form.reset(cleanedSettings);
     }
   }, [settings, form]);
 
- // Update settings mutation
-const updateSettingsMutation = useMutation({
-  mutationFn: async (data: z.infer<typeof insertDisplaySettingsSchema>) => {
-    try {
-      // Try to update existing settings
-      if (settings?.id) {
-        return await settingsApi.updateDisplay(settings.id, data);
-      } else {
-        // If no settings exist, create new ones
-        return await settingsApi.createDisplay(data);
+  // Update settings mutation
+  const updateSettingsMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof insertDisplaySettingsSchema>) => {
+      try {
+        // Try to update existing settings
+        if (settings?.id) {
+          return await settingsApi.updateDisplay(settings.id, data);
+        } else {
+          // If no settings exist, create new ones
+          return await settingsApi.createDisplay(data);
+        }
+      } catch (error) {
+        console.error("Settings mutation error:", error);
+        throw error;
       }
-    } catch (error) {
-      console.error("Settings mutation error:", error);
-      throw error;
-    }
-  },
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ["/api/settings/display"] });
-    toast({
-      title: "Success",
-      description: "Settings updated successfully!"
-    });
-  },
-  onError: (error: Error) => {
-    console.error("Mutation error:", error);
-    const errorMessage = error.message.includes("Network Error") 
-      ? "Network connection failed. Please check your internet connection."
-      : `Failed to update settings: ${error.message}`;
-    
-    toast({
-      title: "Error",
-      description: errorMessage,
-      variant: "destructive"
-    });
-  }
-});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/settings/display"] });
+      toast({
+        title: "Success",
+        description: "Settings updated successfully!",
+      });
+    },
+    onError: (error: Error) => {
+      console.error("Mutation error:", error);
+      const errorMessage = error.message.includes("Network Error")
+        ? "Network connection failed. Please check your internet connection."
+        : `Failed to update settings: ${error.message}`;
+
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    },
+  });
   const onSubmit = (data: z.infer<typeof insertDisplaySettingsSchema>) => {
     updateSettingsMutation.mutate(data);
   };
 
   const colorPresets = [
-    { name: "Gold Theme", colors: { background: "#FFF8E1", text: "#212529", accent: "#FFC107" } },
-    { name: "Blue Theme", colors: { background: "#E3F2FD", text: "#1565C0", accent: "#2196F3" } },
-    { name: "Green Theme", colors: { background: "#E8F5E8", text: "#2E7D32", accent: "#4CAF50" } },
-    { name: "Purple Theme", colors: { background: "#F3E5F5", text: "#6A1B9A", accent: "#9C27B0" } }
+    {
+      name: "Gold Theme",
+      colors: { background: "#FFF8E1", text: "#212529", accent: "#FFC107" },
+    },
+    {
+      name: "Blue Theme",
+      colors: { background: "#E3F2FD", text: "#1565C0", accent: "#2196F3" },
+    },
+    {
+      name: "Green Theme",
+      colors: { background: "#E8F5E8", text: "#2E7D32", accent: "#4CAF50" },
+    },
+    {
+      name: "Purple Theme",
+      colors: { background: "#F3E5F5", text: "#6A1B9A", accent: "#9C27B0" },
+    },
   ];
 
   if (isLoading) {
@@ -117,10 +156,18 @@ const updateSettingsMutation = useMutation({
           <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <i className="fas fa-exclamation-triangle text-red-600 text-xl"></i>
           </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Failed to load settings</h2>
-          <p className="text-gray-600 mb-4">Please check your connection and try again.</p>
-          <Button 
-            onClick={() => queryClient.refetchQueries({ queryKey: ["/api/settings/display"] })}
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Failed to load settings
+          </h2>
+          <p className="text-gray-600 mb-4">
+            Please check your connection and try again.
+          </p>
+          <Button
+            onClick={() =>
+              queryClient.refetchQueries({
+                queryKey: ["/api/settings/display"],
+              })
+            }
             className="bg-jewelry-primary text-white"
           >
             <i className="fas fa-refresh mr-2"></i>Retry
@@ -139,10 +186,16 @@ const updateSettingsMutation = useMutation({
             <div className="w-12 h-12 bg-gradient-to-r from-jewelry-primary to-jewelry-secondary rounded-xl flex items-center justify-center">
               <i className="fas fa-gem text-white text-xl"></i>
             </div>
-            <h1 className="text-3xl font-display font-bold text-gray-900">DEVI JEWELLERS</h1>
+            <h1 className="text-3xl font-display font-bold text-gray-900">
+              DEVI JEWELLERS
+            </h1>
           </div>
-          <h2 className="text-xl font-semibold text-gray-700">Admin Dashboard</h2>
-          <p className="text-gray-600">Manage display settings, timing, and appearance</p>
+          <h2 className="text-xl font-semibold text-gray-700">
+            Admin Dashboard
+          </h2>
+          <p className="text-gray-600">
+            Manage display settings, timing, and appearance
+          </p>
         </div>
 
         <Form {...form}>
@@ -162,39 +215,57 @@ const updateSettingsMutation = useMutation({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>TV Orientation</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select orientation" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="horizontal">Horizontal (Landscape)</SelectItem>
-                            <SelectItem value="vertical">Vertical (Portrait)</SelectItem>
+                            <SelectItem value="horizontal">
+                              Horizontal (Landscape)
+                            </SelectItem>
+                            <SelectItem value="vertical">
+                              Vertical (Portrait)
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="rate_number_font_size"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Rate Numbers Font Size</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select font size" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="text-2xl">Small (2XL)</SelectItem>
-                            <SelectItem value="text-3xl">Medium (3XL)</SelectItem>
-                            <SelectItem value="text-4xl">Large (4XL)</SelectItem>
-                            <SelectItem value="text-5xl">Extra Large (5XL)</SelectItem>
+                            <SelectItem value="text-2xl">
+                              Small (2XL)
+                            </SelectItem>
+                            <SelectItem value="text-3xl">
+                              Medium (3XL)
+                            </SelectItem>
+                            <SelectItem value="text-4xl">
+                              Large (4XL)
+                            </SelectItem>
+                            <SelectItem value="text-5xl">
+                              Extra Large (5XL)
+                            </SelectItem>
                             <SelectItem value="text-6xl">Huge (6XL)</SelectItem>
                           </SelectContent>
                         </Select>
@@ -209,8 +280,12 @@ const updateSettingsMutation = useMutation({
                     render={({ field }) => (
                       <FormItem className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div>
-                          <FormLabel className="font-medium text-gray-800">Show Media Rotation</FormLabel>
-                          <p className="text-sm text-gray-600">Alternate between rates and promotional content</p>
+                          <FormLabel className="font-medium text-gray-800">
+                            Show Media Rotation
+                          </FormLabel>
+                          <p className="text-sm text-gray-600">
+                            Alternate between rates and promotional content
+                          </p>
                         </div>
                         <FormControl>
                           <Switch
@@ -240,24 +315,21 @@ const updateSettingsMutation = useMutation({
                       <FormItem>
                         <FormLabel>Background Color</FormLabel>
                         <div className="flex items-center space-x-2">
-                          <input 
-                            type="color" 
-                            value={field.value} 
+                          <input
+                            type="color"
+                            value={field.value}
                             onChange={(e) => field.onChange(e.target.value)}
                             className="w-12 h-10 border border-gray-300 rounded cursor-pointer"
                           />
                           <FormControl>
-                            <Input 
-                              {...field} 
-                              className="flex-1"
-                            />
+                            <Input {...field} className="flex-1" />
                           </FormControl>
                         </div>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="text_color"
@@ -265,17 +337,14 @@ const updateSettingsMutation = useMutation({
                       <FormItem>
                         <FormLabel>Text Color</FormLabel>
                         <div className="flex items-center space-x-2">
-                          <input 
-                            type="color" 
-                            value={field.value} 
+                          <input
+                            type="color"
+                            value={field.value}
                             onChange={(e) => field.onChange(e.target.value)}
                             className="w-12 h-10 border border-gray-300 rounded cursor-pointer"
                           />
                           <FormControl>
-                            <Input 
-                              {...field} 
-                              className="flex-1"
-                            />
+                            <Input {...field} className="flex-1" />
                           </FormControl>
                         </div>
                         <FormMessage />
@@ -292,12 +361,15 @@ const updateSettingsMutation = useMutation({
                           key={index}
                           type="button"
                           className="w-full h-8 rounded hover:scale-105 transition-transform"
-                          style={{ 
-                            background: `linear-gradient(to right, ${preset.colors.background}, ${preset.colors.accent})`
+                          style={{
+                            background: `linear-gradient(to right, ${preset.colors.background}, ${preset.colors.accent})`,
                           }}
                           title={preset.name}
                           onClick={() => {
-                            form.setValue("background_color", preset.colors.background);
+                            form.setValue(
+                              "background_color",
+                              preset.colors.background,
+                            );
                             form.setValue("text_color", preset.colors.text);
                           }}
                         />
@@ -322,20 +394,24 @@ const updateSettingsMutation = useMutation({
                       <FormItem>
                         <FormLabel>Refresh Interval (seconds)</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="number" 
-                            min="10" 
-                            max="300" 
+                          <Input
+                            type="number"
+                            min="10"
+                            max="300"
                             {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
                           />
                         </FormControl>
-                        <p className="text-xs text-gray-600">How often to check for rate updates</p>
+                        <p className="text-xs text-gray-600">
+                          How often to check for rate updates
+                        </p>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="rates_display_duration_seconds"
@@ -343,15 +419,19 @@ const updateSettingsMutation = useMutation({
                       <FormItem>
                         <FormLabel>Rates Display Duration (seconds)</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="number" 
-                            min="5" 
-                            max="60" 
+                          <Input
+                            type="number"
+                            min="5"
+                            max="60"
                             {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
                           />
                         </FormControl>
-                        <p className="text-xs text-gray-600">How long to show rates before switching to media</p>
+                        <p className="text-xs text-gray-600">
+                          How long to show rates before switching to media
+                        </p>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -359,9 +439,15 @@ const updateSettingsMutation = useMutation({
 
                   {systemInfo && (
                     <div className="bg-green-50 p-3 rounded-lg">
-                      <h4 className="font-medium text-green-800 mb-1">Current Status</h4>
-                      <p className="text-sm text-green-700">Status: {systemInfo.status}</p>
-                      <p className="text-sm text-green-700">Last sync: {systemInfo.last_sync}</p>
+                      <h4 className="font-medium text-green-800 mb-1">
+                        Current Status
+                      </h4>
+                      <p className="text-sm text-green-700">
+                        Status: {systemInfo.status}
+                      </p>
+                      <p className="text-sm text-green-700">
+                        Last sync: {systemInfo.last_sync}
+                      </p>
                     </div>
                   )}
                 </CardContent>
@@ -371,7 +457,8 @@ const updateSettingsMutation = useMutation({
               <Card>
                 <CardHeader className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
                   <CardTitle className="flex items-center">
-                    <i className="fas fa-info-circle mr-2"></i>System Information
+                    <i className="fas fa-info-circle mr-2"></i>System
+                    Information
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-4">
@@ -380,40 +467,51 @@ const updateSettingsMutation = useMutation({
                       <div className="flex justify-between">
                         <span className="text-gray-600">Server Status:</span>
                         <span className="text-green-600 font-semibold flex items-center">
-                          <i className="fas fa-circle text-xs mr-1"></i>{systemInfo.status}
+                          <i className="fas fa-circle text-xs mr-1"></i>
+                          {systemInfo.status}
                         </span>
                       </div>
-                      
+
                       <div className="flex justify-between">
                         <span className="text-gray-600">Local IP:</span>
-                        <span className="font-mono text-sm">{systemInfo.local_ip}</span>
+                        <span className="font-mono text-sm">
+                          {systemInfo.local_ip}
+                        </span>
                       </div>
-                      
+
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Connected Devices:</span>
-                        <span className="font-semibold">{systemInfo.connected_devices}</span>
+                        <span className="text-gray-600">
+                          Connected Devices:
+                        </span>
+                        <span className="font-semibold">
+                          {systemInfo.connected_devices}
+                        </span>
                       </div>
-                      
+
                       <div className="flex justify-between">
                         <span className="text-gray-600">Storage Used:</span>
-                        <span className="font-semibold">{systemInfo.storage_used} / {systemInfo.storage_total}</span>
+                        <span className="font-semibold">
+                          {systemInfo.storage_used} / {systemInfo.storage_total}
+                        </span>
                       </div>
                     </>
                   )}
 
                   <div className="pt-3 border-t border-gray-200">
-                    <h4 className="font-medium text-gray-800 mb-2">Quick Actions</h4>
+                    <h4 className="font-medium text-gray-800 mb-2">
+                      Quick Actions
+                    </h4>
                     <div className="grid grid-cols-2 gap-2">
-                      <Button 
-                        type="button" 
-                        variant="outline" 
+                      <Button
+                        type="button"
+                        variant="outline"
                         className="text-blue-700 border-blue-200 hover:bg-blue-50"
                       >
                         <i className="fas fa-sync-alt mr-1"></i>Sync Now
                       </Button>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
+                      <Button
+                        type="button"
+                        variant="outline"
                         className="text-red-700 border-red-200 hover:bg-red-50"
                       >
                         <i className="fas fa-power-off mr-1"></i>Restart
@@ -426,8 +524,8 @@ const updateSettingsMutation = useMutation({
 
             {/* Save Settings Button */}
             <div className="text-center mt-6">
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white px-8 py-4 text-lg"
                 disabled={updateSettingsMutation.isPending}
               >
