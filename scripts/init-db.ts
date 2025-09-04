@@ -17,7 +17,7 @@ async function initDatabase() {
   const client = postgres(connectionString);
   const db = drizzle(client);
 
-  // Create tables
+  // Create tables (execute each table creation separately)
   await client`
     CREATE TABLE IF NOT EXISTS gold_rates (
       id SERIAL PRIMARY KEY,
@@ -32,8 +32,9 @@ async function initDatabase() {
       is_active BOOLEAN DEFAULT true,
       created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
-    ;
+  `;
 
+  await client`
     CREATE TABLE IF NOT EXISTS display_settings (
       id SERIAL PRIMARY KEY,
       orientation TEXT DEFAULT 'horizontal',
@@ -45,8 +46,9 @@ async function initDatabase() {
       refresh_interval INTEGER DEFAULT 30,
       created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
-    ;
+  `;
 
+  await client`
     CREATE TABLE IF NOT EXISTS media_items (
       id SERIAL PRIMARY KEY,
       name TEXT NOT NULL,
@@ -59,8 +61,9 @@ async function initDatabase() {
       mime_type TEXT,
       created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
-    ;
+  `;
 
+  await client`
     CREATE TABLE IF NOT EXISTS promo_images (
       id SERIAL PRIMARY KEY,
       name TEXT NOT NULL,
@@ -72,8 +75,9 @@ async function initDatabase() {
       file_size INTEGER,
       created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
-    ;
+  `;
 
+  await client`
     CREATE TABLE IF NOT EXISTS banner_settings (
       id SERIAL PRIMARY KEY,
       banner_image_url TEXT,
