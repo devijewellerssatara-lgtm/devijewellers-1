@@ -113,6 +113,20 @@ export default function PromoManager() {
 
   const totalDuration = activePromos.reduce((sum, promo) => sum + (promo.duration_seconds || 0), 0);
 
+  // Slideshow preview timer
+  React.useEffect(() => {
+    if (!previewPlaying || activePromos.length <= 1) return;
+
+    const currentPromo = activePromos[currentPreviewIndex];
+    const duration = (currentPromo?.duration_seconds || 5) * 1000;
+
+    const timer = setInterval(() => {
+      setCurrentPreviewIndex((prev) => (prev + 1) % activePromos.length);
+    }, duration);
+
+    return () => clearInterval(timer);
+  }, [previewPlaying, currentPreviewIndex, activePromos]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 flex items-center justify-center">

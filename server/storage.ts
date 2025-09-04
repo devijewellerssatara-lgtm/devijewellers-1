@@ -60,6 +60,7 @@ export interface IStorage {
   
   // Banner Settings
   getBannerSettings(): Promise<BannerSettings | undefined>;
+  createBannerSettings(banner: InsertBannerSettings): Promise<BannerSettings>;
   updateBannerSettings(id: number, banner: Partial<InsertBannerSettings>): Promise<BannerSettings | undefined>;
 }
 
@@ -180,6 +181,11 @@ async createDisplaySettings(settings: InsertDisplaySettings): Promise<DisplaySet
       .orderBy(desc(bannerSettings.created_date))
       .limit(1);
     return banner[0];
+  }
+
+  async createBannerSettings(banner: InsertBannerSettings): Promise<BannerSettings> {
+    const result = await db.insert(bannerSettings).values(banner).returning();
+    return result[0];
   }
 
   async updateBannerSettings(id: number, banner: Partial<InsertBannerSettings>): Promise<BannerSettings | undefined> {

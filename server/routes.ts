@@ -443,15 +443,47 @@ app.put("/api/settings/display/:id?", async (req, res) => {
   });
 
   // System Info Route
-  app.get("/api/system/info", (req, res) => {
-    res.json({
-      status: "online",
-      local_ip: "192.168.31.177:3000",
-      connected_devices: 3,
-      storage_used: "245 MB",
-      storage_total: "2 GB",
-      last_sync: new Date().toISOString(),
-    });
+  app.get("/api/system/info", async (req, res) => {
+    try {
+      const memUsage = process.memoryUsage();
+      const uptime = process.uptime();
+      
+      // Get database statistics
+      const mediaCount = await storage.getMediaItems(false).then(items => items.length);
+      const promoCount = await storage.getPromoImages(false).then(items => items.length);
+      const ratesData = await storage.getCurrentRates();
+      
+      // Get current IST time
+      const istTime = new Date().toLocaleString("en-IN", {
+        timeZone: "Asia/Kolkata",
+        year: 'numeric',
+        month: '2-digit', 
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+      
+      res.json({
+        status: "online",
+        server_time: istTime,
+        uptime_hours: Math.floor(uptime / 3600),
+        memory_used: `${Math.round(memUsage.heapUsed / 1024 / 1024)} MB`,
+        memory_total: `${Math.round(memUsage.heapTotal / 1024 / 1024)} MB`,
+        database_status: "connected",
+        media_files: mediaCount,
+        promo_images: promoCount,
+        rates_last_updated: ratesData?.created_date || null,
+        node_version: process.version,
+        last_sync: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('System info error:', error);
+      res.status(500).json({
+        status: "error",
+        message: "Failed to fetch system information"
+      });
+    }
   });
 
   const httpServer = createServer(app);
