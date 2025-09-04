@@ -24,7 +24,7 @@ const mediaDir = path.join(uploadsDir, "media");
 const promoDir = path.join(uploadsDir, "promo");
 const bannerDir = path.join(uploadsDir, "banner");
 
-[mediaDir, promoDir, bannerDir].forEach(dir) => {
+[mediaDir, promoDir, bannerDir].forEach(dir => {
   if (!existsSync(dir)) {
     mkdirSync(dir, { recursive: true });
   }
