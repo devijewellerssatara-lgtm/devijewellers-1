@@ -31,7 +31,6 @@ export const displaySettings = sqliteTable("display_settings", {
 created_date: timestamp("created_date").defaultNow()});
 
 // Media Items (for ads between rates)
-export const mediaItems = sqliteTable("media_items", {
 export const mediaItems = pgTable("media_items", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
