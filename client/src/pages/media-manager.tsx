@@ -30,21 +30,22 @@ export default function MediaManager() {
   // Upload mutation
   const uploadMutation = useMutation({
     mutationFn: async ({ files, settings }: { files: File[]; settings: typeof uploadSettings }) => {
-      const formData = new FormData();
-      files.forEach(file => formData.append('files', file));
-      formData.append('duration_seconds', settings.duration_seconds.toString());
-      formData.append('autoActivate', settings.autoActivate.toString());
+      // Convert File[] to FileList for API compatibility
+      const fileList = {
+        length: files.length,
+        item: (index: number) => files[index] || null,
+        [Symbol.iterator]: function* () {
+          for (const file of files) {
+            yield file;
+          }
+        }
+      } as FileList;
       
-      const response = await fetch('/api/media/upload', {
-        method: 'POST',
-        body: formData,
+      // Use the enhanced mediaApi.upload with better error handling
+      return await mediaApi.upload(fileList, {
+        duration_seconds: settings.duration_seconds,
+        autoActivate: settings.autoActivate
       });
-      
-      if (!response.ok) {
-        throw new Error('Upload failed');
-      }
-      
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/media"] });
