@@ -20,7 +20,7 @@ export const goldRates = pgTable("gold_rates", {
 
 // Display Settings
 export const displaySettings = pgTable("display_settings", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+  id: serial("id").primaryKey(),
   orientation: text("orientation").default("horizontal"),
   background_color: text("background_color").default("#FFF8E1"),
   text_color: text("text_color").default("#212529"),
