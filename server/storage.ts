@@ -92,7 +92,6 @@ export class PostgresStorage implements IStorage {
   // Display Settings
   // In storage.ts - add this method
 // Add to IStorage interface
-createDisplaySettings(settings: InsertDisplaySettings): Promise<DisplaySettings>;
 
 // Add to PostgresStorage class
 async createDisplaySettings(settings: InsertDisplaySettings): Promise<DisplaySettings> {
