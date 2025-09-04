@@ -173,7 +173,7 @@ export default function TVDisplay() {
 
   return (
     <div 
-      className={`w-full h-screen overflow-hidden flex flex-col ${screenSize === 'mobile' ? 'p-2' : ''}`}
+      className={`w-full h-screen overflow-y-auto flex flex-col ${screenSize === 'mobile' ? 'p-2' : ''}`}
       style={{ 
         backgroundColor: settings?.background_color || "#FFF8E1",
         color: settings?.text_color || "#212529"
@@ -223,8 +223,8 @@ export default function TVDisplay() {
             </div>
 
             {/* Rates Display - Main Content */}
-            <div className={`flex-1 container mx-auto min-h-0 overflow-auto ${screenSize === 'tv' ? 'px-12 py-12' : screenSize === 'tablet' ? 'px-4 py-6' : 'px-2 md:px-6 py-4 md:py-8'}`}>
-              <div className={`grid h-full ${screenSize === 'tv' ? 'gap-12' : screenSize === 'tablet' ? 'gap-6' : 'gap-4 md:gap-8'} ${screenSize === 'mobile' || isVertical ? 'grid-cols-1' : 'grid-cols-2'}`}>
+            <div className={`flex-1 container mx-auto ${screenSize === 'tv' ? 'px-12 py-12' : screenSize === 'tablet' ? 'px-4 py-6' : 'px-2 md:px-6 py-4 md:py-8'}`}>
+              <div className={`grid ${screenSize === 'tv' ? 'gap-12' : screenSize === 'tablet' ? 'gap-6' : 'gap-4 md:gap-8'} ${screenSize === 'mobile' || isVertical ? 'grid-cols-1' : 'grid-cols-2'}`}>
                 {/* Gold Rates */}
                 <div className="space-y-4 md:space-y-6">
                   <h3 className="text-lg md:text-2xl font-display font-bold text-center text-jewelry-primary mb-4 md:mb-6">GOLD RATES (Per 10 GMS)</h3>
