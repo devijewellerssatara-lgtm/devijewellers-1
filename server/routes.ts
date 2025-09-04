@@ -240,7 +240,7 @@ app.put("/api/settings/display/:id?", async (req, res) => {
   } catch (error) {
     console.error("Upload error:", error);
     res.status(500).json({ message: "Failed to upload media files" });
-  },
+  }
 });
   // Promo Images Routes
   app.get("/api/promo", async (req, res) => {
@@ -344,7 +344,7 @@ app.put("/api/settings/display/:id?", async (req, res) => {
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to upload banner" });
-    },
+    }
   });
 
   // System Info Route
