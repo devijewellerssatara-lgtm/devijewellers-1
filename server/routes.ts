@@ -11,7 +11,7 @@ import {
   insertDisplaySettingsSchema,
   insertMediaItemSchema,
   insertPromoImageSchema,
-  insertBannerSettingsSchema
+  insertBannerSettingsSchema,
 } from "@shared/schema";
 
 // Ensure uploads directory exists
@@ -24,7 +24,7 @@ const mediaDir = path.join(uploadsDir, "media");
 const promoDir = path.join(uploadsDir, "promo");
 const bannerDir = path.join(uploadsDir, "banner");
 
-[mediaDir, promoDir, bannerDir].forEach(dir => {
+[mediaDir, promoDir, bannerDir].forEach(dir) => {
   if (!existsSync(dir)) {
     mkdirSync(dir, { recursive: true });
   }
@@ -36,9 +36,9 @@ const mediaStorage = multer.diskStorage({
     cb(null, mediaDir);
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
+  },
 });
 
 const promoStorage = multer.diskStorage({
@@ -46,9 +46,9 @@ const promoStorage = multer.diskStorage({
     cb(null, promoDir);
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
+  },
 });
 
 const bannerStorage = multer.diskStorage({
@@ -56,22 +56,27 @@ const bannerStorage = multer.diskStorage({
     cb(null, bannerDir);
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
+  },
 });
 
 const uploadMedia = multer({ 
   storage: mediaStorage,
   limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/avi', 'video/mov'];
+    const allowedTypes = ["image/jpeg",
+      "image/png",
+      "image/gif",
+      "video/mp4",
+      "video/avi",
+      "video/mov",];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type. Only images and videos are allowed.'));
+      cb(new Error("Invalid file type. Only images and videos are allowed."));
     }
-  }
+  },
 });
 
 const uploadPromo = multer({ 
@@ -91,18 +96,18 @@ const uploadBanner = multer({
   storage: bannerStorage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png'];
+    const allowedTypes = ["image/jpeg", "image/png"];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
       cb(new Error('Invalid file type. Only JPG and PNG images are allowed.'));
     }
-  }
+  },
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Serve uploaded files statically
-  app.use('/uploads', express.static(uploadsDir));
+  app.use("/uploads", express.static(uploadsDir));
 
   // Gold Rates Routes
   app.get("/api/rates/current", async (req, res) => {
@@ -139,13 +144,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // In routes.ts - add this route
-app.post("/api/settings/display", async (req, res) => {
-  try {
-    const validatedData = insertDisplaySettingsSchema.parse(req.body);
-    // You need to implement createDisplaySettings in your storage
-    const newSettings = await storage.createDisplaySettings(validatedData);
-    res.status(201).json(newSettings);
-  } catch (error) {
+ app.post("/api/settings/display", async (req, res) => {
+   try {
+     const validatedData = insertDisplaySettingsSchema.parse(req.body);
+     // You need to implement createDisplaySettings in your storage
+     const newSettings = await storage.createDisplaySettings(validatedData);
+     res.status(201).json(newSettings);
+    } catch (error) {
     if (error instanceof z.ZodError) {
       res.status(400).json({ message: "Invalid settings data", errors: error.errors });
     } else {
@@ -175,7 +180,7 @@ app.put("/api/settings/display/:id?", async (req, res) => {
         rate_number_font_size: validatedData.rate_number_font_size || "text-4xl",
         show_media: validatedData.show_media !== undefined ? validatedData.show_media : true,
         rates_display_duration_seconds: validatedData.rates_display_duration_seconds || 15,
-        refresh_interval: validatedData.refresh_interval || 30
+        refresh_interval: validatedData.refresh_interval || 30,
       });
       res.json(newSettings);
     }
@@ -191,7 +196,7 @@ app.put("/api/settings/display/:id?", async (req, res) => {
   // Media Items Routes
   app.get("/api/media", async (req, res) => {
     try {
-      const activeOnly = req.query.active === 'true';
+      const activeOnly = req.query.active === "true";
       const media = await storage.getMediaItems(activeOnly);
       res.json(media);
     } catch (error) {
@@ -199,7 +204,7 @@ app.put("/api/settings/display/:id?", async (req, res) => {
     }
   });
 
-  app.post("/api/media/upload", uploadMedia.array('files', 10), async (req, res) => {
+  app.post("/api/media/upload", uploadMedia.array("files", 10), async (req, res) => {
   try {
     const files = req.files as Express.Multer.File[];
     if (!files || files.length === 0) {
@@ -214,7 +219,7 @@ app.put("/api/settings/display/:id?", async (req, res) => {
       Math.max(max, item.order_index || 0), 0);
     
     for (const [index, file] of files.entries()) {
-      const mediaType = file.mimetype.startsWith('image/') ? 'image' : 'video';
+      const mediaType = file.mimetype.startsWith("image/") ? "image" : "video";
       const fileUrl = `/uploads/media/${file.filename}`;
       
       const mediaItem = await storage.createMediaItem({
@@ -223,9 +228,9 @@ app.put("/api/settings/display/:id?", async (req, res) => {
         media_type: mediaType,
         duration_seconds: parseInt(req.body.duration_seconds) || 30,
         order_index: highestOrder + index + 1, // Add proper ordering
-        is_active: req.body.autoActivate === 'true',
+        is_active: req.body.autoActivate === "true",
         file_size: file.size,
-        mime_type: file.mimetype
+        mime_type: file.mimetype,
       });
       
       createdItems.push(mediaItem);
@@ -235,12 +240,12 @@ app.put("/api/settings/display/:id?", async (req, res) => {
   } catch (error) {
     console.error("Upload error:", error);
     res.status(500).json({ message: "Failed to upload media files" });
-  }
+  },
 });
   // Promo Images Routes
   app.get("/api/promo", async (req, res) => {
     try {
-      const activeOnly = req.query.active === 'true';
+      const activeOnly = req.query.active === "true";
       const promos = await storage.getPromoImages(activeOnly);
       res.json(promos);
     } catch (error) {
@@ -263,9 +268,9 @@ app.put("/api/settings/display/:id?", async (req, res) => {
           name: file.originalname,
           image_url: imageUrl,
           duration_seconds: parseInt(req.body.duration_seconds) || 5,
-          transition_effect: req.body.transition || 'fade',
+          transition_effect: req.body.transition || "fade",
           order_index: 0,
-          is_active: req.body.autoActivate === 'true',
+          is_active: req.body.autoActivate === "true",
           file_size: file.size
         });
         
@@ -321,7 +326,7 @@ app.put("/api/settings/display/:id?", async (req, res) => {
     }
   });
 
-  app.post("/api/banner/upload", uploadBanner.single('banner'), async (req, res) => {
+  app.post("/api/banner/upload", uploadBanner.single("banner"), async (req, res) => {
     try {
       const file = req.file;
       if (!file) {
@@ -335,11 +340,11 @@ app.put("/api/settings/display/:id?", async (req, res) => {
       
       res.status(201).json({ 
         banner_image_url: bannerUrl,
-        message: "Banner uploaded successfully"
+        message: "Banner uploaded successfully",
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to upload banner" });
-    }
+    },
   });
 
   // System Info Route
@@ -350,7 +355,7 @@ app.put("/api/settings/display/:id?", async (req, res) => {
       connected_devices: 3,
       storage_used: "245 MB",
       storage_total: "2 GB",
-      last_sync: new Date().toISOString()
+      last_sync: new Date().toISOString(),
     });
   });
 
