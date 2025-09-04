@@ -19,7 +19,7 @@ export const goldRates = pgTable("gold_rates", {
 });
 
 // Display Settings
-export const displaySettings = sqliteTable("display_settings", {
+export const displaySettings = pgTable("display_settings", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   orientation: text("orientation").default("horizontal"),
   background_color: text("background_color").default("#FFF8E1"),
