@@ -40,7 +40,7 @@ export default function AdminDashboard() {
       text_color: "#212529",
       rate_number_font_size: "text-4xl",
       show_media: true,
-      rates_display_duration: 15,
+      rates_display_duration_seconds: 15,
       refresh_interval: 30
     }
   });
