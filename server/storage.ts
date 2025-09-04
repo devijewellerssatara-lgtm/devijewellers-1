@@ -43,6 +43,7 @@ export interface IStorage {
   
   // Display Settings
   getDisplaySettings(): Promise<DisplaySettings | undefined>;
+  createDisplaySettings(settings: InsertDisplaySettings): Promise<DisplaySettings>;
   updateDisplaySettings(id: number, settings: Partial<InsertDisplaySettings>): Promise<DisplaySettings | undefined>;
   
   // Media Items
