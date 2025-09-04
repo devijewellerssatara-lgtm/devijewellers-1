@@ -1,11 +1,11 @@
 import { sql } from "drizzle-orm";
-import { sqliteTable, text, integer, real, blob } from "drizzle-orm/sqlite-core";
+import { pgTable, text, integer, real, serial, boolean, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Gold and Silver Rates
-export const goldRates = sqliteTable("gold_rates", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const goldRates = pgTable("gold_rates", {
+  id: serial("id").primaryKey(),
   gold_24k_sale: real("gold_24k_sale").notNull(),
   gold_24k_purchase: real("gold_24k_purchase").notNull(),
   gold_22k_sale: real("gold_22k_sale").notNull(),
@@ -14,8 +14,8 @@ export const goldRates = sqliteTable("gold_rates", {
   gold_18k_purchase: real("gold_18k_purchase").notNull(),
   silver_per_kg_sale: real("silver_per_kg_sale").notNull(),
   silver_per_kg_purchase: real("silver_per_kg_purchase").notNull(),
-  is_active: integer("is_active", { mode: "boolean" }).default(true),
-  created_date: text("created_date").default(sql`CURRENT_TIMESTAMP`)
+  is_active: boolean("is_active").default(true),
+  created_date: timestamp("created_date").defaultNow()
 });
 
 // Display Settings
@@ -25,46 +25,46 @@ export const displaySettings = sqliteTable("display_settings", {
   background_color: text("background_color").default("#FFF8E1"),
   text_color: text("text_color").default("#212529"),
   rate_number_font_size: text("rate_number_font_size").default("text-4xl"),
-  show_media: integer("show_media", { mode: "boolean" }).default(true),
+  show_media: boolean("show_media").default(true),
   rates_display_duration_seconds: integer("rates_display_duration_seconds").default(15),
   refresh_interval: integer("refresh_interval").default(30),
-  created_date: text("created_date").default(sql`CURRENT_TIMESTAMP`)
-});
+created_date: timestamp("created_date").defaultNow()});
 
 // Media Items (for ads between rates)
 export const mediaItems = sqliteTable("media_items", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const mediaItems = pgTable("media_items", {
+  id: serial("id").primaryKey(),
   name: text("name").notNull(),
   file_url: text("file_url").notNull(),
   media_type: text("media_type").notNull(), // 'image' or 'video'
   duration_seconds: integer("duration_seconds").default(30),
   order_index: integer("order_index").default(0),
-  is_active: integer("is_active", { mode: "boolean" }).default(true),
+is_active: boolean("is_active").default(true),
   file_size: integer("file_size"),
   mime_type: text("mime_type"),
-  created_date: text("created_date").default(sql`CURRENT_TIMESTAMP`)
-});
+  created_date: timestamp("created_date").defaultNow()
+ });
 
 // Promotional Images (slideshow below silver rates)
-export const promoImages = sqliteTable("promo_images", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const promoImages = pgTable("promo_images", {
+  id: serial("id").primaryKey(),
   name: text("name").notNull(),
   image_url: text("image_url").notNull(),
   duration_seconds: integer("duration_seconds").default(5),
   transition_effect: text("transition_effect").default("fade"),
   order_index: integer("order_index").default(0),
-  is_active: integer("is_active", { mode: "boolean" }).default(true),
+is_active: boolean("is_active").default(true),
   file_size: integer("file_size"),
-  created_date: text("created_date").default(sql`CURRENT_TIMESTAMP`)
-});
+  created_date: timestamp("created_date").defaultNow()
+ });
 
 // Banner Settings
-export const bannerSettings = sqliteTable("banner_settings", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const bannerSettings = pgTable("banner_settings", {
+  id: serial("id").primaryKey(),
   banner_image_url: text("banner_image_url"),
   banner_height: integer("banner_height").default(120),
-  is_active: integer("is_active", { mode: "boolean" }).default(true),
-  created_date: text("created_date").default(sql`CURRENT_TIMESTAMP`)
+  is_active: boolean("is_active").default(true),
+  created_date: timestamp("created_date").defaultNow()
 });
 
 // Insert schemas
