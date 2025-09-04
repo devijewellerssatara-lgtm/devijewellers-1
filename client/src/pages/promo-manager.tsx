@@ -13,7 +13,7 @@ import type { PromoImage } from "@shared/schema";
 export default function PromoManager() {
   const { toast } = useToast();
   const [uploadSettings, setUploadSettings] = useState({
-    duration: 5,
+    duration_seconds: 5,
     transition: "fade",
     autoActivate: true
   });
@@ -111,7 +111,7 @@ export default function PromoManager() {
     { value: "bounce", label: "Bounce" }
   ];
 
-  const totalDuration = activePromos.reduce((sum, promo) => sum + promo.duration_seconds, 0);
+  const totalDuration = activePromos.reduce((sum, promo) => sum + (promo.duration_seconds || 0), 0);
 
   if (isLoading) {
     return (
@@ -133,7 +133,7 @@ export default function PromoManager() {
             <div className="w-12 h-12 bg-gradient-to-r from-pink-600 to-purple-600 rounded-xl flex items-center justify-center">
               <i className="fas fa-bullhorn text-white text-xl"></i>
             </div>
-            <h1 className="text-3xl font-display font-bold text-gray-900">DEVI JEWELLERS</h1>
+            {/* Logo-only branding */}
           </div>
           <h2 className="text-xl font-semibold text-gray-700">Promotional Manager</h2>
           <p className="text-gray-600">Manage slideshow images displayed below silver rates on TV</p>
@@ -169,8 +169,8 @@ export default function PromoManager() {
                     type="number"
                     min="1"
                     max="30"
-                    value={uploadSettings.duration}
-                    onChange={(e) => setUploadSettings(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
+                    value={uploadSettings.duration_seconds}
+                    onChange={(e) => setUploadSettings(prev => ({ ...prev, duration_seconds: parseInt(e.target.value) }))}
                     data-testid="input-default-duration"
                   />
                 </div>
@@ -223,7 +223,7 @@ export default function PromoManager() {
             <Card key={item.id} className={`overflow-hidden ${item.is_active ? 'border-2 border-purple-500' : 'border border-gray-200 opacity-75'}`}>
               <div className="relative aspect-video bg-gray-100">
                 <img 
-                  src={item.image_url} 
+                  src={item.image_url || ""} 
                   alt={item.name}
                   className="w-full h-full object-cover"
                   data-testid={`promo-image-${item.id}`}
@@ -266,7 +266,7 @@ export default function PromoManager() {
                       type="number" 
                       min="1"
                       max="30"
-                      value={item.duration_seconds} 
+                      value={item.duration_seconds || 5} 
                       onChange={(e) => handleUpdateItem(item.id, 'duration_seconds', parseInt(e.target.value))}
                       className="text-sm"
                       data-testid={`input-promo-duration-${item.id}`}
@@ -276,7 +276,7 @@ export default function PromoManager() {
                     <label className="text-xs text-gray-600">Order</label>
                     <Input 
                       type="number" 
-                      value={item.order_index} 
+                      value={item.order_index || 0} 
                       onChange={(e) => handleUpdateItem(item.id, 'order_index', parseInt(e.target.value))}
                       className="text-sm"
                       data-testid={`input-promo-order-${item.id}`}
@@ -286,7 +286,7 @@ export default function PromoManager() {
                 <div>
                   <label className="text-xs text-gray-600">Transition</label>
                   <Select 
-                    value={item.transition_effect} 
+                    value={item.transition_effect || "fade"} 
                     onValueChange={(value) => handleUpdateItem(item.id, 'transition_effect', value)}
                   >
                     <SelectTrigger className="text-sm" data-testid={`select-transition-${item.id}`}>
@@ -317,7 +317,7 @@ export default function PromoManager() {
           {/* Add New Placeholder */}
           <div 
             className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border-2 border-dashed border-purple-300 flex items-center justify-center aspect-video cursor-pointer hover:border-purple-400 transition-colors"
-            onClick={() => document.querySelector('[data-testid="promo-upload-dropzone"] input')?.click()}
+            onClick={() => (document.querySelector('[data-testid="promo-upload-dropzone"] input') as HTMLInputElement)?.click()}
             data-testid="add-new-promo-placeholder"
           >
             <div className="text-center">
@@ -342,7 +342,7 @@ export default function PromoManager() {
                 {activePromos.length > 0 ? (
                   <>
                     <img 
-                      src={activePromos[currentPreviewIndex]?.image_url} 
+                      src={activePromos[currentPreviewIndex]?.image_url || ""} 
                       alt="Slideshow preview" 
                       className="w-full h-full object-cover"
                       data-testid="slideshow-preview-image"

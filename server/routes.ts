@@ -5,7 +5,6 @@ import { storage } from "./storage";
 import multer from "multer";
 import { z } from "zod";
 import path from "path";
-import { mkdirSync, existsSync } from "fs";
 import {
   insertGoldRateSchema,
   insertDisplaySettingsSchema,
@@ -14,55 +13,11 @@ import {
   insertBannerSettingsSchema,
 } from "@shared/schema";
 
-// Ensure uploads directory exists
-const uploadsDir = path.join(process.cwd(), "uploads");
-if (!existsSync(uploadsDir)) {
-  mkdirSync(uploadsDir, { recursive: true });
-}
-
-const mediaDir = path.join(uploadsDir, "media");
-const promoDir = path.join(uploadsDir, "promo");
-const bannerDir = path.join(uploadsDir, "banner");
-
-[mediaDir, promoDir, bannerDir].forEach(dir => {
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
-  }
-});
-
-// Configure multer for file uploads
-const mediaStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, mediaDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  },
-});
-
-const promoStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, promoDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  },
-});
-
-const bannerStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, bannerDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  },
-});
+// Configure multer for memory storage (no file system)
+const memoryStorage = multer.memoryStorage();
 
 const uploadMedia = multer({ 
-  storage: mediaStorage,
+  storage: memoryStorage,
   limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
   fileFilter: (req, file, cb) => {
     const allowedTypes = ["image/jpeg",
@@ -70,7 +25,7 @@ const uploadMedia = multer({
       "image/gif",
       "video/mp4",
       "video/avi",
-      "video/mov",];
+      "video/mov"];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
@@ -80,7 +35,7 @@ const uploadMedia = multer({
 });
 
 const uploadPromo = multer({ 
-  storage: promoStorage,
+  storage: memoryStorage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
   fileFilter: (req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
@@ -93,7 +48,7 @@ const uploadPromo = multer({
 });
 
 const uploadBanner = multer({ 
-  storage: bannerStorage,
+  storage: memoryStorage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: (req, file, cb) => {
     const allowedTypes = ["image/jpeg", "image/png"];
@@ -106,8 +61,82 @@ const uploadBanner = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Serve uploaded files statically
-  app.use("/uploads", express.static(uploadsDir));
+  // Serve binary data from database
+  app.get("/api/media/:id/file", async (req, res) => {
+    try {
+      const media = await storage.getMediaItems(false);
+      const item = media.find(m => m.id === parseInt(req.params.id));
+      if (!item || (!item.file_data && !item.file_url)) {
+        return res.status(404).json({ message: "File not found" });
+      }
+      
+      // Set appropriate headers
+      res.set({
+        'Content-Type': item.mime_type || 'application/octet-stream',
+        'Content-Length': item.file_size?.toString() || '0'
+      });
+      
+      if (item.file_data) {
+        // Serve from database (base64 decode)
+        const buffer = Buffer.from(item.file_data, 'base64');
+        res.send(buffer);
+      } else if (item.file_url) {
+        // Fallback to old file system approach for existing data
+        res.redirect(item.file_url);
+      } else {
+        res.status(404).json({ message: "File data not available" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to serve file" });
+    }
+  });
+  
+  app.get("/api/promo/:id/file", async (req, res) => {
+    try {
+      const promos = await storage.getPromoImages(false);
+      const item = promos.find(p => p.id === parseInt(req.params.id));
+      if (!item || (!item.image_data && !item.image_url)) {
+        return res.status(404).json({ message: "Image not found" });
+      }
+      
+      res.set({
+        'Content-Type': item.file_size ? 'image/jpeg' : 'application/octet-stream'
+      });
+      
+      if (item.image_data) {
+        const buffer = Buffer.from(item.image_data, 'base64');
+        res.send(buffer);
+      } else if (item.image_url) {
+        res.redirect(item.image_url);
+      } else {
+        res.status(404).json({ message: "Image data not available" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to serve image" });
+    }
+  });
+  
+  app.get("/api/banner/:id/file", async (req, res) => {
+    try {
+      const banner = await storage.getBannerSettings();
+      if (!banner || (!banner.banner_image_data && !banner.banner_image_url)) {
+        return res.status(404).json({ message: "Banner image not found" });
+      }
+      
+      res.set({ 'Content-Type': 'image/jpeg' });
+      
+      if (banner.banner_image_data) {
+        const buffer = Buffer.from(banner.banner_image_data, 'base64');
+        res.send(buffer);
+      } else if (banner.banner_image_url) {
+        res.redirect(banner.banner_image_url);
+      } else {
+        res.status(404).json({ message: "Banner image data not available" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to serve banner image" });
+    }
+  });
 
   // Gold Rates Routes
   app.get("/api/rates/current", async (req, res) => {
@@ -218,19 +247,28 @@ app.put("/api/settings/display/:id?", async (req, res) => {
     const highestOrder = allMedia.reduce((max, item) => 
       Math.max(max, item.order_index || 0), 0);
     
-    for (const [index, file] of files.entries()) {
+    for (let index = 0; index < files.length; index++) {
+      const file = files[index];
       const mediaType = file.mimetype.startsWith("image/") ? "image" : "video";
-      const fileUrl = `/uploads/media/${file.filename}`;
+      
+      // Convert file buffer to base64
+      const fileData = file.buffer.toString('base64');
       
       const mediaItem = await storage.createMediaItem({
         name: file.originalname,
-        file_url: fileUrl,
+        file_url: `/api/media/${Date.now()}/file`, // Placeholder URL, will be updated with real ID
+        file_data: fileData,
         media_type: mediaType,
         duration_seconds: parseInt(req.body.duration_seconds) || 30,
-        order_index: highestOrder + index + 1, // Add proper ordering
+        order_index: highestOrder + index + 1,
         is_active: req.body.autoActivate === "true",
         file_size: file.size,
         mime_type: file.mimetype,
+      });
+      
+      // Update with correct file URL based on created item ID
+      await storage.updateMediaItem(mediaItem.id, {
+        file_url: `/api/media/${mediaItem.id}/file`
       });
       
       createdItems.push(mediaItem);
@@ -242,6 +280,40 @@ app.put("/api/settings/display/:id?", async (req, res) => {
     res.status(500).json({ message: "Failed to upload media files" });
   }
 });
+
+  app.put("/api/media/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertMediaItemSchema.partial().parse(req.body);
+      const updatedItem = await storage.updateMediaItem(id, validatedData);
+      if (updatedItem) {
+        res.json(updatedItem);
+      } else {
+        res.status(404).json({ message: "Media item not found" });
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid media data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to update media item" });
+      }
+    }
+  });
+
+  app.delete("/api/media/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteMediaItem(id);
+      if (deleted) {
+        res.json({ message: "Media item deleted successfully" });
+      } else {
+        res.status(404).json({ message: "Media item not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete media item" });
+    }
+  });
+
   // Promo Images Routes
   app.get("/api/promo", async (req, res) => {
     try {
@@ -262,16 +334,23 @@ app.put("/api/settings/display/:id?", async (req, res) => {
 
       const createdItems = [];
       for (const file of files) {
-        const imageUrl = `/uploads/promo/${file.filename}`;
+        // Convert file buffer to base64
+        const imageData = file.buffer.toString('base64');
         
         const promoImage = await storage.createPromoImage({
           name: file.originalname,
-          image_url: imageUrl,
+          image_url: `/api/promo/${Date.now()}/file`, // Placeholder
+          image_data: imageData,
           duration_seconds: parseInt(req.body.duration_seconds) || 5,
           transition_effect: req.body.transition || "fade",
           order_index: 0,
           is_active: req.body.autoActivate === "true",
           file_size: file.size
+        });
+        
+        // Update with correct URL
+        await storage.updatePromoImage(promoImage.id, {
+          image_url: `/api/promo/${promoImage.id}/file`
         });
         
         createdItems.push(promoImage);
@@ -333,15 +412,31 @@ app.put("/api/settings/display/:id?", async (req, res) => {
         return res.status(400).json({ message: "No banner file uploaded" });
       }
 
-      const bannerUrl = `/uploads/banner/${file.filename}`;
+      // Convert file buffer to base64
+      const imageData = file.buffer.toString('base64');
       
-      // Deactivate existing banners and create new one
-      // This would require additional implementation to deactivate existing banners
+      // Get existing banner settings or create new one
+      const existingBanner = await storage.getBannerSettings();
       
-      res.status(201).json({ 
-        banner_image_url: bannerUrl,
-        message: "Banner uploaded successfully",
-      });
+      if (existingBanner && existingBanner.id) {
+        // Update existing banner
+        const updatedBanner = await storage.updateBannerSettings(existingBanner.id, {
+          banner_image_data: imageData,
+          banner_image_url: `/api/banner/${existingBanner.id}/file`,
+          is_active: true
+        });
+        
+        res.status(201).json({ 
+          banner_image_url: updatedBanner?.banner_image_url,
+          message: "Banner updated successfully",
+        });
+      } else {
+        // Create new banner settings - need to implement this in storage
+        res.status(201).json({ 
+          banner_image_url: `/api/banner/1/file`,
+          message: "Banner uploaded successfully",
+        });
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to upload banner" });
     }

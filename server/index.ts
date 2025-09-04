@@ -57,7 +57,7 @@ app.get("/api/health", async (req, res) => {
     res.status(500).json({ 
       status: "unhealthy", 
       database: "disconnected", 
-      error: error.message 
+      error: (error as Error).message 
     });
   }
 });

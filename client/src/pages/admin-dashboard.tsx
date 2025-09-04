@@ -186,9 +186,7 @@ export default function AdminDashboard() {
             <div className="w-12 h-12 bg-gradient-to-r from-jewelry-primary to-jewelry-secondary rounded-xl flex items-center justify-center">
               <i className="fas fa-gem text-white text-xl"></i>
             </div>
-            <h1 className="text-3xl font-display font-bold text-gray-900">
-              DEVI JEWELLERS
-            </h1>
+            {/* Logo-only branding - Logo embedded in icon */}
           </div>
           <h2 className="text-xl font-semibold text-gray-700">
             Admin Dashboard
@@ -217,7 +215,7 @@ export default function AdminDashboard() {
                         <FormLabel>TV Orientation</FormLabel>
                         <Select
                           onValueChange={field.onChange}
-                          value={field.value}
+                          value={field.value || "horizontal"}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -246,7 +244,7 @@ export default function AdminDashboard() {
                         <FormLabel>Rate Numbers Font Size</FormLabel>
                         <Select
                           onValueChange={field.onChange}
-                          value={field.value}
+                          value={field.value || "text-4xl"}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -289,7 +287,7 @@ export default function AdminDashboard() {
                         </div>
                         <FormControl>
                           <Switch
-                            checked={field.value}
+                            checked={field.value ?? true}
                             onCheckedChange={field.onChange}
                           />
                         </FormControl>
@@ -317,12 +315,12 @@ export default function AdminDashboard() {
                         <div className="flex items-center space-x-2">
                           <input
                             type="color"
-                            value={field.value}
+                            value={field.value || "#FFF8E1"}
                             onChange={(e) => field.onChange(e.target.value)}
                             className="w-12 h-10 border border-gray-300 rounded cursor-pointer"
                           />
                           <FormControl>
-                            <Input {...field} className="flex-1" />
+                            <Input {...field} value={field.value || ""} className="flex-1" />
                           </FormControl>
                         </div>
                         <FormMessage />
@@ -339,12 +337,12 @@ export default function AdminDashboard() {
                         <div className="flex items-center space-x-2">
                           <input
                             type="color"
-                            value={field.value}
+                            value={field.value || "#212529"}
                             onChange={(e) => field.onChange(e.target.value)}
                             className="w-12 h-10 border border-gray-300 rounded cursor-pointer"
                           />
                           <FormControl>
-                            <Input {...field} className="flex-1" />
+                            <Input {...field} value={field.value || ""} className="flex-1" />
                           </FormControl>
                         </div>
                         <FormMessage />
@@ -399,6 +397,7 @@ export default function AdminDashboard() {
                             min="10"
                             max="300"
                             {...field}
+                            value={field.value ?? 30}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
                             }
@@ -424,6 +423,7 @@ export default function AdminDashboard() {
                             min="5"
                             max="60"
                             {...field}
+                            value={field.value ?? 15}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
                             }

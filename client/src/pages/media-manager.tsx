@@ -148,7 +148,7 @@ export default function MediaManager() {
                 }}
               />
             </div>
-            <h1 className="text-3xl font-display font-bold text-gray-900">DEVI JEWELLERS</h1>
+            {/* Logo-only branding */}
           </div>
           <h2 className="text-xl font-semibold text-gray-700">Media Manager</h2>
           <p className="text-gray-600">Upload and manage promotional videos and images for TV ads</p>
@@ -230,7 +230,7 @@ export default function MediaManager() {
                     <div className="relative">
                       {item.media_type === 'image' ? (
                         <img 
-                          src={item.file_url} 
+                          src={item.file_url || ""} 
                           alt={item.name}
                           className="w-full h-48 object-cover"
                           onError={(e) => {
@@ -239,7 +239,7 @@ export default function MediaManager() {
                         />
                       ) : (
                         <video 
-                          src={item.file_url}
+                          src={item.file_url || ""}
                           className="w-full h-48 object-cover"
                           controls
                           preload="metadata"

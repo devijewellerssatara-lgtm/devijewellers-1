@@ -8,13 +8,30 @@ export default function TVDisplay() {
   const [currentPromoIndex, setCurrentPromoIndex] = useState(0);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [showingRates, setShowingRates] = useState(true);
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [isMobile, setIsMobile] = useState(false);
+  // Create a function to get Indian time
+  const getIndianTime = () => {
+    const now = new Date();
+    // Convert to Indian timezone (Asia/Kolkata)
+    const indianTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Kolkata"}));
+    return indianTime;
+  };
+  
+  const [currentTime, setCurrentTime] = useState(getIndianTime());
+  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop' | 'tv'>('desktop');
 
-  // Check screen size on mount and resize
+  // Enhanced screen size detection for TV, tablet, mobile, and desktop
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768);
+      const width = window.innerWidth;
+      if (width < 768) {
+        setScreenSize('mobile');
+      } else if (width >= 768 && width < 1024) {
+        setScreenSize('tablet');
+      } else if (width >= 1024 && width < 1920) {
+        setScreenSize('desktop');
+      } else {
+        setScreenSize('tv');
+      }
     };
     
     checkScreenSize();
@@ -56,7 +73,7 @@ export default function TVDisplay() {
 
   // Effect for the live clock
   useEffect(() => {
-    const timeInterval = setInterval(() => setCurrentTime(new Date()), 1000);
+    const timeInterval = setInterval(() => setCurrentTime(getIndianTime()), 1000);
     return () => clearInterval(timeInterval);
   }, []);
 
@@ -66,7 +83,7 @@ export default function TVDisplay() {
 
     const ratesDisplayTime = (settings?.rates_display_duration_seconds || 15) * 1000;
     const currentMedia = mediaItems[currentMediaIndex];
-    const mediaDisplayTime = (currentMedia?.duration_seconds_seconds || 30) * 1000;
+    const mediaDisplayTime = (currentMedia?.duration_seconds || 30) * 1000;
 
     const interval = setInterval(() => {
       if (showingRates) {
@@ -85,7 +102,7 @@ export default function TVDisplay() {
     if (promoImages.length <= 1) return;
 
     const currentPromo = promoImages[currentPromoIndex];
-    const duration_seconds = (currentPromo?.duration_seconds_seconds || 5) * 1000;
+    const duration_seconds = (currentPromo?.duration_seconds || 5) * 1000;
 
     const interval = setInterval(() => {
       setCurrentPromoIndex((prev) => (prev + 1) % promoImages.length);
@@ -109,9 +126,15 @@ export default function TVDisplay() {
 
   const isVertical = settings?.orientation === "vertical";
   const currentPromo = promoImages[currentPromoIndex];
-  const rateFontSize = isMobile 
-    ? "text-2xl" 
-    : (settings?.rate_number_font_size || "text-4xl");
+  
+  // Enhanced responsive font sizing
+  const getRateFontSize = () => {
+    if (screenSize === 'mobile') return "text-xl";
+    if (screenSize === 'tablet') return "text-3xl";
+    if (screenSize === 'tv') return "text-6xl";
+    return settings?.rate_number_font_size || "text-4xl";
+  };
+  const rateFontSize = getRateFontSize();
 
   const getAnimationVariants = (effect: string) => {
     const transitions = {
@@ -150,7 +173,7 @@ export default function TVDisplay() {
 
   return (
     <div 
-      className={`w-full h-screen overflow-hidden flex flex-col ${isMobile ? 'p-2' : ''}`}
+      className={`w-full h-screen overflow-hidden flex flex-col ${screenSize === 'mobile' ? 'p-2' : ''}`}
       style={{ 
         backgroundColor: settings?.background_color || "#FFF8E1",
         color: settings?.text_color || "#212529"
@@ -166,8 +189,8 @@ export default function TVDisplay() {
             transition={{ duration_seconds: 0.5, ease: "easeInOut" }}
             className="flex-1 flex flex-col"
           >
-            {/* Header with Company Logo - Mobile optimized */}
-            <div className="relative bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white py-2 md:py-4 flex-shrink-0">
+            {/* Header with Company Logo - Responsive for all devices */}
+            <div className={`relative bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white flex-shrink-0 ${screenSize === 'tv' ? 'py-6' : screenSize === 'tablet' ? 'py-3' : 'py-2 md:py-4'}`}>
               <div className="container mx-auto px-2 md:px-4 flex items-center justify-between">
                 <div className="flex items-center space-x-2 md:space-x-4">
                   <div className="w-10 h-10 md:w-16 md:h-16 bg-gold-500 rounded-full flex items-center justify-center shadow-lg">
@@ -177,8 +200,7 @@ export default function TVDisplay() {
                       className="w-8 h-8 md:w-12 md:h-12 object-contain"
                     />
                   </div>
-                  <div className={isMobile ? "hidden md:block" : ""}>
-                    <h1 className="text-xl md:text-3xl font-display font-bold tracking-wide">DEVI JEWELLERS</h1>
+                  <div className={screenSize === 'mobile' ? "hidden md:block" : ""}>
                     <p className="text-gold-200 text-xs md:text-sm">Premium Gold & Silver Collection</p>
                   </div>
                 </div>
@@ -196,22 +218,22 @@ export default function TVDisplay() {
             </div>
 
             {/* Today's Rate Header */}
-            <div className="bg-gradient-to-r from-gold-600 to-gold-700 text-white py-2 md:py-3 text-center flex-shrink-0">
-              <h2 className="text-xl md:text-3xl font-display font-bold">TODAY'S RATES</h2>
+            <div className={`bg-gradient-to-r from-gold-600 to-gold-700 text-white text-center flex-shrink-0 ${screenSize === 'tv' ? 'py-4' : 'py-2 md:py-3'}`}>
+              <h2 className={`font-display font-bold ${screenSize === 'tv' ? 'text-5xl' : screenSize === 'tablet' ? 'text-2xl' : 'text-xl md:text-3xl'}`}>TODAY'S RATES</h2>
             </div>
 
             {/* Rates Display - Main Content */}
-            <div className="flex-1 container mx-auto px-2 md:px-6 py-4 md:py-8 min-h-0 overflow-auto">
-              <div className={`grid gap-4 md:gap-8 h-full ${isMobile || isVertical ? 'grid-cols-1' : 'grid-cols-2'}`}>
+            <div className={`flex-1 container mx-auto min-h-0 overflow-auto ${screenSize === 'tv' ? 'px-12 py-12' : screenSize === 'tablet' ? 'px-4 py-6' : 'px-2 md:px-6 py-4 md:py-8'}`}>
+              <div className={`grid h-full ${screenSize === 'tv' ? 'gap-12' : screenSize === 'tablet' ? 'gap-6' : 'gap-4 md:gap-8'} ${screenSize === 'mobile' || isVertical ? 'grid-cols-1' : 'grid-cols-2'}`}>
                 {/* Gold Rates */}
                 <div className="space-y-4 md:space-y-6">
                   <h3 className="text-lg md:text-2xl font-display font-bold text-center text-jewelry-primary mb-4 md:mb-6">GOLD RATES (Per 10 GMS)</h3>
                   
                   {/* 24K Gold */}
-                  <div className="rate-card bg-white rounded-lg md:rounded-xl shadow-md md:shadow-xl p-3 md:p-6 border-l-4 md:border-l-8 border-gold-500 fade-in">
+                  <div className="rate-card bg-white rounded-lg md:rounded-xl shadow-md md:shadow-xl p-3 md:p-6 border-l-4 md:border-l-8 border-jewelry-primary fade-in">
                     <div className="flex justify-between items-center mb-2 md:mb-4">
                       <h4 className="text-lg md:text-2xl font-bold text-gray-800">24K GOLD</h4>
-                      <div className="w-8 h-8 md:w-10 md:h-10 bg-gold-500 rounded-full gold-shimmer flex items-center justify-center">
+                      <div className="w-8 h-8 md:w-10 md:h-10 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
                         <i className="fas fa-star text-white text-sm md:text-base"></i>
                       </div>
                     </div>
@@ -228,10 +250,10 @@ export default function TVDisplay() {
                   </div>
 
                   {/* 22K Gold */}
-                  <div className="rate-card bg-white rounded-lg md:rounded-xl shadow-md md:shadow-xl p-3 md:p-6 border-l-4 md:border-l-8 border-gold-600 fade-in">
+                  <div className="rate-card bg-white rounded-lg md:rounded-xl shadow-md md:shadow-xl p-3 md:p-6 border-l-4 md:border-l-8 border-jewelry-primary fade-in">
                     <div className="flex justify-between items-center mb-2 md:mb-4">
                       <h4 className="text-lg md:text-2xl font-bold text-gray-800">22K GOLD</h4>
-                      <div className="w-8 h-8 md:w-10 md:h-10 bg-gold-600 rounded-full gold-shimmer flex items-center justify-center">
+                      <div className="w-8 h-8 md:w-10 md:h-10 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
                         <i className="fas fa-medal text-white text-sm md:text-base"></i>
                       </div>
                     </div>
@@ -248,10 +270,10 @@ export default function TVDisplay() {
                   </div>
 
                   {/* 18K Gold */}
-                  <div className="rate-card bg-white rounded-lg md:rounded-xl shadow-md md:shadow-xl p-3 md:p-6 border-l-4 md:border-l-8 border-gold-700 fade-in">
+                  <div className="rate-card bg-white rounded-lg md:rounded-xl shadow-md md:shadow-xl p-3 md:p-6 border-l-4 md:border-l-8 border-jewelry-primary fade-in">
                     <div className="flex justify-between items-center mb-2 md:mb-4">
                       <h4 className="text-lg md:text-2xl font-bold text-gray-800">18K GOLD</h4>
-                      <div className="w-8 h-8 md:w-10 md:h-10 bg-gold-700 rounded-full gold-shimmer flex items-center justify-center">
+                      <div className="w-8 h-8 md:w-10 md:h-10 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
                         <i className="fas fa-crown text-white text-sm md:text-base"></i>
                       </div>
                     </div>
@@ -274,10 +296,10 @@ export default function TVDisplay() {
                   <div>
                     <h3 className="text-lg md:text-2xl font-display font-bold text-center text-jewelry-primary mb-4 md:mb-6">SILVER RATES (Per KG)</h3>
                     
-                    <div className="rate-card bg-white rounded-lg md:rounded-xl shadow-md md:shadow-xl p-3 md:p-6 border-l-4 md:border-l-8 border-gray-400 fade-in">
+                    <div className="rate-card bg-white rounded-lg md:rounded-xl shadow-md md:shadow-xl p-3 md:p-6 border-l-4 md:border-l-8 border-jewelry-primary fade-in">
                       <div className="flex justify-between items-center mb-2 md:mb-4">
                         <h4 className="text-lg md:text-2xl font-bold text-gray-800">SILVER</h4>
-                        <div className="w-8 h-8 md:w-10 md:h-10 bg-gray-400 rounded-full shadow-lg flex items-center justify-center">
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-jewelry-primary rounded-full shadow-lg flex items-center justify-center">
                           <i className="fas fa-circle text-white text-sm md:text-base"></i>
                         </div>
                       </div>
@@ -302,7 +324,7 @@ export default function TVDisplay() {
                           {currentPromo && (
                             <motion.img
                               key={currentPromo.id}
-                              src={currentPromo.image_url}
+                              src={currentPromo.image_url || ""}
                               alt={currentPromo.name || "Promotional Image"}
                               className="w-full h-full object-cover"
                               initial="initial"
@@ -339,7 +361,7 @@ export default function TVDisplay() {
               <div 
                 className="flex-shrink-0 bg-white border-t-2 md:border-t-4 border-jewelry-primary shadow-md md:shadow-lg"
                 style={{ 
-                  height: `${isMobile ? (bannerSettings.banner_height || 120) * 0.6 : bannerSettings.banner_height || 120}px`
+                  height: `${screenSize === 'mobile' ? (bannerSettings.banner_height || 120) * 0.6 : bannerSettings.banner_height || 120}px`
                 }}
               >
                 <div className="h-full flex items-center justify-center p-1 md:p-2">
@@ -364,13 +386,13 @@ export default function TVDisplay() {
             >
               {currentMedia.media_type === "image" ? (
                 <img 
-                  src={currentMedia.file_url} 
+                  src={currentMedia.file_url || ""} 
                   alt={currentMedia.name}
                   className="max-w-full max-h-full object-contain"
                 />
               ) : (
                 <video 
-                  src={currentMedia.file_url} 
+                  src={currentMedia.file_url || ""} 
                   autoPlay 
                   muted 
                   className="max-w-full max-h-full object-contain"

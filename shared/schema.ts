@@ -34,11 +34,12 @@ created_date: timestamp("created_date").defaultNow()});
 export const mediaItems = pgTable("media_items", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  file_url: text("file_url").notNull(),
+  file_url: text("file_url"), // Keep for backward compatibility
+  file_data: text("file_data"), // Store base64 encoded data
   media_type: text("media_type").notNull(), // 'image' or 'video'
   duration_seconds: integer("duration_seconds").default(30),
   order_index: integer("order_index").default(0),
-is_active: boolean("is_active").default(true),
+  is_active: boolean("is_active").default(true),
   file_size: integer("file_size"),
   mime_type: text("mime_type"),
   created_date: timestamp("created_date").defaultNow()
@@ -48,11 +49,12 @@ is_active: boolean("is_active").default(true),
 export const promoImages = pgTable("promo_images", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  image_url: text("image_url").notNull(),
+  image_url: text("image_url"), // Keep for backward compatibility
+  image_data: text("image_data"), // Store base64 encoded data
   duration_seconds: integer("duration_seconds").default(5),
   transition_effect: text("transition_effect").default("fade"),
   order_index: integer("order_index").default(0),
-is_active: boolean("is_active").default(true),
+  is_active: boolean("is_active").default(true),
   file_size: integer("file_size"),
   created_date: timestamp("created_date").defaultNow()
  });
@@ -60,7 +62,8 @@ is_active: boolean("is_active").default(true),
 // Banner Settings
 export const bannerSettings = pgTable("banner_settings", {
   id: serial("id").primaryKey(),
-  banner_image_url: text("banner_image_url"),
+  banner_image_url: text("banner_image_url"), // Keep for backward compatibility
+  banner_image_data: text("banner_image_data"), // Store base64 encoded data
   banner_height: integer("banner_height").default(120),
   is_active: boolean("is_active").default(true),
   created_date: timestamp("created_date").defaultNow()

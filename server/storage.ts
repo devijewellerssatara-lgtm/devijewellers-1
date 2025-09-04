@@ -139,8 +139,8 @@ async createDisplaySettings(settings: InsertDisplaySettings): Promise<DisplaySet
   }
 
   async deleteMediaItem(id: number): Promise<boolean> {
-    const result = await db.delete(mediaItems).where(eq(mediaItems.id, id));
-    return result.rowCount > 0;
+    const result = await db.delete(mediaItems).where(eq(mediaItems.id, id)).returning();
+    return result.length > 0;
   }
 
   // Promo Images
@@ -169,8 +169,8 @@ async createDisplaySettings(settings: InsertDisplaySettings): Promise<DisplaySet
   }
 
   async deletePromoImage(id: number): Promise<boolean> {
-    const result = await db.delete(promoImages).where(eq(promoImages.id, id));
-    return result.rowCount > 0;
+    const result = await db.delete(promoImages).where(eq(promoImages.id, id)).returning();
+    return result.length > 0;
   }
 
   // Banner Settings
