@@ -60,15 +60,8 @@ export const settingsApi = {
   getDisplay: async (): Promise<DisplaySettings | null> => {
     try {
       const response = await apiRequest("GET", "/api/settings/display");
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Fetch failed (${response.status}): ${errorText}`);
-      }
-
       const data = await response.json();
 
-      // Handle case where backend returns empty object or null
       if (!data || Object.keys(data).length === 0) {
         return null;
       }
@@ -76,44 +69,21 @@ export const settingsApi = {
       return data as DisplaySettings;
     } catch (error: any) {
       console.error("Failed to fetch display settings:", error);
-      return null; // allow UI to fallback gracefully
+      return null;
     }
   },
 
   createDisplay: async (settings: InsertDisplaySettings): Promise<DisplaySettings> => {
-    try {
-      const response = await apiRequest("POST", "/api/settings/display", settings);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Create failed (${response.status}): ${errorText}`);
-      }
-
-      return (await response.json()) as DisplaySettings;
-    } catch (error: any) {
-      console.error("Failed to create display settings:", error);
-      throw new Error(error.message || "Create failed: Unknown error");
-    }
+    const response = await apiRequest("POST", "/api/settings/display", settings);
+    return (await response.json()) as DisplaySettings;
   },
 
   updateDisplay: async (id: number, settings: Partial<InsertDisplaySettings>): Promise<DisplaySettings> => {
-    try {
-      if (!id || isNaN(id)) {
-        throw new Error("Invalid settings ID");
-      }
-
-      const response = await apiRequest("PUT", `/api/settings/display/${id}`, settings);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Update failed (${response.status}): ${errorText}`);
-      }
-
-      return (await response.json()) as DisplaySettings;
-    } catch (error: any) {
-      console.error("Failed to update display settings:", error);
-      throw new Error(error.message || "Update failed: Unknown error");
+    if (!id || isNaN(id)) {
+      throw new Error("Invalid settings ID");
     }
+    const response = await apiRequest("PUT", `/api/settings/display/${id}`, settings);
+    return (await response.json()) as DisplaySettings;
   }
 };
 // Media API
