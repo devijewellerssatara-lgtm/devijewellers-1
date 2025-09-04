@@ -18,7 +18,12 @@ const memoryStorage = multer.memoryStorage();
 
 const uploadMedia = multer({ 
   storage: memoryStorage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+  limits: { 
+    fileSize: 50 * 1024 * 1024, // 50MB
+    files: 10, // Maximum 10 files per upload
+    fieldSize: 10 * 1024 * 1024, // 10MB per field
+    fields: 20 // Maximum fields
+  },
   fileFilter: (req, file, cb) => {
     const allowedTypes = ["image/jpeg",
       "image/png",
@@ -36,7 +41,12 @@ const uploadMedia = multer({
 
 const uploadPromo = multer({ 
   storage: memoryStorage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  limits: { 
+    fileSize: 10 * 1024 * 1024, // 10MB
+    files: 10, // Maximum 10 files per upload
+    fieldSize: 5 * 1024 * 1024, // 5MB per field
+    fields: 15 // Maximum fields
+  },
   fileFilter: (req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
     if (allowedTypes.includes(file.mimetype)) {

@@ -95,20 +95,52 @@ export const mediaApi = {
 
   upload: async (files: FileList, options: { duration_seconds: number; autoActivate: boolean }): Promise<MediaItem[]> => {
     const formData = new FormData();
-    Array.from(files).forEach(file => formData.append('files', file));
+    const filesArray = Array.from(files);
+    
+    // Validate file sizes before upload (50MB limit for cloud deployment)
+    for (const file of filesArray) {
+      if (file.size > 50 * 1024 * 1024) {
+        throw new Error(`File ${file.name} is too large (${Math.round(file.size / 1024 / 1024)}MB). Maximum size is 50MB.`);
+      }
+    }
+    
+    filesArray.forEach(file => formData.append('files', file));
     formData.append('duration_seconds', options.duration_seconds.toString());
     formData.append('autoActivate', options.autoActivate.toString());
 
-    const response = await fetch("/api/media/upload", {
-      method: "POST",
-      body: formData
-    });
+    // Create abort controller for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
     
-    if (!response.ok) {
-      throw new Error(`Upload failed: ${response.status}`);
+    try {
+      const response = await fetch("/api/media/upload", {
+        method: "POST",
+        body: formData,
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage;
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorData.message || `Upload failed: ${response.status}`;
+        } catch {
+          errorMessage = `Upload failed: ${response.status} - ${errorText}`;
+        }
+        throw new Error(errorMessage);
+      }
+      
+      return response.json();
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error('Upload timed out. Please try uploading smaller files or fewer files at once.');
+      }
+      throw error;
     }
-    
-    return response.json();
   },
 
   update: async (id: number, updates: Partial<MediaItem>): Promise<MediaItem> => {
@@ -130,21 +162,53 @@ export const promoApi = {
 
   upload: async (files: FileList, options: { duration_seconds: number; transition: string; autoActivate: boolean }): Promise<PromoImage[]> => {
     const formData = new FormData();
-    Array.from(files).forEach(file => formData.append('files', file));
+    const filesArray = Array.from(files);
+    
+    // Validate file sizes before upload (10MB limit for promo images)
+    for (const file of filesArray) {
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error(`Image ${file.name} is too large (${Math.round(file.size / 1024 / 1024)}MB). Maximum size is 10MB.`);
+      }
+    }
+    
+    filesArray.forEach(file => formData.append('files', file));
     formData.append('duration_seconds', options.duration_seconds.toString());
     formData.append('transition', options.transition);
     formData.append('autoActivate', options.autoActivate.toString());
 
-    const response = await fetch("/api/promo/upload", {
-      method: "POST",
-      body: formData
-    });
+    // Create abort controller for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 1 minute timeout for images
     
-    if (!response.ok) {
-      throw new Error(`Upload failed: ${response.status}`);
+    try {
+      const response = await fetch("/api/promo/upload", {
+        method: "POST",
+        body: formData,
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage;
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorData.message || `Upload failed: ${response.status}`;
+        } catch {
+          errorMessage = `Upload failed: ${response.status} - ${errorText}`;
+        }
+        throw new Error(errorMessage);
+      }
+      
+      return response.json();
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error('Upload timed out. Please try uploading smaller images or fewer images at once.');
+      }
+      throw error;
     }
-    
-    return response.json();
   },
 
   update: async (id: number, updates: Partial<PromoImage>): Promise<PromoImage> => {
