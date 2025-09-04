@@ -240,6 +240,7 @@ app.put("/api/settings/display/:id?", async (req, res) => {
       return res.status(400).json({ message: "No files uploaded" });
     }
 
+    console.log(`Processing ${files.length} media files for upload`);
     const createdItems = [];
     
     // Get the highest order index to place new items at the end
@@ -249,35 +250,59 @@ app.put("/api/settings/display/:id?", async (req, res) => {
     
     for (let index = 0; index < files.length; index++) {
       const file = files[index];
+      console.log(`Processing file ${index + 1}/${files.length}: ${file.originalname} (${file.size} bytes)`);
+      
+      // Validate file size (50MB limit for cloud deployment)
+      if (file.size > 50 * 1024 * 1024) {
+        console.warn(`File ${file.originalname} too large: ${file.size} bytes`);
+        continue;
+      }
+      
       const mediaType = file.mimetype.startsWith("image/") ? "image" : "video";
       
-      // Convert file buffer to base64
-      const fileData = file.buffer.toString('base64');
-      
-      const mediaItem = await storage.createMediaItem({
-        name: file.originalname,
-        file_url: `/api/media/${Date.now()}/file`, // Placeholder URL, will be updated with real ID
-        file_data: fileData,
-        media_type: mediaType,
-        duration_seconds: parseInt(req.body.duration_seconds) || 30,
-        order_index: highestOrder + index + 1,
-        is_active: req.body.autoActivate === "true",
-        file_size: file.size,
-        mime_type: file.mimetype,
-      });
-      
-      // Update with correct file URL based on created item ID
-      await storage.updateMediaItem(mediaItem.id, {
-        file_url: `/api/media/${mediaItem.id}/file`
-      });
-      
-      createdItems.push(mediaItem);
+      try {
+        // Convert file buffer to base64
+        const fileData = file.buffer.toString('base64');
+        console.log(`File ${file.originalname} converted to base64, length: ${fileData.length}`);
+        
+        const mediaItem = await storage.createMediaItem({
+          name: file.originalname,
+          file_url: `/api/media/${Date.now()}/file`, // Placeholder URL, will be updated with real ID
+          file_data: fileData,
+          media_type: mediaType,
+          duration_seconds: parseInt(req.body.duration_seconds) || 30,
+          order_index: highestOrder + index + 1,
+          is_active: req.body.autoActivate === "true",
+          file_size: file.size,
+          mime_type: file.mimetype,
+        });
+        
+        console.log(`Created media item with ID: ${mediaItem.id}`);
+        
+        // Update with correct file URL based on created item ID
+        await storage.updateMediaItem(mediaItem.id, {
+          file_url: `/api/media/${mediaItem.id}/file`
+        });
+        
+        createdItems.push(mediaItem);
+      } catch (fileError) {
+        console.error(`Error processing file ${file.originalname}:`, fileError);
+        // Continue with other files
+      }
     }
 
+    console.log(`Successfully created ${createdItems.length} media items`);
     res.status(201).json(createdItems);
   } catch (error) {
-    console.error("Upload error:", error);
-    res.status(500).json({ message: "Failed to upload media files" });
+    console.error("Media upload error details:", {
+      error: error instanceof Error ? error.message : error,
+      stack: error instanceof Error ? error.stack : undefined,
+      filesCount: req.files ? (req.files as Express.Multer.File[]).length : 0
+    });
+    res.status(500).json({ 
+      message: "Failed to upload media files",
+      error: error instanceof Error ? error.message : "Unknown error"
+    });
   }
 });
 
@@ -332,33 +357,59 @@ app.put("/api/settings/display/:id?", async (req, res) => {
         return res.status(400).json({ message: "No files uploaded" });
       }
 
+      console.log(`Processing ${files.length} promo images for upload`);
       const createdItems = [];
       for (const file of files) {
-        // Convert file buffer to base64
-        const imageData = file.buffer.toString('base64');
+        console.log(`Processing promo image: ${file.originalname} (${file.size} bytes)`);
         
-        const promoImage = await storage.createPromoImage({
-          name: file.originalname,
-          image_url: `/api/promo/${Date.now()}/file`, // Placeholder
-          image_data: imageData,
-          duration_seconds: parseInt(req.body.duration_seconds) || 5,
-          transition_effect: req.body.transition || "fade",
-          order_index: 0,
-          is_active: req.body.autoActivate === "true",
-          file_size: file.size
-        });
+        // Validate file size (10MB limit for images)
+        if (file.size > 10 * 1024 * 1024) {
+          console.warn(`Promo image ${file.originalname} too large: ${file.size} bytes`);
+          continue;
+        }
         
-        // Update with correct URL
-        await storage.updatePromoImage(promoImage.id, {
-          image_url: `/api/promo/${promoImage.id}/file`
-        });
-        
-        createdItems.push(promoImage);
+        try {
+          // Convert file buffer to base64
+          const imageData = file.buffer.toString('base64');
+          console.log(`Promo image ${file.originalname} converted to base64, length: ${imageData.length}`);
+          
+          const promoImage = await storage.createPromoImage({
+            name: file.originalname,
+            image_url: `/api/promo/${Date.now()}/file`, // Placeholder
+            image_data: imageData,
+            duration_seconds: parseInt(req.body.duration_seconds) || 5,
+            transition_effect: req.body.transition || "fade",
+            order_index: 0,
+            is_active: req.body.autoActivate === "true",
+            file_size: file.size
+          });
+          
+          console.log(`Created promo image with ID: ${promoImage.id}`);
+          
+          // Update with correct URL
+          await storage.updatePromoImage(promoImage.id, {
+            image_url: `/api/promo/${promoImage.id}/file`
+          });
+          
+          createdItems.push(promoImage);
+        } catch (fileError) {
+          console.error(`Error processing promo image ${file.originalname}:`, fileError);
+          // Continue with other files
+        }
       }
 
+      console.log(`Successfully created ${createdItems.length} promo images`);
       res.status(201).json(createdItems);
     } catch (error) {
-      res.status(500).json({ message: "Failed to upload promotional images" });
+      console.error("Promo upload error details:", {
+        error: error instanceof Error ? error.message : error,
+        stack: error instanceof Error ? error.stack : undefined,
+        filesCount: req.files ? (req.files as Express.Multer.File[]).length : 0
+      });
+      res.status(500).json({ 
+        message: "Failed to upload promotional images",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 
