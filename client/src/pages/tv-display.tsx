@@ -189,32 +189,13 @@ export default function TVDisplay() {
             transition={{ duration_seconds: 0.5, ease: "easeInOut" }}
             className="flex-1 flex flex-col"
           >
-            {/* Header with Company Logo - Responsive for all devices */}
-            <div className={`relative bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white flex-shrink-0 ${screenSize === 'tv' ? 'py-6' : screenSize === 'tablet' ? 'py-3' : 'py-2 md:py-4'}`}>
-              <div className="container mx-auto px-2 md:px-4 flex items-center justify-between">
-                <div className="flex items-center space-x-2 md:space-x-4">
-                  <div className="w-10 h-10 md:w-16 md:h-16 bg-gold-500 rounded-full flex items-center justify-center shadow-lg">
-                    <img 
-                      src="/logo.png" 
-                      alt="Devi Jewellers Logo"
-                      className="w-8 h-8 md:w-12 md:h-12 object-contain"
-                    />
-                  </div>
-                  <div className={screenSize === 'mobile' ? "hidden md:block" : ""}>
-                    <p className="text-gold-200 text-xs md:text-sm">Premium Gold & Silver Collection</p>
-                  </div>
-                </div>
-                
-                {/* Date and Time */}
-                <div className="text-right bg-black bg-opacity-30 px-3 py-1 md:px-6 md:py-3 rounded-lg backdrop-blur-sm">
-                  <div className="text-sm md:text-lg font-semibold text-gold-200">
-                    {format(currentTime, "EEEE dd-MMM-yyyy")}
-                  </div>
-                  <div className="text-lg md:text-2xl font-bold text-white">
-                    {format(currentTime, "HH:mm:ss")}
-                  </div>
-                </div>
-              </div>
+            {/* Common Header - matches Mobile Control page */}
+            <div className="bg-gradient-to-r from-gold-600 to-gold-700 text-black p-4 flex justify-center flex-shrink-0">
+              <img 
+                src="/logo.png" 
+                alt="Devi Jewellers Logo"
+                className="h-40 w-[350px] object-contain"
+              />
             </div>
 
             {/* Today's Rate Header */}
