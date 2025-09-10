@@ -130,11 +130,12 @@ export default function MobileControl() {
                 <h3 className="font-semibold text-gray-800">Last Updated</h3>
                 <p className="text-sm text-gray-600">
                   {currentRates?.created_date
-                    ? `${new Date(currentRates.created_date).toLocaleString("en-IN", {
-                        timeZone: "Asia/Kolkata",
+                    ? new Date(currentRates.created_date).toLocaleString(undefined, {
                         dateStyle: "medium",
                         timeStyle: "short",
-                      })} IST`
+                      })
+                    : "Never"}
+                 })} IST`
                     : "Never"}
                 </p>
               </div>
