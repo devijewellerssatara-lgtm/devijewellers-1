@@ -127,30 +127,18 @@ export default function MediaManager() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-teal-50 p-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header with Logo */}
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-teal-50">
+      {/* Common Header - matches Mobile Control page */}
+      <div className="bg-gradient-to-r from-gold-600 to-gold-700 text-black p-4 flex justify-center">
+        <img 
+          src="/logo.png" 
+          alt="Devi Jewellers Logo" 
+          className="h-40 w-[350px] object-contain"
+        />
+      </div>
+      <div className="max-w-6xl mx-auto p-4">
+        {/* Page Title */}
         <div className="text-center mb-8">
-          <div className="flex flex-col items-center justify-center mb-4">
-            {/* Logo at center top */}
-            <div className="w-24 h-24 bg-white rounded-full shadow-lg p-2 mb-4">
-              <img 
-                src="/logo.png" 
-                alt="Devi Jewellers Logo" 
-                className="w-full h-full object-contain"
-                onError={(e) => {
-                  // Fallback if logo doesn't exist
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.parentElement!.innerHTML = `
-                    <div class="w-full h-full bg-gradient-to-r from-green-600 to-teal-600 rounded-full flex items-center justify-center">
-                      <span class="text-white font-bold text-lg">DJ</span>
-                    </div>
-                  `;
-                }}
-              />
-            </div>
-            {/* Logo-only branding */}
-          </div>
           <h2 className="text-xl font-semibold text-gray-700">Media Manager</h2>
           <p className="text-gray-600">Upload and manage promotional videos and images for TV ads</p>
         </div>

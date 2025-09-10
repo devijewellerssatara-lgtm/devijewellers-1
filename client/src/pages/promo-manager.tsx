@@ -139,16 +139,18 @@ export default function PromoManager() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 p-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50">
+      {/* Common Header - matches Mobile Control page */}
+      <div className="bg-gradient-to-r from-gold-600 to-gold-700 text-black p-4 flex justify-center">
+        <img 
+          src="/logo.png" 
+          alt="Devi Jewellers Logo"
+          className="h-40 w-[350px] object-contain"
+        />
+      </div>
+      <div className="max-w-6xl mx-auto p-4">
+        {/* Page Title */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-pink-600 to-purple-600 rounded-xl flex items-center justify-center">
-              <i className="fas fa-bullhorn text-white text-xl"></i>
-            </div>
-            {/* Logo-only branding */}
-          </div>
           <h2 className="text-xl font-semibold text-gray-700">Promotional Manager</h2>
           <p className="text-gray-600">Manage slideshow images displayed below silver rates on TV</p>
         </div>
