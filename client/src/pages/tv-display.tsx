@@ -189,13 +189,18 @@ export default function TVDisplay() {
             transition={{ duration_seconds: 0.5, ease: "easeInOut" }}
             className="flex-1 flex flex-col"
           >
-            {/* Common Header - matches Mobile Control page */}
-            <div className="bg-gradient-to-r from-gold-600 to-gold-700 text-black p-4 flex justify-center flex-shrink-0">
+            {/* Common Header - matches Mobile Control page, with date/time on top-right */}
+            <div className="relative bg-gradient-to-r from-gold-600 to-gold-700 text-black p-4 flex justify-center flex-shrink-0">
               <img 
                 src="/logo.png" 
                 alt="Devi Jewellers Logo"
                 className="h-40 w-[350px] object-contain"
               />
+              {/* Date & Time - top-right corner */}
+              <div className="absolute right-3 top-3 bg-black/30 text-white px-3 py-2 rounded-md backdrop-blur-sm">
+                <div className="text-xs md:text-sm">{format(currentTime, "EEEE dd-MMM-yyyy")}</div>
+                <div className="text-sm md:text-lg font-semibold">{format(currentTime, "HH:mm:ss")}</div>
+              </div>
             </div>
 
             {/* Today's Rate Header */}
