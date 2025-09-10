@@ -129,10 +129,13 @@ export default function MobileControl() {
               <div>
                 <h3 className="font-semibold text-gray-800">Last Updated</h3>
                 <p className="text-sm text-gray-600">
-                  {currentRates?.created_date 
-                    ? format(new Date(currentRates.created_date), "PPpp")
-                    : "Never"
-                  }
+                  {currentRates?.created_date
+                    ? `${new Date(currentRates.created_date).toLocaleString("en-IN", {
+                        timeZone: "Asia/Kolkata",
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })} IST`
+                    : "Never"}
                 </p>
               </div>
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
