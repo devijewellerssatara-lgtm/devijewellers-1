@@ -28,6 +28,10 @@ const goldRateFormSchema = insertGoldRateSchema.extend({
 export default function MobileControl() {
   const { toast } = useToast();
 
+  // Helper to convert any Date to Indian Time (Asia/Kolkata)
+  const toIndianTime = (date: Date) =>
+    new Date(date.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+
   // Get current rates
   const { data: currentRates, isLoading } = useQuery({
     queryKey: ["/api/rates/current"],
@@ -130,7 +134,7 @@ export default function MobileControl() {
                 <h3 className="font-semibold text-gray-800">Last Updated</h3>
                 <p className="text-sm text-gray-600">
                   {currentRates?.created_date 
-                    ? format(new Date(currentRates.created_date), "PPpp")
+                    ? format(toIndianTime(new Date(currentRates.created_date)), "PPpp")
                     : "Never"
                   }
                 </p>
