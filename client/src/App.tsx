@@ -11,6 +11,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import MediaManager from "@/pages/media-manager";
 import PromoManager from "@/pages/promo-manager";
 import NotFound from "@/pages/not-found";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 function Router() {
   return (
@@ -34,7 +35,9 @@ function App() {
       <ThemeProvider>
         <TooltipProvider>
           <Toaster />
-          <Router />
+          <ErrorBoundary>
+            <Router />
+          </ErrorBoundary>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
