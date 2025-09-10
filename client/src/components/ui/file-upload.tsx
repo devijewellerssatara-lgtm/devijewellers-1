@@ -2,7 +2,8 @@ import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { cn } from '@/lib/utils';
 
-type AcceptProp = string | string[] | undefined;
+type AcceptObject = Record<string, string[]>;
+type AcceptProp = string | string[] | AcceptObject | undefined;
 
 interface FileUploadProps {
   onDrop: (files: File[]) => void;
@@ -13,16 +14,23 @@ interface FileUploadProps {
   children?: React.ReactNode;
 }
 
-function buildAccept(accept?: AcceptProp): Record<string, string[]> | undefined {
+function buildAccept(accept?: AcceptProp): AcceptObject | undefined {
   if (!accept) return undefined;
+
+  // If already an object (react-dropzone format), pass through.
+  if (typeof accept === 'object' && !Array.isArray(accept)) {
+    return accept as AcceptObject;
+  }
 
   const types = Array.isArray(accept)
     ? accept
-    : accept.split(',').map((s) => s.trim()).filter(Boolean);
+    : typeof accept === 'string'
+      ? accept.split(',').map((s) => s.trim()).filter(Boolean)
+      : [];
 
   if (types.length === 0) return undefined;
 
-  return types.reduce<Record<string, string[]>>((acc, mime) => {
+  return types.reduce<AcceptObject>((acc, mime) => {
     acc[mime] = [];
     return acc;
   }, {});
