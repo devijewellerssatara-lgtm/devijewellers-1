@@ -473,25 +473,58 @@ export default function AdminDashboard() {
                       </div>
 
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Local IP:</span>
+                        <span className="text-gray-600">Server Time (IST):</span>
                         <span className="font-mono text-sm">
-                          {systemInfo.local_ip}
+                          {systemInfo.server_time}
                         </span>
                       </div>
 
                       <div className="flex justify-between">
-                        <span className="text-gray-600">
-                          Connected Devices:
-                        </span>
+                        <span className="text-gray-600">Uptime (hrs):</span>
                         <span className="font-semibold">
-                          {systemInfo.connected_devices}
+                          {systemInfo.uptime_hours}
                         </span>
                       </div>
 
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Storage Used:</span>
+                        <span className="text-gray-600">Memory:</span>
                         <span className="font-semibold">
-                          {systemInfo.storage_used} / {systemInfo.storage_total}
+                          {systemInfo.memory_used} / {systemInfo.memory_total}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Media Files:</span>
+                        <span className="font-semibold">
+                          {systemInfo.media_files}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Promo Images:</span>
+                        <span className="font-semibold">
+                          {systemInfo.promo_images}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Rates Updated:</span>
+                        <span className="font-mono text-sm">
+                          {systemInfo.rates_last_updated || "—"}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Node Version:</span>
+                        <span className="font-mono text-sm">
+                          {systemInfo.node_version}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Last Sync:</span>
+                        <span className="font-mono text-sm">
+                          {systemInfo.last_sync}
                         </span>
                       </div>
                     </>
@@ -522,8 +555,8 @@ export default function AdminDashboard() {
               </Card>
             </div>
 
-            {/* Save Settings Button */}
-            <div className="text-center mt-6">
+            {/* Save Settings Button - sticky footer to ensure visibility */}
+            <div className="sticky bottom-0 z-10 mt-6 flex justify-center bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t border-gray-200 py-4">
               <Button
                 type="submit"
                 className="bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white px-8 py-4 text-lg"
