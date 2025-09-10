@@ -522,8 +522,8 @@ export default function AdminDashboard() {
               </Card>
             </div>
 
-            {/* Save Settings Button */}
-            <div className="text-center mt-6">
+            {/* Save Settings Button - Desktop */}
+            <div className="hidden lg:block text-center mt-6">
               <Button
                 type="submit"
                 className="bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white px-8 py-4 text-lg"
@@ -541,6 +541,29 @@ export default function AdminDashboard() {
                   </>
                 )}
               </Button>
+            </div>
+
+            {/* Save Settings Action Bar - Mobile */}
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xs border-t border-gray-200 px-4 py-3">
+              <div className="max-w-6xl mx-auto">
+                <Button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white h-12 text-base"
+                  disabled={updateSettingsMutation.isPending}
+                >
+                  {updateSettingsMutation.isPending ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-save mr-2"></i>
+                      Save All Settings
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </form>
         </Form>
