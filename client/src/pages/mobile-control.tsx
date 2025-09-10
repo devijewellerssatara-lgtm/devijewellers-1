@@ -135,8 +135,6 @@ export default function MobileControl() {
                         timeStyle: "short",
                       })
                     : "Never"}
-                 })} IST`
-                    : "Never"}
                 </p>
               </div>
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
