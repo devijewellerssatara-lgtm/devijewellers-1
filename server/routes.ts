@@ -182,56 +182,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // In routes.ts - add this route
- app.post("/api/settings/display", async (req, res) => {
-   try {
-     const validatedData = insertDisplaySettingsSchema.parse(req.body);
-     // You need to implement createDisplaySettings in your storage
-     const newSettings = await storage.createDisplaySettings(validatedData);
-     res.status(201).json(newSettings);
+  // Create display settings
+  app.post("/api/settings/display", async (req, res) => {
+    try {
+      const validatedData = insertDisplaySettingsSchema.parse(req.body);
+      const newSettings = await storage.createDisplaySettings(validatedData);
+      res.status(201).json(newSettings);
     } catch (error) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json({ message: "Invalid settings data", errors: error.errors });
-    } else {
-      res.status(500).json({ message: "Failed to create settings" });
+      if (error instanceof z.ZodError) {
+        res
+          .status(400)
+          .json({ message: "Invalid settings data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create settings" });
+      }
     }
-  }
-});
-  // Fix the PUT route to handle the case where settings might not exist
-app.put("/api/settings/display/:id?", async (req, res) => {
-  try {
-    const validatedData = insertDisplaySettingsSchema.partial().parse(req.body);
-    
-    // Check if we have existing settings
-    const existingSettings = await storage.getDisplaySettings();
-    
-    if (existingSettings && existingSettings.id) {
-      // Update existing settings
-      const updatedSettings = await storage.updateDisplaySettings(existingSettings.id, validatedData);
-      res.json(updatedSettings);
-    } else {
-      // Create new settings if none exist
-      const newSettings = await storage.createDisplaySettings({
-        ...validatedData,
-        orientation: validatedData.orientation || "horizontal",
-        background_color: validatedData.background_color || "#FFF8E1",
-        text_color: validatedData.text_color || "#212529",
-        rate_number_font_size: validatedData.rate_number_font_size || "text-4xl",
-        show_media: validatedData.show_media !== undefined ? validatedData.show_media : true,
-        rates_display_duration_seconds: validatedData.rates_display_duration_seconds || 15,
-        refresh_interval: validatedData.refresh_interval || 30,
-      });
-      res.json(newSettings);
+  });
+
+  // Update or create display settings if not exist
+  app.put("/api/settings/display/:id?", async (req, res) => {
+    try {
+      const validatedData = insertDisplaySettingsSchema
+        .partial()
+        .parse(req.body);
+
+      // Check if we have existing settings
+      const existingSettings = await storage.getDisplaySettings();
+
+      if (existingSettings && existingSettings.id) {
+        // Update existing settings
+        const updatedSettings = await storage.updateDisplaySettings(
+          existingSettings.id,
+          validatedData,
+        );
+        res.json(updatedSettings);
+      } else {
+        // Create new settings if none exist
+        const newSettings = await storage.createDisplaySettings({
+          ...validatedData,
+          orientation: validatedData.orientation || "horizontal",
+          background_color: validatedData.background_color || "#FFF8E1",
+          text_color: validatedData.text_color || "#212529",
+          rate_number_font_size:
+            validatedData.rate_number_font_size || "text-4xl",
+          show_media:
+            validatedData.show_media !== undefined
+              ? validatedData.show_media
+              : true,
+          rates_display_duration_seconds:
+            validatedData.rates_display_duration_seconds || 15,
+          refresh_interval: validatedData.refresh_interval || 30,
+        });
+        res.json(newSettings);
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res
+          .status(400)
+          .json({ message: "Invalid settings data", errors: error.errors });
+      } else {
+        console.error("Settings update error:", error);
+        res.status(500).json({ message: "Failed to update settings" });
+      }
     }
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json({ message: "Invalid settings data", errors: error.errors });
-    } else {
-      console.error("Settings update error:", error);
-      res.status(500).json({ message: "Failed to update settings" });
-    }
-  }
-});
+  });
   // Media Items Routes
   app.get("/api/media", async (req, res) => {
     try {
