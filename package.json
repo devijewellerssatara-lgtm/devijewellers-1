@@ -4,13 +4,13 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev": "NODE_ENV=development tsx server/index.ts",
+    "dev": "cross-env NODE_ENV=development tsx server/index.ts",
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
-    "start": "NODE_ENV=production node dist/index.js",
+    "start": "cross-env NODE_ENV=production node dist/index.js",
     "check": "tsc",
     "db:push": "drizzle-kit push",
     "init-db": "tsx scripts/init-db.ts",
-    "mobile:env": "cp -f .env.mobile .env || true",
+    "mobile:env": "node -e \"const fs=require('fs');fs.copyFileSync('.env.mobile','.env');console.log('Copied .env.mobile -> .env');\"",
     "android:prep": "npm run build && npm run mobile:env",
     "android:init": "npx cap init GoldRatesApp com.example.goldrates -y",
     "android:add": "npx cap add android",
@@ -113,7 +113,8 @@
     "typescript": "5.6.3",
     "vite": "^5.4.19",
     "@capacitor/cli": "^6.2.0",
-    "@capacitor/android": "^6.2.0"
+    "@capacitor/android": "^6.2.0",
+    "cross-env": "^7.0.3"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.8"
