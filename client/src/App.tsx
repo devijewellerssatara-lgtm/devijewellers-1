@@ -17,7 +17,9 @@ function Router() {
     <div className="min-h-screen bg-gold-50">
       <Navigation />
       <Switch>
+        {/* Make TV Display available at /tv and keep / for backward compatibility */}
         <Route path="/" component={TVDisplay} />
+        <Route path="/tv" component={TVDisplay} />
         <Route path="/mobile" component={MobileControl} />
         <Route path="/admin" component={AdminDashboard} />
         <Route path="/media" component={MediaManager} />
