@@ -53,6 +53,11 @@ export const ratesApi = {
   create: async (rates: InsertGoldRate): Promise<GoldRate> => {
     const response = await apiRequest("POST", "/api/rates", rates);
     return response.json();
+  },
+
+  update: async (id: number, rates: Partial<InsertGoldRate>): Promise<GoldRate> => {
+    const response = await apiRequest("PUT", `/api/rates/${id}`, rates);
+    return response.json();
   }
 };
 

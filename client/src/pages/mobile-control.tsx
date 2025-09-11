@@ -50,9 +50,14 @@ export default function MobileControl() {
     }
   });
 
-  // Update rates mutation
+  // Update rates mutation (update existing if present, else create)
   const updateRatesMutation = useMutation({
-    mutationFn: ratesApi.create,
+    mutationFn: async (data: z.infer<typeof goldRateFormSchema>) => {
+      if (currentRates?.id) {
+        return ratesApi.update(currentRates.id, data);
+      }
+      return ratesApi.create(data);
+    },
     onSuccess: (result) => {
       console.log('Mutation successful:', result);
       queryClient.invalidateQueries({ queryKey: ["/api/rates/current"] });
@@ -61,11 +66,11 @@ export default function MobileControl() {
         description: "Rates updated successfully! Changes will appear on TV display."
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Mutation error:', error);
       toast({
         title: "Error",
-        description: `Failed to update rates: ${error.message}`,
+        description: `Failed to update rates: ${error.message || String(error)}`,
         variant: "destructive"
       });
     }

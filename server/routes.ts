@@ -167,7 +167,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof z.ZodError) {
         res.status(400).json({ message: "Invalid rate data", errors: error.errors });
       } else {
+        console.error("Create rates error:", error);
         res.status(500).json({ message: "Failed to create rates" });
+      }
+    }
+  });
+
+  // Update existing rate row
+  app.put("/api/rates/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (Number.isNaN(id)) {
+        return res.status(400).json({ message: "Invalid rate ID" });
+      }
+      // Allow partial updates
+      const partialSchema = insertGoldRateSchema.partial();
+      const validated = partialSchema.parse(req.body);
+      const updated = await storage.updateGoldRate(id, validated);
+      if (!updated) {
+        return res.status(404).json({ message: "Rate not found" });
+      }
+      res.json(updated);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid rate data", errors: error.errors });
+      } else {
+        console.error("Update rates error:", error);
+        res.status(500).json({ message: "Failed to update rates" });
       }
     }
   });
