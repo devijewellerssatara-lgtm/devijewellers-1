@@ -112,6 +112,9 @@ export function Navigation() {
           <span className="text-lg font-semibold text-jewelry-primary">
             Controls
           </span>
+          <span className="ml-2 text-xs rounded px-2 py-1 bg-gold-50 text-jewelry-primary border border-gold-200">
+            v1.1 Drawer
+          </span>
         </div>
 
         <nav className="py-2">
