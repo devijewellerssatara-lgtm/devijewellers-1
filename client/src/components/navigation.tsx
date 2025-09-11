@@ -18,6 +18,11 @@ const navItems: NavItem[] = [
 export function Navigation() {
   const [location] = useLocation();
 
+  // Hide navigation tabs on the TV Display page
+  if (location === "/" || location.startsWith("/tv")) {
+    return null;
+  }
+
   return (
     <div className="bg-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto">
