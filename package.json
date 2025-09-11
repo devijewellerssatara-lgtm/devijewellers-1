@@ -12,7 +12,7 @@
     "init-db": "tsx scripts/init-db.ts",
     "mobile:env": "node -e \"const fs=require('fs');fs.copyFileSync('.env.mobile','.env');console.log('Copied .env.mobile -> .env');\"",
     "android:prep": "npm run build && npm run mobile:env",
-    "android:init": "npx cap init GoldRatesApp com.example.goldrates -y",
+    "android:init": "npx cap init GoldRatesApp com.example.goldrates --web-dir=dist/public",
     "android:add": "npx cap add android",
     "android:sync": "npx cap sync android",
     "android:open": "npx cap open android"
