@@ -26,19 +26,17 @@ const uploadsDir = join(process.cwd(), "uploads");
 mkdirSync(uploadsDir, { recursive: true });
 
 // Get database connection string from environment variable
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-  throw new Error("DATABASE_URL environment variable is required");
-}
+const connectionString = process.env.DATABASE_URL || "";
 
-// Create PostgreSQL client
-const client = postgres(connectionString);
-const db = drizzle(client);
+// Create PostgreSQL client conditionally
+const client = connectionString ? postgres(connectionString) : undefined as unknown as postgres.Sql;
+const db = connectionString ? drizzle(client as unknown as postgres.Sql) : undefined as unknown as ReturnType<typeof drizzle>;
 
-// Explicit init to ensure schema exists before first queries
+// Explicit init to ensure schema exists before first queries (no-op without DB)
 export async function initStorage(): Promise<void> {
+  if (!connectionString || !client) return;
   try {
-    await client`
+    await (client as unknown as postgres.Sql)`
       CREATE TABLE IF NOT EXISTS gold_rates (
         id serial PRIMARY KEY,
         gold_24k_sale real NOT NULL,
@@ -54,7 +52,7 @@ export async function initStorage(): Promise<void> {
       )
     `;
 
-    await client`
+    await (client as unknown as postgres.Sql)`
       CREATE TABLE IF NOT EXISTS display_settings (
         id serial PRIMARY KEY,
         orientation text DEFAULT 'horizontal',
@@ -68,7 +66,7 @@ export async function initStorage(): Promise<void> {
       )
     `;
 
-    await client`
+    await (client as unknown as postgres.Sql)`
       CREATE TABLE IF NOT EXISTS media_items (
         id serial PRIMARY KEY,
         name text NOT NULL,
@@ -84,7 +82,7 @@ export async function initStorage(): Promise<void> {
       )
     `;
 
-    await client`
+    await (client as unknown as postgres.Sql)`
       CREATE TABLE IF NOT EXISTS promo_images (
         id serial PRIMARY KEY,
         name text NOT NULL,
@@ -99,7 +97,7 @@ export async function initStorage(): Promise<void> {
       )
     `;
 
-    await client`
+    await (client as unknown as postgres.Sql)`
       CREATE TABLE IF NOT EXISTS banner_settings (
         id serial PRIMARY KEY,
         banner_image_url text,
@@ -273,4 +271,100 @@ export class PostgresStorage implements IStorage {
   }
 }
 
-export const storage = new PostgresStorage();
+class InMemoryStorage implements IStorage {
+  private rates: GoldRate[] = [];
+  private display?: DisplaySettings;
+  private media: MediaItem[] = [];
+  private promos: PromoImage[] = [];
+  private banner?: BannerSettings;
+  private idSeq = 1;
+
+  async getCurrentRates(): Promise<GoldRate | undefined> {
+    return this.rates.find(r => r.is_active) || this.rates[this.rates.length - 1];
+  }
+  async createGoldRate(rate: InsertGoldRate): Promise<GoldRate> {
+    this.rates.forEach(r => (r.is_active = false));
+    const row: GoldRate = { id: this.idSeq++, created_date: new Date(), ...rate };
+    this.rates.push(row);
+    return row;
+  }
+  async updateGoldRate(id: number, rate: Partial<InsertGoldRate>): Promise<GoldRate | undefined> {
+    const idx = this.rates.findIndex(r => r.id === id);
+    if (idx === -1) return undefined;
+    const updated = { ...this.rates[idx], ...rate } as GoldRate;
+    this.rates[idx] = updated;
+    return updated;
+  }
+
+  async getDisplaySettings(): Promise<DisplaySettings | undefined> {
+    return this.display;
+  }
+  async createDisplaySettings(settings: InsertDisplaySettings): Promise<DisplaySettings> {
+    const row: DisplaySettings = { id: this.idSeq++, created_date: new Date(), ...settings };
+    this.display = row;
+    return row;
+  }
+  async updateDisplaySettings(id: number, settings: Partial<InsertDisplaySettings>): Promise<DisplaySettings | undefined> {
+    if (!this.display || this.display.id !== id) return undefined;
+    this.display = { ...this.display, ...settings };
+    return this.display;
+  }
+
+  async getMediaItems(activeOnly = false): Promise<MediaItem[]> {
+    return activeOnly ? this.media.filter(m => m.is_active) : this.media.slice();
+  }
+  async createMediaItem(item: InsertMediaItem): Promise<MediaItem> {
+    const row: MediaItem = { id: this.idSeq++, created_date: new Date(), ...item };
+    this.media.push(row);
+    return row;
+  }
+  async updateMediaItem(id: number, item: Partial<InsertMediaItem>): Promise<MediaItem | undefined> {
+    const idx = this.media.findIndex(m => m.id === id);
+    if (idx === -1) return undefined;
+    const updated = { ...this.media[idx], ...item } as MediaItem;
+    this.media[idx] = updated;
+    return updated;
+  }
+  async deleteMediaItem(id: number): Promise<boolean> {
+    const len = this.media.length;
+    this.media = this.media.filter(m => m.id !== id);
+    return this.media.length !== len;
+  }
+
+  async getPromoImages(activeOnly = false): Promise<PromoImage[]> {
+    return activeOnly ? this.promos.filter(p => p.is_active) : this.promos.slice();
+  }
+  async createPromoImage(image: InsertPromoImage): Promise<PromoImage> {
+    const row: PromoImage = { id: this.idSeq++, created_date: new Date(), ...image };
+    this.promos.push(row);
+    return row;
+  }
+  async updatePromoImage(id: number, image: Partial<InsertPromoImage>): Promise<PromoImage | undefined> {
+    const idx = this.promos.findIndex(p => p.id === id);
+    if (idx === -1) return undefined;
+    const updated = { ...this.promos[idx], ...image } as PromoImage;
+    this.promos[idx] = updated;
+    return updated;
+  }
+  async deletePromoImage(id: number): Promise<boolean> {
+    const len = this.promos.length;
+    this.promos = this.promos.filter(p => p.id !== id);
+    return this.promos.length !== len;
+  }
+
+  async getBannerSettings(): Promise<BannerSettings | undefined> {
+    return this.banner && this.banner.is_active ? this.banner : this.banner;
+  }
+  async createBannerSettings(banner: InsertBannerSettings): Promise<BannerSettings> {
+    const row: BannerSettings = { id: this.idSeq++, created_date: new Date(), ...banner };
+    this.banner = row;
+    return row;
+  }
+  async updateBannerSettings(id: number, banner: Partial<InsertBannerSettings>): Promise<BannerSettings | undefined> {
+    if (!this.banner || this.banner.id !== id) return undefined;
+    this.banner = { ...this.banner, ...banner };
+    return this.banner;
+  }
+}
+
+export const storage: IStorage = connectionString ? new PostgresStorage() : new InMemoryStorage();
