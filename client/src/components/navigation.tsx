@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import {
   SidebarProvider,
   Sidebar,
@@ -72,7 +72,7 @@ function DrawerContents() {
   useAutoCloseOnRoute();
   useAutoHideOnInactivity();
 
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
 
   return (
     <SidebarContent className="bg-white">
@@ -86,23 +86,19 @@ function DrawerContents() {
             const active = location === item.path;
             return (
               <SidebarMenuItem key={item.path}>
-                <Link href={item.path}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={active}
-                    className={cn(
-                      "transition-colors",
-                      active
-                        ? "bg-gold-50 text-jewelry-primary"
-                        : "text-gray-700 hover:text-jewelry-primary"
-                    )}
-                  >
-                    <a>
-                      <span className="mr-2 inline-flex items-center">{item.icon}</span>
-                      <span>{item.label}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </Link>
+                <SidebarMenuButton
+                  isActive={active}
+                  className={cn(
+                    "transition-colors",
+                    active
+                      ? "bg-gold-50 text-jewelry-primary"
+                      : "text-gray-700 hover:text-jewelry-primary"
+                  )}
+                  onClick={() => navigate(item.path)}
+                >
+                  <span className="mr-2 inline-flex items-center">{item.icon}</span>
+                  <span>{item.label}</span>
+                </SidebarMenuButton>
               </SidebarMenuItem>
             );
           })}
