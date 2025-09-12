@@ -247,8 +247,8 @@
                 <h2 className="font-display font-extrabold text-3xl">TODAY'S SALE RATES</h2>
             </div>
 
-            {/* Rates only (sale) */}
-          <div className="flex-1 px-0 py-5 space-y-5">
+            {/* Rates only (sale) - fill full page with four equal-height boxes */}
+          <div className="flex-1 p-0 grid grid-rows-4 gap-0">
             <RateCard title="24K GOLD (Per 10 gms)" value={currentRates.gold_24k_sale} rateSize={"text-6xl"} />
             <RateCard title="22K GOLD (Per 10 gms)" value={currentRates.gold_22k_sale} rateSize={"text-6xl"} />
             <RateCard title="18K GOLD (Per 10 gms)" value={currentRates.gold_18k_sale} rateSize={"text-6xl"} />
@@ -287,14 +287,14 @@
       rateSize: string;
     }) {
       return (
-        <div className="bg-white rounded-none shadow-none border-l-8 border-jewelry-primary p-0 w-full min-h-28">
-          <div className="flex items-center justify-between px-3 py-3">
-            <h4 className="text-2xl font-semibold text-gray-900">{title}</h4>
-            <div className="w-12 h-12 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
-              <i className="fas fa-rupee-sign text-white text-base"></i>
+        <div className="bg-white rounded-none shadow-none border-l-8 border-jewelry-primary w-full h-full flex flex-col justify-center">
+          <div className="flex items-center justify-between px-4">
+            <h4 className="text-3xl font-semibold text-gray-900">{title}</h4>
+            <div className="w-14 h-14 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
+              <i className="fas fa-rupee-sign text-white text-lg"></i>
             </div>
           </div>
-          <div className="text-center py-2">
+          <div className="text-center py-1">
             <p className={`${rateSize} font-extrabold text-blue-900 leading-tight`}>₹{value}</p>
           </div>
         </div>
