@@ -229,29 +229,29 @@ export default function SaleStatus() {
           }}
         >
           {/* Branded header inside the image (logo only, no round bg or tagline) */}
-          <div className="bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white py-3 px-4 flex items-center justify-between">
+          <div className="bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white py-4 px-5 flex items-center justify-between">
             <div className="flex items-center">
-              <img src="/logo.png" alt="Logo" className="h-10 w-auto object-contain" />
+              <img src="/logo.png" alt="Logo" className="h-12 w-auto object-contain" />
             </div>
             <div className="text-right">
-              <div className="text-sm font-semibold text-gold-200">
+              <div className="text-lg font-semibold text-gold-200">
                 {format(currentTime, "EEEE dd-MMM-yyyy")}
               </div>
-              <div className="text-lg font-extrabold text-white">{format(currentTime, "HH:mm")}</div>
+              <div className="text-2xl font-extrabold text-white">{format(currentTime, "HH:mm")}</div>
             </div>
           </div>
 
           {/* Title */}
-          <div className="bg-gradient-to-r from-gold-600 to-gold-700 text-white text-center py-2">
-            <h2 className="font-display font-extrabold text-2xl">TODAY'S SALE RATES</h2>
+          <div className="bg-gradient-to-r from-gold-600 to-gold-700 text-white text-center py-3">
+            <h2 className="font-display font-extrabold text-3xl">TODAY'S SALE RATES</h2>
           </div>
 
           {/* Rates only (sale) */}
-          <div className="flex-1 p-4 space-y-4">
-            <RateCard title="24K GOLD (Per 10 gms)" value={currentRates.gold_24k_sale} rateSize={"text-5xl"} />
-            <RateCard title="22K GOLD (Per 10 gms)" value={currentRates.gold_22k_sale} rateSize={"text-5xl"} />
-            <RateCard title="18K GOLD (Per 10 gms)" value={currentRates.gold_18k_sale} rateSize={"text-5xl"} />
-            <RateCard title="SILVER (Per KG)" value={currentRates.silver_per_kg_sale} rateSize={"text-5xl"} />
+          <div className="flex-1 p-5 space-y-5">
+            <RateCard title="24K GOLD (Per 10 gms)" value={currentRates.gold_24k_sale} rateSize={"text-6xl"} />
+            <RateCard title="22K GOLD (Per 10 gms)" value={currentRates.gold_22k_sale} rateSize={"text-6xl"} />
+            <RateCard title="18K GOLD (Per 10 gms)" value={currentRates.gold_18k_sale} rateSize={"text-6xl"} />
+            <RateCard title="SILVER (Per KG)" value={currentRates.silver_per_kg_sale} rateSize={"text-6xl"} />
           </div>
 
           {/* Footer note */}
@@ -267,11 +267,11 @@ export default function SaleStatus() {
         style={{ backgroundColor: theme.background, borderColor: "rgba(0,0,0,0.1)" }}
       >
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-center gap-3">
-          <Button onClick={handleSaveImage} className="bg-jewelry-primary text-white" disabled={isWorking !== "idle"}>
+          <Button onClick={handleSaveImage} className="bg-jewelry-primary text-white px-5 py-3 text-base font-semibold rounded-lg" disabled={isWorking !== "idle"}>
             <i className="fas fa-download mr-2"></i>
             {isWorking === "saving" ? "Saving..." : "Save Image (9:16)"}
           </Button>
-          <Button onClick={handleShareWhatsApp} className="bg-green-600 hover:bg-green-700 text-white" disabled={isWorking !== "idle"}>
+          <Button onClick={handleShareWhatsApp} className="bg-green-600 hover:bg-green-700 text-white px-5 py-3 text-base font-semibold rounded-lg" disabled={isWorking !== "idle"}>
             <i className="fab fa-whatsapp mr-2"></i>
             {isWorking === "sharing" ? "Opening Share..." : "Share on WhatsApp"}
           </Button>
@@ -291,15 +291,15 @@ function RateCard({
   rateSize: string;
 }) {
   return (
-    <div className="bg-white rounded-lg shadow border-l-8 border-jewelry-primary p-3">
+    <div className="bg-white rounded-xl shadow border-l-8 border-jewelry-primary p-5">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-gray-700">{title}</h4>
-        <div className="w-8 h-8 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
-          <i className="fas fa-rupee-sign text-white text-xs"></i>
+        <h4 className="text-2xl font-semibold text-gray-900">{title}</h4>
+        <div className="w-12 h-12 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
+          <i className="fas fa-rupee-sign text-white text-base"></i>
         </div>
       </div>
-      <div className="text-center mt-2">
-        <p className={`${rateSize} font-bold text-blue-800`}>₹{value}</p>
+      <div className="text-center mt-3">
+        <p className={`${rateSize} font-extrabold text-blue-900 leading-tight`}>₹{value}</p>
       </div>
     </div>
   );
