@@ -12,7 +12,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { Tv, Smartphone, Settings, Images, Megaphone, Menu } from "lucide-react";
+import { Tv, Smartphone, Settings, Image, Megaphone, Menu } from "lucide-react";
 
 interface NavItem {
   path: string;
@@ -24,7 +24,7 @@ const navItems: NavItem[] = [
   { path: "/", label: "TV Display", icon: <Tv className="h-4 w-4" /> },
   { path: "/mobile", label: "Mobile Control", icon: <Smartphone className="h-4 w-4" /> },
   { path: "/admin", label: "Admin Dashboard", icon: <Settings className="h-4 w-4" /> },
-  { path: "/media", label: "Media Manager", icon: <Images className="h-4 w-4" /> },
+  { path: "/media", label: "Media Manager", icon: <Image className="h-4 w-4" /> },
   { path: "/promo", label: "Promo Manager", icon: <Megaphone className="h-4 w-4" /> },
 ];
 
