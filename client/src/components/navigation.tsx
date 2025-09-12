@@ -68,6 +68,8 @@ export function Navigation() {
     }
   }, [open]);
 
+  const navItemsLimited = navItems.slice(0, 3);
+
   return (
     <>
       {/* Top bar with hamburger */}
@@ -111,7 +113,7 @@ export function Navigation() {
         role="dialog"
         aria-modal="true"
       >
-        <div className="flex items-center justify-between px-4 py-3 border-b">
+        <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2 text-jewelry-primary font-semibold">
             <i className="fas fa-gem text-gold-600" />
             Navigation
@@ -126,7 +128,7 @@ export function Navigation() {
         </div>
 
         <nav className="py-2">
-          {navItems.map((item) => {
+          {navItemsLimited.map((item) => {
             const active = location === item.path;
             return (
               <Link key={item.path} href={item.path}>
@@ -135,7 +137,7 @@ export function Navigation() {
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 transition-colors",
                     active
-                      ? "bg-gold-50 text-jewelry-primary font-semibold border-l-4 border-gold-500"
+                      ? "bg-gold-50 text-jewelry-primary font-semibold"
                       : "text-gray-700 hover:bg-gray-50"
                   )}
                 >
