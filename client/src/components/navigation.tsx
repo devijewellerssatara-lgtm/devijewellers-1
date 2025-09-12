@@ -87,9 +87,12 @@ function DrawerContents() {
 }
 
 export function Navigation() {
+  // Keep desktop open state stable across route changes by controlling the provider's open prop.
+  const [open, setOpen] = React.useState(false);
+
   // Render a floating hamburger button at the top-left and the sidebar drawer itself on all pages/devices.
   return (
-    <SidebarProvider defaultOpen={false} className="fixed inset-0 pointer-events-none z-50">
+    <SidebarProvider open={open} onOpenChange={setOpen} className="fixed inset-0 pointer-events-none z-50">
       {/* Hamburger trigger fixed at top-left with subtle shadow for visibility */}
       <div className="fixed top-3 left-3 z-[51] pointer-events-auto">
         <SidebarTrigger className="h-10 w-10 rounded-md bg-white shadow-md hover:bg-gold-50 text-jewelry-primary" aria-label="Toggle navigation">
