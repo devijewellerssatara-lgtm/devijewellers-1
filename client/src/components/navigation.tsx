@@ -42,35 +42,11 @@ function useAutoCloseOnRoute() {
   }, [location]);
 }
 
-// Close after 3 seconds of inactivity when the mobile sidebar is open.
-function useAutoHideOnInactivity() {
-  const { openMobile, setOpenMobile } = useSidebar();
-
-  React.useEffect(() => {
-    if (!openMobile) return;
-
-    let timer: number | undefined;
-
-    const reset = () => {
-      if (timer) window.clearTimeout(timer);
-      timer = window.setTimeout(() => setOpenMobile(false), 3000);
-    };
-
-    reset();
-
-    const events = ["mousemove", "mousedown", "keydown", "touchstart", "scroll"];
-    events.forEach((evt) => window.addEventListener(evt, reset, { passive: true }));
-
-    return () => {
-      if (timer) window.clearTimeout(timer);
-      events.forEach((evt) => window.removeEventListener(evt, reset as EventListener));
-    };
-  }, [openMobile, setOpenMobile]);
-}
+// Auto-hide on inactivity disabled on mobile to avoid premature closing while trying to tap.
+// If needed later, re-introduce with a longer timeout and sidebar-specific event targets.
 
 function DrawerContents() {
   useAutoCloseOnRoute();
-  useAutoHideOnInactivity();
 
   const [location, navigate] = useLocation();
 
