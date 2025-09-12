@@ -97,55 +97,40 @@ export default function SaleStatus() {
     }
   };
 
-  // Share to WhatsApp via Web Share API with image if available
+  // Share to WhatsApp: always generate snapshot first, then use native share with image file
   const handleShareWhatsApp = async () => {
     try {
       setIsWorking("sharing");
-      const existing = imageUrl ? null : await generateImage();
-      const blob = existing?.blob;
 
-      // Prefer direct Web Share with file if supported
-      // Requires Android Chrome 76+ or iOS Safari 16.4+ for files
+      // Always generate a fresh image (snapshot first)
+      const generated = await generateImage();
+      if (!generated) throw new Error("Failed to render image for sharing");
+      const { blob } = generated;
+
+      // Native share with image file only
       // @ts-expect-error
-      if (blob && navigator?.canShare && navigator?.share) {
+      if (navigator?.share) {
         const file = new File(
           [blob],
           `rates-status-${format(currentTime, "yyyyMMdd-HHmm")}.png`,
           { type: "image/png" }
         );
-        // @ts-expect-error
-        if (navigator.canShare?.({ files: [file] })) {
+
+        // Some vendors require a title, but keep payload strictly as file
+        try {
           // @ts-expect-error
-          await navigator.share({
-            files: [file],
-            text: buildTextSummary(currentRates, currentTime),
-            title: "Today's Sale Rates",
-          });
+          await navigator.share({ files: [file], title: "Today's Sale Rates" });
           return;
+        } catch (err) {
+          console.error("Native share rejected", err);
+          throw err;
         }
+      } else {
+        throw new Error("Native share not supported on this browser.");
       }
-
-      // If file sharing is not supported, try text-only share as automatic fallback
-      if ("share" in navigator) {
-        // @ts-expect-error
-        await navigator.share({
-          text: buildTextSummary(currentRates, currentTime),
-          title: "Today's Sale Rates",
-        });
-        return;
-      }
-
-      // Last resort open WhatsApp text share link
-      const url = `https://wa.me/?text=${encodeURIComponent(
-        buildTextSummary(currentRates, currentTime)
-      )}`;
-      window.open(url, "_blank");
     } catch (e) {
       console.error("Share failed", e);
-      const url = `https://wa.me/?text=${encodeURIComponent(
-        buildTextSummary(currentRates, currentTime)
-      )}`;
-      window.open(url, "_blank");
+      alert("Native image sharing is not supported on this browser. Please use Chrome on Android or Safari 16.4+ on iOS.");
     } finally {
       setIsWorking("idle");
     }
