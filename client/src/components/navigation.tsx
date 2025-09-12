@@ -106,7 +106,8 @@ export function Navigation() {
       {/* Drawer */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 h-full w-72 max-w-[85vw] bg-transparent shadow-none",
+          "fixed left-0 top-0 z-50 h-full w-72 max-w-[85vw]",
+          open ? "bg-white shadow-2xl" : "bg-transparent shadow-none",
           "transform transition-transform duration-300 ease-out",
           open ? "translate-x-0" : "-translate-x-full"
         )}
