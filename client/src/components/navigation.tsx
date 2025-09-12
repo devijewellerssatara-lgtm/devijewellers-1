@@ -115,10 +115,9 @@ function DrawerContents() {
 
 export function Navigation() {
   const isMobile = useIsMobile();
-  const [location] = useLocation();
 
-  // Only render the hamburger + drawer on mobile screens and not on the TV Display route.
-  if (!isMobile || location === "/") {
+  // Only render the hamburger + drawer on mobile screens.
+  if (!isMobile) {
     return null;
   }
 
