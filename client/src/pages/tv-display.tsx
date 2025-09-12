@@ -326,7 +326,7 @@ export default function TVDisplay() {
                               key={currentPromo.id}
                               src={currentPromo.image_url || ""}
                               alt={currentPromo.name || "Promotional Image"}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-contain"
                               initial="initial"
                               animate="animate"
                               exit="exit"

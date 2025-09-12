@@ -230,21 +230,25 @@ export default function MediaManager() {
                   <div key={item.id} className="border rounded-lg overflow-hidden bg-white shadow-sm">
                     <div className="relative">
                       {item.media_type === 'image' ? (
-                        <img 
-                          src={item.file_url || ""} 
-                          alt={item.name}
-                          className="w-full h-48 object-cover"
-                          onError={(e) => {
-                            e.currentTarget.src = '/placeholder-image.jpg';
-                          }}
-                        />
+                        <div className="w-full aspect-video bg-black">
+                          <img 
+                            src={item.file_url || ""} 
+                            alt={item.name}
+                            className="w-full h-full object-contain"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).src = '/placeholder-image.jpg';
+                            }}
+                          />
+                        </div>
                       ) : (
-                        <video 
-                          src={item.file_url || ""}
-                          className="w-full h-48 object-cover"
-                          controls
-                          preload="metadata"
-                        />
+                        <div className="w-full aspect-video bg-black">
+                          <video 
+                            src={item.file_url || ""}
+                            className="w-full h-full object-contain"
+                            controls
+                            preload="metadata"
+                          />
+                        </div>
                       )}
                       <div className="absolute top-2 right-2">
                         <Button

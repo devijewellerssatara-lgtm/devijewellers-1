@@ -235,11 +235,11 @@ export default function PromoManager() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {promoImages.map((item) => (
             <Card key={item.id} className={`overflow-hidden ${item.is_active ? 'border-2 border-purple-500' : 'border border-gray-200 opacity-75'}`}>
-              <div className="relative aspect-video bg-gray-100">
+              <div className="relative aspect-video bg-black">
                 <img 
                   src={item.image_url || ""} 
                   alt={item.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                   data-testid={`promo-image-${item.id}`}
                 />
                 
@@ -352,13 +352,13 @@ export default function PromoManager() {
           <CardContent className="p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Preview Window */}
-              <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-video">
+              <div className="relative bg-black rounded-lg overflow-hidden aspect-video">
                 {activePromos.length > 0 ? (
                   <>
                     <img 
                       src={activePromos[currentPreviewIndex]?.image_url || ""} 
                       alt="Slideshow preview" 
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                       data-testid="slideshow-preview-image"
                     />
                     
