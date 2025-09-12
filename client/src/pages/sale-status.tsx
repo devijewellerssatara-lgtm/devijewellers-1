@@ -52,53 +52,68 @@ export default function SaleStatus() {
       // Force higher pixel ratio for crisp status
       const dataUrl = await toPng(node, {
         cacheBust: true,
-        pixelRatio: 2,
+        pixelRatio: 3,
         backgroundColor: theme.background,
       });
 
+      // Try download first
       const a = document.createElement("a");
       a.href = dataUrl;
       a.download = `rates-status-${format(currentTime, "yyyyMMdd-HHmm")}.png`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+
+      // Also open in a new tab as a fallback (helps on some mobile browsers)
+      try {
+        window.open(dataUrl, "_blank");
+      } catch {}
     } catch (e) {
       console.error("Failed to export image", e);
-      alert("Failed to save image. Please try again.");
+      alert("Failed to save image. Please try again. On iPhone, tap and hold the image to save.");
     }
   };
 
-  // Share to WhatsApp via Web Share API with image if available, otherwise fallback to text share
+  // Share to WhatsApp via Web Share API with image if available, otherwise provide a manual fallback
   const handleShareWhatsApp = async () => {
     if (!captureRef.current) return;
 
     // Build a plain text summary as a fallback
     const textSummary = buildTextSummary(currentRates, currentTime);
 
-    // Try Web Share API with image
     try {
       const { toBlob } = await import("html-to-image");
       const blob = await toBlob(captureRef.current, {
         cacheBust: true,
-        pixelRatio: 2,
+        pixelRatio: 3,
         backgroundColor: theme.background,
       });
 
-      if (blob && "canShare" in navigator && "share" in navigator) {
-        const file = new File(
-          [blob],
-          `rates-status-${format(currentTime, "yyyyMMdd-HHmm")}.png`,
-          { type: "image/png" }
-        );
-
-        // @ts-expect-error: Web Share API with files (supported on modern mobile browsers)
-        if (navigator.canShare?.({ files: [file] })) {
+      if (blob) {
+        // Prefer Web Share API with files (Android Chrome, iOS Safari 16.4+)
+        // @ts-expect-error
+        if (navigator?.canShare && navigator?.share) {
+          const file = new File(
+            [blob],
+            `rates-status-${format(currentTime, "yyyyMMdd-HHmm")}.png`,
+            { type: "image/png" }
+          );
           // @ts-expect-error
-          await navigator.share({ files: [file], text: textSummary });
-          return;
+          if (navigator.canShare?.({ files: [file] })) {
+            // @ts-expect-error
+            await navigator.share({ files: [file], text: textSummary });
+            return;
+          }
         }
+
+        // Manual fallback: open image in a new tab for user to long-press and share to WhatsApp
+        const blobUrl = URL.createObjectURL(blob);
+        window.open(blobUrl, "_blank");
+        alert("Image opened. Long-press and share to WhatsApp. If it doesn't open, use Save Image and share from gallery.");
+        return;
       }
-      // Fallback to WhatsApp text share URL
+
+      // If we couldn't create an image, fallback to WhatsApp text share URL
       const url = `https://wa.me/?text=${encodeURIComponent(textSummary)}`;
       window.open(url, "_blank");
     } catch (e) {
@@ -139,23 +154,19 @@ export default function SaleStatus() {
 
   return (
     <div
-      className="min-h-screen p-4 md:p-6"
+      className="min-h-screen"
       style={{ backgroundColor: theme.background, color: theme.text }}
     >
-      {/* Page header consistent with other pages */}
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-4">
-          <div className="flex items-center justify-center space-x-3 mb-2">
-            <div className="w-12 h-12 bg-gradient-to-r from-jewelry-primary to-jewelry-secondary rounded-xl flex items-center justify-center shadow">
-              <i className="fas fa-gem text-white text-xl"></i>
-            </div>
-          </div>
-          <h2 className="text-lg font-semibold text-gray-800">Shareable Sale Rates</h2>
-          <p className="text-gray-600">
-            Auto-styled using your display settings
-          </p>
-        </div>
+      {/* Mobile Control-like header (full-width banner with logo) */}
+      <div className="bg-gradient-to-r from-gold-600 to-gold-700 text-black p-4 flex justify-center">
+        <img
+          src="/logo.png"
+          alt="Devi Jewellers Logo"
+          className="h-40 w-[350px] object-contain"
+        />
+      </div>
 
+      <div className="max-w-5xl mx-auto p-4 md:p-6">
         {/* Date + Day under the page header */}
         <div className="text-center mb-4">
           <div className="inline-block bg-white/70 backdrop-blur rounded-lg px-4 py-2 shadow-sm">
@@ -174,7 +185,7 @@ export default function SaleStatus() {
               className="w-full h-full rounded-xl shadow-lg overflow-hidden flex flex-col"
               style={{ backgroundColor: theme.background, color: theme.text }}
             >
-              {/* Branded header similar to TV display */}
+              {/* Branded header inside the image */}
               <div className="bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white py-3 px-4 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-gold-500 rounded-full flex items-center justify-center shadow-lg">
