@@ -3,7 +3,6 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -140,7 +139,7 @@ export default function MobileControl() {
                 <h3 className="font-semibold" style={{ color: textColor }}>Last Updated</h3>
                 <p className="text-sm opacity-80" style={{ color: textColor }}>
                   {currentRates?.created_date 
-                    ? format(new Date(currentRates.created_date), "PPpp")
+                    ? new Date(currentRates.created_date).toLocaleString()
                     : "Never"
                   }
                 </p>
