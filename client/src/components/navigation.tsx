@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import {
   SidebarProvider,
   Sidebar,
@@ -87,6 +87,7 @@ function DrawerContents() {
             return (
               <SidebarMenuItem key={item.path}>
                 <SidebarMenuButton
+                  asChild
                   isActive={active}
                   className={cn(
                     "transition-colors",
@@ -94,10 +95,11 @@ function DrawerContents() {
                       ? "bg-gold-50 text-jewelry-primary"
                       : "text-gray-700 hover:text-jewelry-primary"
                   )}
-                  onClick={() => navigate(item.path)}
                 >
-                  <span className="mr-2 inline-flex items-center">{item.icon}</span>
-                  <span>{item.label}</span>
+                  <Link href={item.path}>
+                    <span className="mr-2 inline-flex items-center">{item.icon}</span>
+                    <span>{item.label}</span>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             );
