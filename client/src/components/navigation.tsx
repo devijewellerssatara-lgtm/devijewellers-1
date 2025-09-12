@@ -113,10 +113,10 @@ function DrawerContents() {
 export function Navigation() {
   // Render a floating hamburger button at the top-left and the sidebar drawer itself on all pages/devices.
   return (
-    <SidebarProvider className="fixed inset-0 pointer-events-none z-50">
+    <SidebarProvider defaultOpen={false} className="fixed inset-0 pointer-events-none z-50">
       {/* Hamburger trigger fixed at top-left with subtle shadow for visibility */}
       <div className="fixed top-3 left-3 z-[51] pointer-events-auto">
-        <SidebarTrigger className="h-10 w-10 rounded-md bg-white shadow-md hover:bg-gold-50 text-jewelry-primary" aria-label="Open navigation">
+        <SidebarTrigger className="h-10 w-10 rounded-md bg-white shadow-md hover:bg-gold-50 text-jewelry-primary" aria-label="Toggle navigation">
           <Menu className="h-5 w-5" />
         </SidebarTrigger>
       </div>
