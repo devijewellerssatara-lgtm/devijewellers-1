@@ -35,8 +35,8 @@ if (!connectionString) {
 const client = postgres(connectionString);
 const db = drizzle(client);
 
-// Best-effort bootstrap: create tables if they don't exist (idempotent)
-(async () => {
+// Explicit init to ensure schema exists before first queries
+export async function initStorage(): Promise<void> {
   try {
     await client`
       CREATE TABLE IF NOT EXISTS gold_rates (
@@ -110,9 +110,9 @@ const db = drizzle(client);
       )
     `;
   } catch {
-    // If bootstrap fails, let regular queries surface errors as before.
+    // Let subsequent queries surface errors; this is best-effort.
   }
-})();
+}
 
 export interface IStorage {
   // Gold Rates

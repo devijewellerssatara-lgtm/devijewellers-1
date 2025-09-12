@@ -154,6 +154,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rates = await storage.getCurrentRates();
       res.json(rates || null);
     } catch (error) {
+      console.error("GET /api/rates/current error:", error);
       res.status(500).json({ message: "Failed to fetch current rates" });
     }
   });
@@ -167,6 +168,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof z.ZodError) {
         res.status(400).json({ message: "Invalid rate data", errors: error.errors });
       } else {
+        console.error("POST /api/rates error:", error);
         res.status(500).json({ message: "Failed to create rates" });
       }
     }
