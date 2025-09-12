@@ -27,11 +27,16 @@ const goldRateFormSchema = insertGoldRateSchema.extend({
 export default function MobileControl() {
   const { toast } = useToast();
 
-  const formatToIST = (value: string | number | Date) => {
+  const formatLocalTime = (value: string | number | Date) => {
     try {
-      return new Intl.DateTimeFormat(undefined, {
-        year: "numeric",
-        month: "short",
+      return new Date(value).toLocaleString();
+    } catch {
+      return "";
+    }
+  };
+
+  const [now, setNow] = useState<Date>(new Date());
+  React.useEffect(() => "short",
         day: "2-digit",
         hour: "2-digit",
         minute: "2-digit",
@@ -153,13 +158,9 @@ export default function MobileControl() {
           <CardContent className="pt-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-semibold" style={{ color: textColor }}>Last Updated</h3>
+                <h3 className="font-semibold" style={{ color: textColor }}>Current Time</h3>
                 <p className="text-sm opacity-80" style={{ color: textColor }}>
-                  {currentRates?.created_date 
-                    ? formatLocalTime(currentRates.created_date)
-                    : "Never"
-               _code  new </}
-              }
+                  {formatLocalTime(now)}
                 </p>
               </div>
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
