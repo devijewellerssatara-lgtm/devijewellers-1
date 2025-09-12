@@ -13,6 +13,7 @@ export default function SaleStatus() {
 
   const [currentTime, setCurrentTime] = useState<Date>(getIndianTime());
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const [isWorking, setIsWorking] = useState<"idle" | "saving" | "sharing">("idle");
 
   useEffect(() => {
@@ -45,6 +46,7 @@ export default function SaleStatus() {
   // Explicit 9:16 capture size improves Android reliability
   const CAPTURE_WIDTH = 720; // px
   const CAPTURE_HEIGHT = 1280; // px
+  const FILENAME = `rates-status-${format(getIndianTime(), "yyyyMMdd-HHmm")}.png`;
 
   // Generate PNG and keep it for reuse (improves sharing reliability on Android)
   const generateImage = async (): Promise<{ blob: Blob; url: string } | null> => {
@@ -68,7 +70,42 @@ export default function SaleStatus() {
     if (!blob) return null;
     const url = URL.createObjectURL(blob);
     setImageUrl(url);
+    setImageBlob(blob);
     return { blob, url };
+  };
+
+  // Try File System Access API if available, else download anchor, else open in new tab
+  const saveBlobToGallery = async (blob: Blob, filename: string, blobUrl: string) => {
+    // File System Access API (not widely on mobile, but try)
+    // @ts-expect-error
+    if (window.showSaveFilePicker) {
+      try {
+        // @ts-expect-error
+        const handle = await window.showSaveFilePicker({
+          suggestedName: filename,
+          types: [{ description: "PNG Image", accept: { "image/png": [".png"] } }],
+        });
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        return;
+      } catch (err) {
+        // fall through to anchor download
+      }
+    }
+
+    // Anchor download (most browsers)
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    // As a fallback for Android: open image in new tab; user can Save Image to gallery
+    try {
+      window.open(blobUrl, "_blank");
+    } catch {}
   };
 
   const handleSaveImage = async () => {
@@ -77,21 +114,10 @@ export default function SaleStatus() {
       const generated = await generateImage();
       if (!generated) throw new Error("Failed to render image");
 
-      // Trigger download
-      const a = document.createElement("a");
-      a.href = generated.url;
-      a.download = `rates-status-${format(currentTime, "yyyyMMdd-HHmm")}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-
-      // Android sometimes ignores download attribute; open the image as fallback
-      try {
-        window.open(generated.url, "_blank");
-      } catch {}
+      await saveBlobToGallery(generated.blob, FILENAME, generated.url);
     } catch (e) {
       console.error("Failed to export image", e);
-      alert("Failed to save image. On Android, please ensure you're using Chrome or a modern browser.");
+      alert("Failed to save image. On Android, open the image and use Save Image to save to gallery.");
     } finally {
       setIsWorking("idle");
     }
@@ -110,11 +136,7 @@ export default function SaleStatus() {
       // Native share with image file only
       // @ts-expect-error
       if (navigator?.share) {
-        const file = new File(
-          [blob],
-          `rates-status-${format(currentTime, "yyyyMMdd-HHmm")}.png`,
-          { type: "image/png" }
-        );
+        const file = new File([blob], FILENAME, { type: "image/png" });
 
         // Some vendors require a title, but keep payload strictly as file
         try {
@@ -251,15 +273,44 @@ export default function SaleStatus() {
         {/* Spacer to ensure content doesn’t collide with sticky action bar */}
         <div className="h-20 md:h-0" />
 
-        {/* Preview on mobile if needed (above action bar to avoid overlap) */}
+        {/* Preview (9:16) */}
         {imageUrl && (
           <div className="text-center mt-4 mb-4">
-            <p className="text-xs text-gray-600 mb-2">Preview (for reference):</p>
-            <img
-              src={imageUrl}
-              alt="Generated status"
-              className="mx-auto max-w-[360px] rounded-lg border"
-            />
+            <p className="text-xs text-gray-600 mb-2">Preview (9:16)</p>
+            <div className="mx-auto w-full" style={{ maxWidth: 360 }}>
+              <div
+                className="relative w-full rounded-lg border overflow-hidden"
+                style={{ paddingTop: `${(16 / 9) * 100}%` }}
+              >
+                <div
+                  className="absolute inset-0 bg-black/2"
+                  style={{
+                    backgroundImage: `url(${imageUrl})`,
+                    backgroundSize: "contain",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                  }}
+                />
+              </div>
+            </div>
+            <div className="mt-2 flex items-center justify-center gap-2">
+              <Button
+                variant="outline"
+                className="border-black/20"
+                onClick={() => imageUrl && window.open(imageUrl, "_blank")}
+              >
+                Open Fullscreen Preview
+              </Button>
+              {imageBlob && (
+                <Button
+                  variant="outline"
+                  className="border-black/20"
+                  onClick={() => saveBlobToGallery(imageBlob, FILENAME, imageUrl!)}
+                >
+                  Save to Gallery
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </div>
