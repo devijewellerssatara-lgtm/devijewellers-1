@@ -73,12 +73,13 @@ export function Navigation() {
   return (
     <>
       {/* Top bar with hamburger */}
-      <div className="sticky top-0 z-50">
-        <div className="flex items-center bg-transparent px-3 py-2 shadow-none">
-          <button
-            aria-label="Open menu"
-            aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
+     <<div className="fixed top-2 left-2 z-50">
+       <lbutton
+          aria-label="Open menu"
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+          className={cn(
+            "inline-flex items-center justify((v) => !v)}
             className={cn(
               "inline-flex items-center justify-center rounded-md",
               "text-jewelry-primary hover:text-jewelry-primary/80",
