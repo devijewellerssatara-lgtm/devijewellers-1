@@ -263,8 +263,28 @@ export default function SaleStatus() {
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center justify-center gap-3 mt-5">
+        {/* Spacer to ensure content doesn’t collide with sticky action bar */}
+        <div className="h-20 md:h-0" />
+
+        {/* Preview on mobile if needed (above action bar to avoid overlap) */}
+        {imageUrl && (
+          <div className="text-center mt-4 mb-4">
+            <p className="text-xs text-gray-600 mb-2">Preview (for reference):</p>
+            <img
+              src={imageUrl}
+              alt="Generated status"
+              className="mx-auto max-w-[360px] rounded-lg border"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Sticky Action Bar - stays above any overlapping content */}
+      <div
+        className="sticky bottom-0 z-40 w-full border-t"
+        style={{ backgroundColor: theme.background, borderColor: "rgba(0,0,0,0.1)" }}
+      >
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-center gap-3">
           <Button onClick={handleSaveImage} className="bg-jewelry-primary text-white" disabled={isWorking !== "idle"}>
             <i className="fas fa-download mr-2"></i>
             {isWorking === "saving" ? "Saving..." : "Save Image (9:16)"}
@@ -274,18 +294,6 @@ export default function SaleStatus() {
             {isWorking === "sharing" ? "Opening Share..." : "Share on WhatsApp"}
           </Button>
         </div>
-
-        {/* Preview on mobile if needed */}
-        {imageUrl && (
-          <div className="text-center mt-4">
-            <p className="text-xs text-gray-600 mb-2">Preview (for reference):</p>
-            <img
-              src={imageUrl}
-              alt="Generated status"
-              className="mx-auto max-w-[360px] rounded-lg border"
-            />
-          </div>
-        )}
       </div>
     </div>
   );
