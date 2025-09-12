@@ -2,19 +2,17 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ratesApi, settingsApi } from "@/lib/api";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
 
 export default function SaleStatus() {
   // Keep time in India timezone
   const getIndianTime = () => {
     const now = new Date();
-    return new Date(
-      now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
-    );
+    return new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
   };
 
   const [currentTime, setCurrentTime] = useState<Date>(getIndianTime());
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(getIndianTime()), 1000);
@@ -43,92 +41,114 @@ export default function SaleStatus() {
     };
   }, [settings]);
 
-  // Export node as image
-  const handleSaveImage = async () => {
-    if (!captureRef.current) return;
-    try {
-      const node = captureRef.current;
-      const { toPng } = await import("html-to-image");
-      // Force higher pixel ratio for crisp status
-      const dataUrl = await toPng(node, {
-        cacheBust: true,
-        pixelRatio: 3,
-        backgroundColor: theme.background,
-      });
+  // Explicit 9:16 capture size improves Android reliability
+  const CAPTURE_WIDTH = 720; // px
+  const CAPTURE_HEIGHT = 1280; // px
 
-      // Try download first
+  // Generate PNG and keep it for reuse (improves sharing reliability on Android)
+  const generateImage = async (): Promise<{ blob: Blob; url: string } | null> => {
+    if (!captureRef.current) return null;
+    const node = captureRef.current;
+
+    // Ensure capture node has explicit size (no transform/padding hacks)
+    node.style.width = `${CAPTURE_WIDTH}px`;
+    node.style.height = `${CAPTURE_HEIGHT}px`;
+
+    const { toBlob } = await import("html-to-image");
+    const blob = await toBlob(node, {
+      cacheBust: true,
+      pixelRatio: 2,
+      backgroundColor: theme.background,
+      // Filter can help avoid capturing control buttons etc. (not used here but kept for clarity)
+      filter: (n) => true,
+      style: {
+        // Avoid sticky/transform issues on Android
+        transform: "none",
+      },
+    });
+
+    if (!blob) return null;
+    const url = URL.createObjectURL(blob);
+    setImageUrl(url);
+    return { blob, url };
+  };
+
+  const handleSaveImage = async () => {
+    try {
+      const generated = await generateImage();
+      if (!generated) throw new Error("Failed to render image");
+
+      // Trigger download
       const a = document.createElement("a");
-      a.href = dataUrl;
+      a.href = generated.url;
       a.download = `rates-status-${format(currentTime, "yyyyMMdd-HHmm")}.png`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
 
-      // Also open in a new tab as a fallback (helps on some mobile browsers)
+      // Android sometimes ignores download attribute; open the image as fallback
       try {
-        window.open(dataUrl, "_blank");
+        window.open(generated.url, "_blank");
       } catch {}
     } catch (e) {
       console.error("Failed to export image", e);
-      alert("Failed to save image. Please try again. On iPhone, tap and hold the image to save.");
+      alert("Failed to save image. On Android, long-press the opened image to Save/Share.");
     }
   };
 
-  // Share to WhatsApp via Web Share API with image if available, otherwise provide a manual fallback
+  // Share to WhatsApp via Web Share API with image if available, otherwise open image for manual share
   const handleShareWhatsApp = async () => {
-    if (!captureRef.current) return;
-
-    // Build a plain text summary as a fallback
-    const textSummary = buildTextSummary(currentRates, currentTime);
-
     try {
-      const { toBlob } = await import("html-to-image");
-      const blob = await toBlob(captureRef.current, {
-        cacheBust: true,
-        pixelRatio: 3,
-        backgroundColor: theme.background,
-      });
+      const existing = imageUrl ? null : await generateImage();
+      const blobUrl = imageUrl || existing?.url;
 
-      if (blob) {
-        // Prefer Web Share API with files (Android Chrome, iOS Safari 16.4+)
+      // Prefer direct Web Share with file if supported
+      // Note: Some Android browsers need a File, not just Blob URL
+      if (!imageUrl && existing?.blob && "canShare" in navigator && "share" in navigator) {
+        const file = new File(
+          [existing.blob],
+          `rates-status-${format(currentTime, "yyyyMMdd-HHmm")}.png`,
+          { type: "image/png" }
+        );
         // @ts-expect-error
-        if (navigator?.canShare && navigator?.share) {
-          const file = new File(
-            [blob],
-            `rates-status-${format(currentTime, "yyyyMMdd-HHmm")}.png`,
-            { type: "image/png" }
-          );
+        if (navigator.canShare?.({ files: [file] })) {
           // @ts-expect-error
-          if (navigator.canShare?.({ files: [file] })) {
-            // @ts-expect-error
-            await navigator.share({ files: [file], text: textSummary });
-            return;
-          }
+          await navigator.share({
+            files: [file],
+            text: buildTextSummary(currentRates, currentTime),
+            title: "Today's Sale Rates",
+          });
+          return;
         }
+      }
 
-        // Manual fallback: open image in a new tab for user to long-press and share to WhatsApp
-        const blobUrl = URL.createObjectURL(blob);
+      // Manual fallback: open image in a new tab so user can long-press -> Share (WhatsApp)
+      if (blobUrl) {
         window.open(blobUrl, "_blank");
-        alert("Image opened. Long-press and share to WhatsApp. If it doesn't open, use Save Image and share from gallery.");
+        alert("Image opened. Long-press and choose Share to send on WhatsApp.");
         return;
       }
 
-      // If we couldn't create an image, fallback to WhatsApp text share URL
-      const url = `https://wa.me/?text=${encodeURIComponent(textSummary)}`;
+      // Last resort: text share link
+      const url = `https://wa.me/?text=${encodeURIComponent(
+        buildTextSummary(currentRates, currentTime)
+      )}`;
       window.open(url, "_blank");
     } catch (e) {
       console.error("Share failed", e);
-      const url = `https://wa.me/?text=${encodeURIComponent(textSummary)}`;
+      const url = `https://wa.me/?text=${encodeURIComponent(
+        buildTextSummary(currentRates, currentTime)
+      )}`;
       window.open(url, "_blank");
     }
   };
 
-  const buildTextSummary = (
-    rates: any,
-    time: Date
-  ) => {
+  const buildTextSummary = (rates: any, time: Date) => {
     if (!rates) {
-      return `Today's Gold & Silver sale rates.\n${format(time, "EEEE, dd MMM yyyy • HH:mm")} (IST)`;
+      return `Today's Gold & Silver sale rates.\n${format(
+        time,
+        "EEEE, dd MMM yyyy • HH:mm"
+      )} (IST)`;
     }
     return [
       "TODAY'S SALE RATES",
@@ -177,57 +197,62 @@ export default function SaleStatus() {
           </div>
         </div>
 
-        {/* 9:16 canvas area to capture */}
-        <div className="mx-auto max-w-[480px]">
-          <AspectRatio ratio={9 / 16}>
-            <div
-              ref={captureRef}
-              className="w-full h-full rounded-xl shadow-lg overflow-hidden flex flex-col"
-              style={{ backgroundColor: theme.background, color: theme.text }}
-            >
-              {/* Branded header inside the image */}
-              <div className="bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white py-3 px-4 flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gold-500 rounded-full flex items-center justify-center shadow-lg">
-                    <img
-                      src="/logo.png"
-                      alt="Logo"
-                      className="w-7 h-7 object-contain"
-                    />
+        {/* 9:16 capture area - explicit size for Android reliability */}
+        <div className="mx-auto" style={{ maxWidth: 360 }}>
+          {/* Visual scale wrapper so it fits on smaller screens while keeping captureRef explicit px size */}
+          <div className="relative w-full" style={{ paddingTop: `${(16 / 9) * 100}%` }}>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div
+                ref={captureRef}
+                className="rounded-xl shadow-lg overflow-hidden flex flex-col border border-black/10"
+                style={{
+                  backgroundColor: theme.background,
+                  color: theme.text,
+                  width: `${CAPTURE_WIDTH}px`,
+                  height: `${CAPTURE_HEIGHT}px`,
+                  // Scale down to fit container while keeping true pixel size for capture
+                  transformOrigin: "top left",
+                  transform: "scale(calc((min(100%, 360px)) / 720))",
+                }}
+              >
+                {/* Branded header inside the image */}
+                <div className="bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white py-3 px-4 flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gold-500 rounded-full flex items-center justify-center shadow-lg">
+                      <img src="/logo.png" alt="Logo" className="w-7 h-7 object-contain" />
+                    </div>
+                    <div className="hidden sm:block">
+                      <p className="text-gold-200 text-xs">Premium Gold & Silver Collection</p>
+                    </div>
                   </div>
-                  <div className="hidden sm:block">
-                    <p className="text-gold-200 text-xs">Premium Gold & Silver Collection</p>
+                  <div className="text-right">
+                    <div className="text-xs font-semibold text-gold-200">
+                      {format(currentTime, "EEEE dd-MMM-yyyy")}
+                    </div>
+                    <div className="text-sm font-bold text-white">{format(currentTime, "HH:mm")}</div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-xs font-semibold text-gold-200">
-                    {format(currentTime, "EEEE dd-MMM-yyyy")}
-                  </div>
-                  <div className="text-sm font-bold text-white">
-                    {format(currentTime, "HH:mm")}
-                  </div>
+
+                {/* Title */}
+                <div className="bg-gradient-to-r from-gold-600 to-gold-700 text-white text-center py-2">
+                  <h2 className="font-display font-bold text-xl">TODAY'S SALE RATES</h2>
                 </div>
-              </div>
 
-              {/* Title */}
-              <div className="bg-gradient-to-r from-gold-600 to-gold-700 text-white text-center py-2">
-                <h2 className="font-display font-bold text-xl">TODAY'S SALE RATES</h2>
-              </div>
+                {/* Rates only (sale) */}
+                <div className="flex-1 p-4 space-y-3">
+                  <RateCard title="24K GOLD (Per 10 gms)" value={currentRates.gold_24k_sale} rateSize={theme.rateSize} />
+                  <RateCard title="22K GOLD (Per 10 gms)" value={currentRates.gold_22k_sale} rateSize={theme.rateSize} />
+                  <RateCard title="18K GOLD (Per 10 gms)" value={currentRates.gold_18k_sale} rateSize={theme.rateSize} />
+                  <RateCard title="SILVER (Per KG)" value={currentRates.silver_per_kg_sale} rateSize={theme.rateSize} />
+                </div>
 
-              {/* Rates only (sale) */}
-              <div className="flex-1 p-4 space-y-3">
-                <RateCard title="24K GOLD (Per 10 gms)" value={currentRates.gold_24k_sale} rateSize={theme.rateSize} />
-                <RateCard title="22K GOLD (Per 10 gms)" value={currentRates.gold_22k_sale} rateSize={theme.rateSize} />
-                <RateCard title="18K GOLD (Per 10 gms)" value={currentRates.gold_18k_sale} rateSize={theme.rateSize} />
-                <RateCard title="SILVER (Per KG)" value={currentRates.silver_per_kg_sale} rateSize={theme.rateSize} />
-              </div>
-
-              {/* Footer note */}
-              <div className="text-center text-[10px] text-gray-600 pb-2">
-                Prices subject to market changes • {format(currentTime, "dd MMM yyyy")}
+                {/* Footer note */}
+                <div className="text-center text-[10px] text-gray-600 pb-2">
+                  Prices subject to market changes • {format(currentTime, "dd MMM yyyy")}
+                </div>
               </div>
             </div>
-          </AspectRatio>
+          </div>
         </div>
 
         {/* Actions */}
@@ -241,6 +266,18 @@ export default function SaleStatus() {
             Share on WhatsApp
           </Button>
         </div>
+
+        {/* Preview on mobile if needed */}
+        {imageUrl && (
+          <div className="text-center mt-4">
+            <p className="text-xs text-gray-600 mb-2">Preview (long-press to save/share on Android):</p>
+            <img
+              src={imageUrl}
+              alt="Generated status"
+              className="mx-auto max-w-[360px] rounded-lg border"
+            />
+          </div>
+        )}
       </div>
     </div>
   );
