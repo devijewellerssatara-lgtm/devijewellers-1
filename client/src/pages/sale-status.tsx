@@ -248,7 +248,7 @@
             </div>
 
             {/* Rates only (sale) */}
-          <div className="flex-1 px-2 py-5 space-y-5">
+          <div className="flex-1 px-0 py-5 space-y-5">
             <RateCard title="24K GOLD (Per 10 gms)" value={currentRates.gold_24k_sale} rateSize={"text-6xl"} />
             <RateCard title="22K GOLD (Per 10 gms)" value={currentRates.gold_22k_sale} rateSize={"text-6xl"} />
             <RateCard title="18K GOLD (Per 10 gms)" value={currentRates.gold_18k_sale} rateSize={"text-6xl"} />
