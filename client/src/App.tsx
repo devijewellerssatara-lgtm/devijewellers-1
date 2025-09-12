@@ -11,6 +11,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import MediaManager from "@/pages/media-manager";
 import PromoManager from "@/pages/promo-manager";
 import NotFound from "@/pages/not-found";
+import SaleStatus from "@/pages/sale-status";
 
 function Router() {
   return (
@@ -22,6 +23,7 @@ function Router() {
         <Route path="/admin" component={AdminDashboard} />
         <Route path="/media" component={MediaManager} />
         <Route path="/promo" component={PromoManager} />
+        <Route path="/status" component={SaleStatus} />
         <Route component={NotFound} />
       </Switch>
     </div>
