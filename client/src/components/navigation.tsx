@@ -46,9 +46,13 @@ function useAutoCloseOnRoute() {
 // If needed later, re-introduce with a longer timeout and sidebar-specific event targets.
 
 function DrawerContents() {
-  useAutoCloseOnRoute();
+  const { setOpenMobile } = useSidebar();
+  const [location] = useLocation();
 
-  const [location, navigate] = useLocation();
+  const handleNavigate = React.useCallback(() => {
+    // Close the mobile drawer explicitly after a tiny delay to avoid event overlap.
+    setTimeout(() => setOpenMobile(false), 50);
+  }, [setOpenMobile]);
 
   return (
     <SidebarContent className="bg-white">
@@ -72,7 +76,7 @@ function DrawerContents() {
                       : "text-gray-700 hover:text-jewelry-primary"
                   )}
                 >
-                  <Link href={item.path}>
+                  <Link href={item.path} onClick={handleNavigate}>
                     <span className="mr-2 inline-flex items-center">{item.icon}</span>
                     <span>{item.label}</span>
                   </Link>
@@ -90,6 +94,9 @@ export function Navigation() {
   // Keep desktop open state stable across route changes by controlling the provider's open prop.
   const [open, setOpen] = React.useState(false);
 
+  // Prevent immediate close from the same touch by ignoring the first outside pointer after open.
+  const justOpenedAt = React.useRef<number | null>(null);
+
   // A trigger that hides itself when the mobile drawer is open to prevent accidental immediate close.
   function MobileAwareTrigger({ setDesktopOpen }: { setDesktopOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
     const { isMobile, openMobile, setOpenMobile } = useSidebar();
@@ -99,10 +106,10 @@ export function Navigation() {
       e.preventDefault();
       e.stopPropagation();
       if (isMobile) {
+        justOpenedAt.current = Date.now();
         // Open explicitly on mobile to avoid double-toggle close.
         setOpenMobile(true);
       } else {
-        // Toggle on desktop.
         setDesktopOpen((v) => !v);
       }
     };
@@ -128,7 +135,23 @@ export function Navigation() {
       <MobileAwareTrigger setDesktopOpen={setOpen} />
 
       {/* Left sidebar (mobile uses overlay/backdrop via Sheet; desktop uses offcanvas behavior) */}
-      <Sidebar side="left" variant="sidebar" collapsible="offcanvas" className="bg-white border-r pointer-events-auto">
+      <Sidebar
+        side="left"
+        variant="sidebar"
+        collapsible="offcanvas"
+        className="bg-white border-r pointer-events-auto"
+        // Prevent the first outside pointer immediately after opening from closing the sheet.
+        onPointerDownOutside={(e: any) => {
+          if (justOpenedAt.current && Date.now() - justOpenedAt.current < 250) {
+            e.preventDefault();
+          }
+        }}
+        onInteractOutside={(e: any) => {
+          if (justOpenedAt.current && Date.now() - justOpenedAt.current < 250) {
+            e.preventDefault();
+          }
+        }}
+      >
         <DrawerContents />
       </Sidebar>
     </SidebarProvider>
