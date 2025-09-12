@@ -54,14 +54,14 @@
 
     // Recompute scale to fit available space without scrolling
     const recomputeScale = () => {
-    const stage = stageRef.current;
-    if (!stage) return;
-    const rect = stage.getBoundingClientRect();
-    // Use full available width so height can be the limiting factor, removing blank space below
-    const availableW = rect.width;
-    const availableH = rect.height;
-    const s = Math.min(availableWH / CAPTURE_HEIGHT);
-        setScale(Math.max(0.2, Math.min(s, 1)));
+      const stage = stageRef.current;
+      if (!stage) return;
+      const rect = stage.getBoundingClientRect();
+      // Use full available width so height can be the limiting factor, removing blank space below
+      const availableW = rect.width;
+      const availableH = rect.height;
+      const s = Math.min(availableW / CAPTURE_WIDTH, availableH / CAPTURE_HEIGHT);
+      setScale(Math.max(0.2, Math.min(s, 1)));
     };
 
     useEffect(() => {
@@ -287,17 +287,16 @@
     rateSize: string;
     }) {
     return (
-        <div className="bg-white rounded-xl shadow border-l-8 border-jewelry-primary p-6 w-full min-h-28">
-      <div className="flex items-center justify-between">
-        <h4 className="text-2xl font-semibold text-gray-900">{title}</h4>
-        <div className="w-12 h-12 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
-          <i className="fas fa-rupee-sign text-white text-base"></i>
+      <div className="bg-white rounded-xl shadow border-l-8 border-jewelry-primary p-6 w-full min-h-28">
+        <div className="flex items-center justify-between">
+          <h4 className="text-2xl font-semibold text-gray-900">{title}</h4>
+          <div className="w-12 h-12 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
+            <i className="fas fa-rupee-sign text-white text-base"></i>
+          </div>
+        </div>
+        <div className="text-center mt-3">
+          <p className={`${rateSize} font-extrabold text-blue-900 leading-tight`}>₹{value}</p>
         </div>
       </div>
-      <div className="text-center mt-3">
-        <p className={`${rateSize} font-extrabold text-blue-900 leading-tight`}>₹{value}</p>
-      </div>
-    </div>
-        </div>
     );
-    }
+  }
