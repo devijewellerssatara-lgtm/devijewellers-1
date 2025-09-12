@@ -47,10 +47,10 @@
         };
     }, [settings]);
 
-    // Explicit 9:16 capture size improves Android reliability
-    const CAPTURE_WIDTH = 720; // px
-    const CAPTURE_HEIGHT = 1280; // px
-    const FILENAME = `rates-status-${format(getIndianTime(), "yyyyMMdd-HHmm")}.png`;
+    // Explicit canvas size (width x height). Height adjusted as requested.
+  const CAPTURE_WIDTH = 720; // px
+  const CAPTURE_HEIGHT = 1060; // px
+  const FILENAME = `rates-status-${format(getIndianTime(), "yyyyMMdd-HHmm")}.png`;
 
     // Recompute scale to fit available space without scrolling
     const recomputeScale = () => {
