@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { ratesApi } from "@/lib/api";
+import { ratesApi, settingsApi } from "@/lib/api";
 import { queryClient } from "@/lib/queryClient";
-import { insertGoldRateSchema } from "@shared/schema";
+import { insertGoldRateSchema } from "@/shared/schema";
 
 // Create a custom schema that converts strings to numbers
 const goldRateFormSchema = insertGoldRateSchema.extend({
@@ -33,6 +33,16 @@ export default function MobileControl() {
     queryKey: ["/api/rates/current"],
     queryFn: ratesApi.getCurrent
   });
+
+  // Get display settings for color customization
+  const { data: displaySettings } = useQuery({
+    queryKey: ["/api/settings/display"],
+    queryFn: settingsApi.getDisplay,
+    staleTime: 60_000
+  });
+
+  const bgColor = displaySettings?.background_color || "#FFF8E1";
+  const textColor = displaySettings?.text_color || "#212529";
 
   // Form setup with custom schema
   const form = useForm<z.infer<typeof goldRateFormSchema>>({
@@ -101,7 +111,7 @@ export default function MobileControl() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-jewelry-primary/10 to-jewelry-secondary/10 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: bgColor, color: textColor }}>
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-jewelry-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p>Loading rates...</p>
@@ -111,9 +121,9 @@ export default function MobileControl() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-jewelry-primary/10 to-jewelry-secondary/10">
+    <div className="min-h-screen" style={{ backgroundColor: bgColor, color: textColor }}>
       {/* Mobile Header */}
-      <div className="bg-gradient-to-r from-gold-600 to-gold-700 text-black p-4 flex justify-center">
+      <div className="p-4 flex justify-center" style={{ color: textColor }}>
         <img 
           src="/logo.png" 
           alt="Devi Jewellers Logo"
@@ -123,12 +133,12 @@ export default function MobileControl() {
 
       <div className="p-4 space-y-6">
         {/* Quick Status Card */}
-        <Card className="border-l-4 border border-black">
+        <Card className="border-l-4 border border-black" style={{ backgroundColor: "#ffffffcc" }}>
           <CardContent className="pt-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-semibold text-gray-800">Last Updated</h3>
-                <p className="text-sm text-gray-600">
+                <h3 className="font-semibold" style={{ color: textColor }}>Last Updated</h3>
+                <p className="text-sm opacity-80" style={{ color: textColor }}>
                   {currentRates?.created_date 
                     ? format(new Date(currentRates.created_date), "PPpp")
                     : "Never"
@@ -141,9 +151,9 @@ export default function MobileControl() {
         </Card>
 
         {/* Rate Update Form */}
-        <Card className="w-full bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-black py-4 text-lg border-2 border-black rounded-lg">
-          <CardHeader className="bg-gradient-to-r from-gold-500 to-gold-600 text-black">
-            <CardTitle className="flex items-center text-lg">
+        <Card className="w-full text-black py-4 text-lg border-2 border-black rounded-lg" style={{ backgroundColor: "#ffffff" }}>
+          <CardHeader className="text-black" style={{ backgroundColor: bgColor }}>
+            <CardTitle className="flex items-center text-lg" style={{ color: textColor }}>
               Update Gold & Silver Rates
             </CardTitle>
           </CardHeader>
@@ -152,8 +162,8 @@ export default function MobileControl() {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 {/* 24K Gold */}
                 <div className="p-4 border-b border-gray-100">
-                  <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
-                    <span className="text-gold-500 mr-2">★</span>24K Gold (Per 10 GMS)
+                  <h3 className="font-semibold mb-3 flex items-center" style={{ color: textColor }}>
+                    <span className="mr-2">★</span>24K Gold (Per 10 GMS)
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     <FormField
@@ -169,6 +179,7 @@ export default function MobileControl() {
                               min="0"
                               {...field}
                               className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                              style={{ color: textColor, backgroundColor: bgColor }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -188,6 +199,7 @@ export default function MobileControl() {
                               min="0"
                               {...field}
                               className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                              style={{ color: textColor, backgroundColor: bgColor }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -199,8 +211,8 @@ export default function MobileControl() {
 
                 {/* 22K Gold */}
                 <div className="p-4 border-b border-gray-100">
-                  <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
-                    <span className="text-gold-600 mr-2">◆</span>22K Gold (Per 10 GMS)
+                  <h3 className="font-semibold mb-3 flex items-center" style={{ color: textColor }}>
+                    <span className="mr-2">◆</span>22K Gold (Per 10 GMS)
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     <FormField
@@ -216,6 +228,7 @@ export default function MobileControl() {
                               min="0"
                               {...field}
                               className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                              style={{ color: textColor, backgroundColor: bgColor }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -235,6 +248,7 @@ export default function MobileControl() {
                               min="0"
                               {...field}
                               className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                              style={{ color: textColor, backgroundColor: bgColor }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -246,8 +260,8 @@ export default function MobileControl() {
 
                 {/* 18K Gold */}
                 <div className="p-4 border-b border-gray-100">
-                  <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
-                    <span className="text-gold-700 mr-2">♦</span>18K Gold (Per 10 GMS)
+                  <h3 className="font-semibold mb-3 flex items-center" style={{ color: textColor }}>
+                    <span className="mr-2">♦</span>18K Gold (Per 10 GMS)
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     <FormField
@@ -263,6 +277,7 @@ export default function MobileControl() {
                               min="0"
                               {...field}
                               className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                              style={{ color: textColor, backgroundColor: bgColor }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -282,6 +297,7 @@ export default function MobileControl() {
                               min="0"
                               {...field}
                               className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                              style={{ color: textColor, backgroundColor: bgColor }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -293,8 +309,8 @@ export default function MobileControl() {
 
                 {/* Silver */}
                 <div className="p-4">
-                  <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
-                    <span className="text-gray-400 mr-2">●</span>Silver (Per KG)
+                  <h3 className="font-semibold mb-3 flex items-center" style={{ color: textColor }}>
+                    <span className="mr-2">●</span>Silver (Per KG)
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     <FormField
@@ -310,6 +326,7 @@ export default function MobileControl() {
                               min="0"
                               {...field}
                               className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                              style={{ color: textColor, backgroundColor: bgColor }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -329,6 +346,7 @@ export default function MobileControl() {
                               min="0"
                               {...field}
                               className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                              style={{ color: textColor, backgroundColor: bgColor }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -340,7 +358,8 @@ export default function MobileControl() {
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-black py-4 text-lg border-2 border-black rounded-lg hover:from-yellow-500 hover:to-yellow-600 transition-colors duration-300"
+                  className="w-full text-black py-4 text-lg border-2 border-black rounded-lg transition-colors duration-300"
+                  style={{ backgroundColor: bgColor, color: textColor }}
                   disabled={updateRatesMutation.isPending}
                 >
                   {updateRatesMutation.isPending ? (
@@ -360,23 +379,23 @@ export default function MobileControl() {
         </Card>
 
         {/* Current Rates Display */}
-        <Card className="w-full bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-black py-4 text-lg border-2 border-black rounded-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center text-lg">
+        <Card className="w-full text-black py-4 text-lg border-2 border-black rounded-lg" style={{ backgroundColor: "#ffffff" }}>
+          <CardHeader style={{ backgroundColor: bgColor }}>
+            <CardTitle className="flex items-center text-lg" style={{ color: textColor }}>
               Currently Displayed Rates
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3 text-xl">
-              <div className="flex justify-between">
+              <div className="flex justify-between" style={{ color: textColor }}>
                 <span>24K Gold Sale:</span>
                 <span className="font-semibold border-2 border-black rounded-md px-2 py-1">₹{currentRates?.gold_24k_sale}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between" style={{ color: textColor }}>
                 <span>22K Gold Sale:</span>
                 <span className="font-semibold border-2 border-black rounded-md px-2 py-1">₹{currentRates?.gold_22k_sale}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between" style={{ color: textColor }}>
                 <span>Silver Sale:</span>
                 <span className="font-semibold border-2 border-black rounded-md px-2 py-1">₹{currentRates?.silver_per_kg_sale}</span>
               </div>
