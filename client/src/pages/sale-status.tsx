@@ -16,6 +16,12 @@ export default function SaleStatus() {
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const [isWorking, setIsWorking] = useState<"idle" | "saving" | "sharing">("idle");
 
+  // Layout refs/state to avoid page scrolling
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const captureRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.5);
+
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(getIndianTime()), 1000);
     return () => clearInterval(timer);
@@ -33,8 +39,6 @@ export default function SaleStatus() {
     refetchInterval: 30000,
   });
 
-  const captureRef = useRef<HTMLDivElement>(null);
-
   const theme = useMemo(() => {
     return {
       background: settings?.background_color || "#FFF8E1",
@@ -48,12 +52,30 @@ export default function SaleStatus() {
   const CAPTURE_HEIGHT = 1280; // px
   const FILENAME = `rates-status-${format(getIndianTime(), "yyyyMMdd-HHmm")}.png`;
 
+  // Recompute scale to fit available space without scrolling
+  const recomputeScale = () => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const rect = stage.getBoundingClientRect();
+    const availableW = Math.min(rect.width, 420); // keep centered narrow layout
+    const availableH = rect.height;
+    const s = Math.min(availableW / CAPTURE_WIDTH, availableH / CAPTURE_HEIGHT);
+    setScale(Math.max(0.2, Math.min(s, 1)));
+  };
+
+  useEffect(() => {
+    recomputeScale();
+    window.addEventListener("resize", recomputeScale);
+    return () => window.removeEventListener("resize", recomputeScale);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Generate PNG and keep it for reuse (improves sharing reliability on Android)
   const generateImage = async (): Promise<{ blob: Blob; url: string } | null> => {
     if (!captureRef.current) return null;
     const node = captureRef.current;
 
-    // Ensure capture node has explicit size (no transform/padding hacks)
+    // Ensure capture node has explicit size
     node.style.width = `${CAPTURE_WIDTH}px`;
     node.style.height = `${CAPTURE_HEIGHT}px`;
 
@@ -89,8 +111,8 @@ export default function SaleStatus() {
         await writable.write(blob);
         await writable.close();
         return;
-      } catch (err) {
-        // fall through to anchor download
+      } catch {
+        // fall through
       }
     }
 
@@ -113,7 +135,6 @@ export default function SaleStatus() {
       setIsWorking("saving");
       const generated = await generateImage();
       if (!generated) throw new Error("Failed to render image");
-
       await saveBlobToGallery(generated.blob, FILENAME, generated.url);
     } catch (e) {
       console.error("Failed to export image", e);
@@ -127,8 +148,6 @@ export default function SaleStatus() {
   const handleShareWhatsApp = async () => {
     try {
       setIsWorking("sharing");
-
-      // Always generate a fresh image (snapshot first)
       const generated = await generateImage();
       if (!generated) throw new Error("Failed to render image for sharing");
       const { blob } = generated;
@@ -137,16 +156,9 @@ export default function SaleStatus() {
       // @ts-expect-error
       if (navigator?.share) {
         const file = new File([blob], FILENAME, { type: "image/png" });
-
-        // Some vendors require a title, but keep payload strictly as file
-        try {
-          // @ts-expect-error
-          await navigator.share({ files: [file], title: "Today's Sale Rates" });
-          return;
-        } catch (err) {
-          console.error("Native share rejected", err);
-          throw err;
-        }
+        // @ts-expect-error
+        await navigator.share({ files: [file], title: "Today's Sale Rates" });
+        return;
       } else {
         throw new Error("Native share not supported on this browser.");
       }
@@ -189,135 +201,74 @@ export default function SaleStatus() {
 
   return (
     <div
-      className="min-h-screen"
+      ref={viewportRef}
+      className="h-screen flex flex-col overflow-hidden"
       style={{ backgroundColor: theme.background, color: theme.text }}
     >
       {/* Mobile Control-like header (full-width banner with logo) */}
-      <div className="bg-gradient-to-r from-gold-600 to-gold-700 text-black p-3 md:p-4 flex justify-center">
+      <div className="shrink-0 bg-gradient-to-r from-gold-600 to-gold-700 text-black px-3 py-2 md:px-4 md:py-3 flex justify-center items-center">
         <img
           src="/logo.png"
           alt="Devi Jewellers Logo"
-          className="h-24 md:h-40 w-[260px] md:w-[350px] object-contain"
+          className="h-16 md:h-24 w-[220px] md:w-[320px] object-contain"
         />
       </div>
 
-      <div className="max-w-5xl mx-auto p-4 md:p-6 pb-4">
-        {/* Date + Day under the page header */}
-        <div className="text-center mb-4">
-          <div className="inline-block bg-white/70 backdrop-blur rounded-lg px-4 py-2 shadow-sm">
-            <div className="text-sm text-gray-600">{format(currentTime, "EEEE")}</div>
-            <div className="text-base font-semibold text-gray-800">
-              {format(currentTime, "dd MMM yyyy")} • {format(currentTime, "HH:mm:ss")}
-            </div>
-          </div>
-        </div>
-
-        {/* 9:16 capture area - explicit size for Android reliability */}
-        <div className="mx-auto mb-2" style={{ maxWidth: 360 }}>
-          {/* Visual scale wrapper so it fits on smaller screens while keeping captureRef explicit px size */}
-          <div className="relative w-full" style={{ paddingTop: `${(16 / 9) * 100}%` }}>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div
-                ref={captureRef}
-                className="rounded-xl shadow-lg overflow-hidden flex flex-col border border-black/10"
-                style={{
-                  backgroundColor: theme.background,
-                  color: theme.text,
-                  width: `${CAPTURE_WIDTH}px`,
-                  height: `${CAPTURE_HEIGHT}px`,
-                  // Scale down to fit container while keeping true pixel size for capture
-                  transformOrigin: "top left",
-                  transform: "scale(calc((min(100%, 360px)) / 720))",
-                }}
-              >
-                {/* Branded header inside the image */}
-                <div className="bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white py-3 px-4 flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gold-500 rounded-full flex items-center justify-center shadow-lg">
-                      <img src="/logo.png" alt="Logo" className="w-7 h-7 object-contain" />
-                    </div>
-                    <div className="hidden sm:block">
-                      <p className="text-gold-200 text-xs">Premium Gold & Silver Collection</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs font-semibold text-gold-200">
-                      {format(currentTime, "EEEE dd-MMM-yyyy")}
-                    </div>
-                    <div className="text-sm font-bold text-white">{format(currentTime, "HH:mm")}</div>
-                  </div>
-                </div>
-
-                {/* Title */}
-                <div className="bg-gradient-to-r from-gold-600 to-gold-700 text-white text-center py-2">
-                  <h2 className="font-display font-bold text-xl">TODAY'S SALE RATES</h2>
-                </div>
-
-                {/* Rates only (sale) */}
-                <div className="flex-1 p-4 space-y-3">
-                  <RateCard title="24K GOLD (Per 10 gms)" value={currentRates.gold_24k_sale} rateSize={theme.rateSize} />
-                  <RateCard title="22K GOLD (Per 10 gms)" value={currentRates.gold_22k_sale} rateSize={theme.rateSize} />
-                  <RateCard title="18K GOLD (Per 10 gms)" value={currentRates.gold_18k_sale} rateSize={theme.rateSize} />
-                  <RateCard title="SILVER (Per KG)" value={currentRates.silver_per_kg_sale} rateSize={theme.rateSize} />
-                </div>
-
-                {/* Footer note */}
-                <div className="text-center text-[10px] text-gray-600 pb-2">
-                  Prices subject to market changes • {format(currentTime, "dd MMM yyyy")}
-                </div>
+      {/* Center stage - no scrolling; capture scaled to fit */}
+      <div ref={stageRef} className="flex-1 flex items-center justify-center overflow-hidden px-2">
+        <div
+          ref={captureRef}
+          className="rounded-xl shadow-lg overflow-hidden flex flex-col border border-black/10"
+          style={{
+            backgroundColor: theme.background,
+            color: theme.text,
+            width: `${CAPTURE_WIDTH}px`,
+            height: `${CAPTURE_HEIGHT}px`,
+            transformOrigin: "center center",
+            transform: `scale(${scale})`,
+          }}
+        >
+          {/* Branded header inside the image */}
+          <div className="bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white py-3 px-4 flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gold-500 rounded-full flex items-center justify-center shadow-lg">
+                <img src="/logo.png" alt="Logo" className="w-7 h-7 object-contain" />
+              </div>
+              <div className="hidden sm:block">
+                <p className="text-gold-200 text-xs">Premium Gold & Silver Collection</p>
               </div>
             </div>
+            <div className="text-right">
+              <div className="text-xs font-semibold text-gold-200">
+                {format(currentTime, "EEEE dd-MMM-yyyy")}
+              </div>
+              <div className="text-sm font-bold text-white">{format(currentTime, "HH:mm")}</div>
+            </div>
+          </div>
+
+          {/* Title */}
+          <div className="bg-gradient-to-r from-gold-600 to-gold-700 text-white text-center py-2">
+            <h2 className="font-display font-bold text-xl">TODAY'S SALE RATES</h2>
+          </div>
+
+          {/* Rates only (sale) */}
+          <div className="flex-1 p-4 space-y-3">
+            <RateCard title="24K GOLD (Per 10 gms)" value={currentRates.gold_24k_sale} rateSize={theme.rateSize} />
+            <RateCard title="22K GOLD (Per 10 gms)" value={currentRates.gold_22k_sale} rateSize={theme.rateSize} />
+            <RateCard title="18K GOLD (Per 10 gms)" value={currentRates.gold_18k_sale} rateSize={theme.rateSize} />
+            <RateCard title="SILVER (Per KG)" value={currentRates.silver_per_kg_sale} rateSize={theme.rateSize} />
+          </div>
+
+          {/* Footer note */}
+          <div className="text-center text-[10px] text-gray-600 pb-2">
+            Prices subject to market changes • {format(currentTime, "dd MMM yyyy")}
           </div>
         </div>
-
-        {/* Spacer to ensure content doesn’t collide with sticky action bar */}
-        <div className="h-20 md:h-0" />
-
-        {/* Preview (9:16) */}
-        {imageUrl && (
-          <div className="text-center mt-4 mb-4">
-            <p className="text-xs text-gray-600 mb-2">Preview (9:16)</p>
-            <div className="mx-auto w-full" style={{ maxWidth: 360 }}>
-              <div
-                className="relative w-full rounded-lg border overflow-hidden"
-                style={{ paddingTop: `${(16 / 9) * 100}%` }}
-              >
-                <div
-                  className="absolute inset-0 bg-black/2"
-                  style={{
-                    backgroundImage: `url(${imageUrl})`,
-                    backgroundSize: "contain",
-                    backgroundPosition: "center",
-                    backgroundRepeat: "no-repeat",
-                  }}
-                />
-              </div>
-            </div>
-            <div className="mt-2 flex items-center justify-center gap-2">
-              <Button
-                variant="outline"
-                className="border-black/20"
-                onClick={() => imageUrl && window.open(imageUrl, "_blank")}
-              >
-                Open Fullscreen Preview
-              </Button>
-              {imageBlob && (
-                <Button
-                  variant="outline"
-                  className="border-black/20"
-                  onClick={() => saveBlobToGallery(imageBlob, FILENAME, imageUrl!)}
-                >
-                  Save to Gallery
-                </Button>
-              )}
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Sticky Action Bar - stays above any overlapping content */}
+      {/* Bottom action bar - fixed height, no page scroll */}
       <div
-        className="sticky bottom-0 z-40 w-full border-t"
+        className="shrink-0 w-full border-t"
         style={{ backgroundColor: theme.background, borderColor: "rgba(0,0,0,0.1)" }}
       >
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-center gap-3">
