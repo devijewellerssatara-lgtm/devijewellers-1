@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { Tv, Smartphone, Settings, Images, Megaphone, Menu } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface NavItem {
   path: string;
@@ -114,14 +113,7 @@ function DrawerContents() {
 }
 
 export function Navigation() {
-  const isMobile = useIsMobile();
-
-  // Only render the hamburger + drawer on mobile screens.
-  if (!isMobile) {
-    return null;
-  }
-
-  // Render a floating hamburger button at the top-left and the sidebar drawer itself (mobile only).
+  // Render a floating hamburger button at the top-left and the sidebar drawer itself on all pages/devices.
   return (
     <SidebarProvider>
       {/* Hamburger trigger fixed at top-left with subtle shadow for visibility */}
@@ -131,7 +123,7 @@ export function Navigation() {
         </SidebarTrigger>
       </div>
 
-      {/* Left sidebar drawer (mobile uses overlay/backdrop via Sheet) */}
+      {/* Left sidebar (mobile uses overlay/backdrop via Sheet; desktop uses offcanvas behavior) */}
       <Sidebar side="left" variant="sidebar" collapsible="offcanvas" className="bg-white border-r">
         <DrawerContents />
       </Sidebar>
