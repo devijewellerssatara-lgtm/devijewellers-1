@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { Tv, Smartphone, Settings, Images, Megaphone, Menu } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface NavItem {
   path: string;
@@ -113,13 +114,21 @@ function DrawerContents() {
 }
 
 export function Navigation() {
-  // Render a floating hamburger button at the top-left and the sidebar drawer itself.
+  const isMobile = useIsMobile();
+  const [location] = useLocation();
+
+  // Only render the hamburger + drawer on mobile screens and not on the TV Display route.
+  if (!isMobile || location === "/") {
+    return null;
+  }
+
+  // Render a floating hamburger button at the top-left and the sidebar drawer itself (mobile only).
   return (
     <SidebarProvider>
       {/* Hamburger trigger fixed at top-left with subtle shadow for visibility */}
       <div className="fixed top-3 left-3 z-50">
         <SidebarTrigger className="h-10 w-10 rounded-md bg-white shadow-md hover:bg-gold-50 text-jewelry-primary" aria-label="Open navigation">
-          {React.createElement(menuIcon)}
+          <Menu className="h-5 w-5" />
         </SidebarTrigger>
       </div>
 
