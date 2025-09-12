@@ -1,44 +1,132 @@
+import * as React from "react";
 import { Link, useLocation } from "wouter";
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarTrigger,
+  useSidebar,
+} from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { Tv, Smartphone, Settings, Images, Megaphone, Menu } from "lucide-react";
 
 interface NavItem {
   path: string;
   label: string;
-  icon: string;
+  icon: React.ReactNode;
 }
 
 const navItems: NavItem[] = [
-  { path: "/", label: "TV Display", icon: "fas fa-tv" },
-  { path: "/mobile", label: "Mobile Control", icon: "fas fa-mobile-alt" },
-  { path: "/admin", label: "Admin Dashboard", icon: "fas fa-cog" },
-  { path: "/media", label: "Media Manager", icon: "fas fa-images" },
-  { path: "/promo", label: "Promo Manager", icon: "fas fa-bullhorn" }
+  { path: "/", label: "TV Display", icon: <Tv className="h-4 w-4" /> },
+  { path: "/mobile", label: "Mobile Control", icon: <Smartphone className="h-4 w-4" /> },
+  { path: "/admin", label: "Admin Dashboard", icon: <Settings className="h-4 w-4" /> },
+  { path: "/media", label: "Media Manager", icon: <Images className="h-4 w-4" /> },
+  { path: "/promo", label: "Promo Manager", icon: <Megaphone className="h-4 w-4" /> },
 ];
 
-export function Navigation() {
+// A small helper to close the sidebar on route change and on mobile interactions.
+function useAutoCloseOnRoute() {
+  const [location] = useLocation();
+  const { setOpenMobile, openMobile } = useSidebar();
+
+  React.useEffect(() => {
+    if (openMobile) {
+      // Close the mobile drawer when the route changes.
+      setOpenMobile(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location]);
+}
+
+// Close after 3 seconds of inactivity when the mobile sidebar is open.
+function useAutoHideOnInactivity() {
+  const { openMobile, setOpenMobile } = useSidebar();
+
+  React.useEffect(() => {
+    if (!openMobile) return;
+
+    let timer: number | undefined;
+
+    const reset = () => {
+      if (timer) window.clearTimeout(timer);
+      timer = window.setTimeout(() => setOpenMobile(false), 3000);
+    };
+
+    reset();
+
+    const events = ["mousemove", "mousedown", "keydown", "touchstart", "scroll"];
+    events.forEach((evt) => window.addEventListener(evt, reset, { passive: true }));
+
+    return () => {
+      if (timer) window.clearTimeout(timer);
+      events.forEach((evt) => window.removeEventListener(evt, reset as EventListener));
+    };
+  }, [openMobile, setOpenMobile]);
+}
+
+function DrawerContents() {
+  useAutoCloseOnRoute();
+  useAutoHideOnInactivity();
+
   const [location] = useLocation();
 
   return (
-    <div className="bg-white shadow-lg sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto">
-        <nav className="flex overflow-x-auto">
-          {navItems.map((item) => (
-            <Link key={item.path} href={item.path}>
-              <button
-                className={cn(
-                  "flex-shrink-0 px-6 py-4 text-center border-b-2 transition-colors",
-                  location === item.path
-                    ? "border-gold-500 bg-gold-50 text-jewelry-primary font-semibold"
-                    : "border-transparent hover:border-gold-300 text-gray-600 hover:text-jewelry-primary"
-                )}
-              >
-                <i className={`${item.icon} mr-2`}></i>
-                {item.label}
-              </button>
-            </Link>
-          ))}
-        </nav>
+    <SidebarContent className="bg-white">
+      <SidebarHeader className="px-4 py-3 border-b">
+        <div className="text-base font-semibold text-jewelry-primary">Menu</div>
+        <div className="text-xs text-gray-500">Navigate between sections</div>
+      </SidebarHeader>
+      <nav className="p-2">
+        <SidebarMenu>
+          {navItems.map((item) => {
+            const active = location === item.path;
+            return (
+              <SidebarMenuItem key={item.path}>
+                <Link href={item.path}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={active}
+                    className={cn(
+                      "transition-colors",
+                      active
+                        ? "bg-gold-50 text-jewelry-primary"
+                        : "text-gray-700 hover:text-jewelry-primary"
+                    )}
+                  >
+                    <a>
+                      <span className="mr-2 inline-flex items-center">{item.icon}</span>
+                      <span>{item.label}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </Link>
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
+      </nav>
+    </SidebarContent>
+  );
+}
+
+export function Navigation() {
+  // Render a floating hamburger button at the top-left and the sidebar drawer itself.
+  return (
+    <SidebarProvider>
+      {/* Hamburger trigger fixed at top-left with subtle shadow for visibility */}
+      <div className="fixed top-3 left-3 z-50">
+        <SidebarTrigger className="h-10 w-10 rounded-md bg-white shadow-md hover:bg-gold-50 text-jewelry-primary" aria-label="Open navigation">
+          {React.createElement(menuIcon)}
+        </SidebarTrigger>
       </div>
-    </div>
+
+      {/* Left sidebar drawer (mobile uses overlay/backdrop via Sheet) */}
+      <Sidebar side="left" variant="sidebar" collapsible="offcanvas" className="bg-white border-r">
+        <DrawerContents />
+      </Sidebar>
+    </SidebarProvider>
   );
 }
