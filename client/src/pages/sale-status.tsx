@@ -47,8 +47,8 @@
         };
     }, [settings]);
 
-    // Explicit canvas size (width x height). Height adjusted as requested.
-  const CAPTURE_WIDTH = 720; // px
+    // Explicit canvas size (width x height). Increased width to better fit screens.
+  const CAPTURE_WIDTH = 1080; // px
   const CAPTURE_HEIGHT = 1060; // px
   const FILENAME = `rates-status-${format(getIndianTime(), "yyyyMMdd-HHmm")}.png`;
 
