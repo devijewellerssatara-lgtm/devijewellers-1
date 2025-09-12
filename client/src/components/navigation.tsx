@@ -24,8 +24,7 @@ export function Navigation() {
   // Close drawer on route change
   useEffect(() => {
     if (open) setOpen(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location]);
+  }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Manage inactivity auto-close when open
   useEffect(() => {
@@ -40,7 +39,7 @@ export function Navigation() {
       clearTimer();
       inactivityTimer.current = window.setTimeout(() => {
         setOpen(false);
-      }, 3000); // 3 seconds
+      }, 3000);
     }
 
     function resetTimer() {
@@ -56,7 +55,9 @@ export function Navigation() {
         "keydown",
         "click",
       ];
-      events.forEach((evt) => document.addEventListener(evt, resetTimer, { passive: true }));
+      events.forEach((evt) =>
+        document.addEventListener(evt, resetTimer, { passive: true })
+      );
       return () => {
         clearTimer();
         events.forEach((evt) =>
@@ -68,31 +69,23 @@ export function Navigation() {
     }
   }, [open]);
 
-  const navItemsLimited = navItems.slice(0, 3);
-
   return (
     <>
-      {/* Top bar with hamburger */}
-     <<div className="fixed top-2 left-2 z-50">
-       <lbutton
+      {/* Floating hamburger button */}
+      <div className="fixed top-2 left-2 z-50">
+        <button
           aria-label="Open menu"
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
           className={cn(
-            "inline-flex items-center justify((v) => !v)}
-            className={cn(
-              "inline-flex items-center justify-center rounded-md",
-              "text-jewelry-primary hover:text-jewelry-primary/80",
-              "focus:outline-none focus:ring-2 focus:ring-gold-400",
-              "h-10 w-10"
-            )}
-          >
-            <i className="fas fa-bars text-xl" />
-          </button>
-          <div className="ml-3 text-jewelry-primary font-semibold">
-            Menu
-          </div>
-        </div>
+            "inline-flex items-center justify-center rounded-md",
+            "text-jewelry-primary hover:text-jewelry-primary/80",
+            "focus:outline-none focus:ring-2 focus:ring-gold-400",
+            "h-10 w-10"
+          )}
+        >
+          <i className="fas fa-bars text-xl" />
+        </button>
       </div>
 
       {/* Backdrop */}
@@ -130,7 +123,7 @@ export function Navigation() {
         </div>
 
         <nav className="py-2">
-          {navItemsLimited.map((item) => {
+          {navItems.map((item) => {
             const active = location === item.path;
             return (
               <Link key={item.path} href={item.path}>
