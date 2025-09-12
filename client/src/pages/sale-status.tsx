@@ -13,6 +13,7 @@ export default function SaleStatus() {
 
   const [currentTime, setCurrentTime] = useState<Date>(getIndianTime());
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [isWorking, setIsWorking] = useState<"idle" | "saving" | "sharing">("idle");
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(getIndianTime()), 1000);
@@ -59,10 +60,7 @@ export default function SaleStatus() {
       cacheBust: true,
       pixelRatio: 2,
       backgroundColor: theme.background,
-      // Filter can help avoid capturing control buttons etc. (not used here but kept for clarity)
-      filter: (n) => true,
       style: {
-        // Avoid sticky/transform issues on Android
         transform: "none",
       },
     });
@@ -75,6 +73,7 @@ export default function SaleStatus() {
 
   const handleSaveImage = async () => {
     try {
+      setIsWorking("saving");
       const generated = await generateImage();
       if (!generated) throw new Error("Failed to render image");
 
@@ -92,21 +91,25 @@ export default function SaleStatus() {
       } catch {}
     } catch (e) {
       console.error("Failed to export image", e);
-      alert("Failed to save image. On Android, long-press the opened image to Save/Share.");
+      alert("Failed to save image. On Android, please ensure you're using Chrome or a modern browser.");
+    } finally {
+      setIsWorking("idle");
     }
   };
 
-  // Share to WhatsApp via Web Share API with image if available, otherwise open image for manual share
+  // Share to WhatsApp via Web Share API with image if available
   const handleShareWhatsApp = async () => {
     try {
+      setIsWorking("sharing");
       const existing = imageUrl ? null : await generateImage();
-      const blobUrl = imageUrl || existing?.url;
+      const blob = existing?.blob;
 
       // Prefer direct Web Share with file if supported
-      // Note: Some Android browsers need a File, not just Blob URL
-      if (!imageUrl && existing?.blob && "canShare" in navigator && "share" in navigator) {
+      // Requires Android Chrome 76+ or iOS Safari 16.4+ for files
+      // @ts-expect-error
+      if (blob && navigator?.canShare && navigator?.share) {
         const file = new File(
-          [existing.blob],
+          [blob],
           `rates-status-${format(currentTime, "yyyyMMdd-HHmm")}.png`,
           { type: "image/png" }
         );
@@ -122,14 +125,17 @@ export default function SaleStatus() {
         }
       }
 
-      // Manual fallback: open image in a new tab so user can long-press -> Share (WhatsApp)
-      if (blobUrl) {
-        window.open(blobUrl, "_blank");
-        alert("Image opened. Long-press and choose Share to send on WhatsApp.");
+      // If file sharing is not supported, try text-only share as automatic fallback
+      if ("share" in navigator) {
+        // @ts-expect-error
+        await navigator.share({
+          text: buildTextSummary(currentRates, currentTime),
+          title: "Today's Sale Rates",
+        });
         return;
       }
 
-      // Last resort: text share link
+      // Last resort open WhatsApp text share link
       const url = `https://wa.me/?text=${encodeURIComponent(
         buildTextSummary(currentRates, currentTime)
       )}`;
@@ -140,6 +146,8 @@ export default function SaleStatus() {
         buildTextSummary(currentRates, currentTime)
       )}`;
       window.open(url, "_blank");
+    } finally {
+      setIsWorking("idle");
     }
   };
 
@@ -257,20 +265,20 @@ export default function SaleStatus() {
 
         {/* Actions */}
         <div className="flex items-center justify-center gap-3 mt-5">
-          <Button onClick={handleSaveImage} className="bg-jewelry-primary text-white">
+          <Button onClick={handleSaveImage} className="bg-jewelry-primary text-white" disabled={isWorking !== "idle"}>
             <i className="fas fa-download mr-2"></i>
-            Save Image (9:16)
+            {isWorking === "saving" ? "Saving..." : "Save Image (9:16)"}
           </Button>
-          <Button onClick={handleShareWhatsApp} className="bg-green-600 hover:bg-green-700 text-white">
+          <Button onClick={handleShareWhatsApp} className="bg-green-600 hover:bg-green-700 text-white" disabled={isWorking !== "idle"}>
             <i className="fab fa-whatsapp mr-2"></i>
-            Share on WhatsApp
+            {isWorking === "sharing" ? "Opening Share..." : "Share on WhatsApp"}
           </Button>
         </div>
 
         {/* Preview on mobile if needed */}
         {imageUrl && (
           <div className="text-center mt-4">
-            <p className="text-xs text-gray-600 mb-2">Preview (long-press to save/share on Android):</p>
+            <p className="text-xs text-gray-600 mb-2">Preview (for reference):</p>
             <img
               src={imageUrl}
               alt="Generated status"
