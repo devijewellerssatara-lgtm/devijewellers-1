@@ -74,7 +74,7 @@ export function Navigation() {
     <>
       {/* Top bar with hamburger */}
       <div className="sticky top-0 z-50">
-        <div className="flex items-center bg-white/90 backdrop-blur shadow-md px-3 py-2">
+        <div className="flex items-center bg-transparent px-3 py-2 shadow-none">
           <button
             aria-label="Open menu"
             aria-expanded={open}
@@ -97,7 +97,7 @@ export function Navigation() {
       {/* Backdrop */}
       <div
         className={cn(
-          "fixed inset-0 z-40 bg-black/40 transition-opacity duration-300",
+          "fixed inset-0 z-40 bg-transparent transition-opacity duration-300",
           open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
         onClick={() => setOpen(false)}
@@ -106,7 +106,7 @@ export function Navigation() {
       {/* Drawer */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 h-full w-72 max-w-[85vw] bg-white shadow-2xl",
+          "fixed left-0 top-0 z-50 h-full w-72 max-w-[85vw] bg-transparent shadow-none",
           "transform transition-transform duration-300 ease-out",
           open ? "translate-x-0" : "-translate-x-full"
         )}
@@ -137,8 +137,8 @@ export function Navigation() {
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 transition-colors",
                     active
-                      ? "bg-gold-50 text-jewelry-primary font-semibold"
-                      : "text-gray-700 hover:bg-gray-50"
+                      ? "text-jewelry-primary font-semibold"
+                      : "text-gray-700 hover:text-jewelry-primary"
                   )}
                 >
                   <i className={cn(item.icon, "w-5 text-base")} />
