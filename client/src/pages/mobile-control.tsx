@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { ratesApi, settingsApi } from "@/lib/api";
 import { queryClient } from "@/lib/queryClient";
-import { insertGoldRateSchema } from "@/shared/schema";
+import { insertGoldRateSchema } from "@shared/schema";
 
 // Create a custom schema that converts strings to numbers
 const goldRateFormSchema = insertGoldRateSchema.extend({
