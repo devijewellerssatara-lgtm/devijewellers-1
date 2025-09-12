@@ -27,6 +27,23 @@ const goldRateFormSchema = insertGoldRateSchema.extend({
 export default function MobileControl() {
   const { toast } = useToast();
 
+  const formatToIST = (value: string | number | Date) => {
+    try {
+      return new Intl.DateTimeFormat(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+        timeZone: "Asia/Kolkata",
+      }).format(new Date(value));
+    } catch {
+      return "";
+    }
+  };
+
   // Get current rates
   const { data: currentRates, isLoading } = useQuery({
     queryKey: ["/api/rates/current"],
@@ -139,7 +156,7 @@ export default function MobileControl() {
                 <h3 className="font-semibold" style={{ color: textColor }}>Last Updated</h3>
                 <p className="text-sm opacity-80" style={{ color: textColor }}>
                   {currentRates?.created_date 
-                    ? new Date(currentRates.created_date).toLocaleString()
+                    ? formatToIST(currentRates.created_date)
                     : "Never"
                   }
                 </p>
