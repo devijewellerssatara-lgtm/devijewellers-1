@@ -91,14 +91,32 @@ export function Navigation() {
   const [open, setOpen] = React.useState(false);
 
   // A trigger that hides itself when the mobile drawer is open to prevent accidental immediate close.
-  function MobileAwareTrigger() {
-    const { isMobile, openMobile } = useSidebar();
+  function MobileAwareTrigger({ setDesktopOpen }: { setDesktopOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
+    const { isMobile, openMobile, setOpenMobile } = useSidebar();
     const hidden = isMobile && openMobile;
+
+    const handleClick = (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (isMobile) {
+        // Open explicitly on mobile to avoid double-toggle close.
+        setOpenMobile(true);
+      } else {
+        // Toggle on desktop.
+        setDesktopOpen((v) => !v);
+      }
+    };
+
     return (
       <div className={cn("fixed top-3 left-3 z-[51] pointer-events-auto transition-opacity", hidden ? "opacity-0 pointer-events-none" : "opacity-100")}>
-        <SidebarTrigger className="h-10 w-10 rounded-md bg-white shadow-md hover:bg-gold-50 text-jewelry-primary" aria-label="Toggle navigation">
+        <button
+          type="button"
+          onClick={handleClick}
+          className="h-10 w-10 inline-flex items-center justify-center rounded-md bg-white shadow-md hover:bg-gold-50 text-jewelry-primary"
+          aria-label="Toggle navigation"
+        >
           <Menu className="h-5 w-5" />
-        </SidebarTrigger>
+        </button>
       </div>
     );
   }
@@ -107,7 +125,7 @@ export function Navigation() {
   return (
     <SidebarProvider open={open} onOpenChange={setOpen} className="fixed inset-0 pointer-events-none z-50">
       {/* Hamburger trigger fixed at top-left with subtle shadow for visibility */}
-      <MobileAwareTrigger />
+      <MobileAwareTrigger setDesktopOpen={setOpen} />
 
       {/* Left sidebar (mobile uses overlay/backdrop via Sheet; desktop uses offcanvas behavior) */}
       <Sidebar side="left" variant="sidebar" collapsible="offcanvas" className="bg-white border-r pointer-events-auto">
