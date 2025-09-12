@@ -156,9 +156,10 @@ export default function MobileControl() {
                 <h3 className="font-semibold" style={{ color: textColor }}>Last Updated</h3>
                 <p className="text-sm opacity-80" style={{ color: textColor }}>
                   {currentRates?.created_date 
-                    ? formatToIST(currentRates.created_date)
+                    ? formatLocalTime(currentRates.created_date)
                     : "Never"
-                  }
+               _code  new </}
+              }
                 </p>
               </div>
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
