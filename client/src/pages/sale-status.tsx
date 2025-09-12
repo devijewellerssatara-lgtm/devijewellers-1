@@ -228,35 +228,30 @@ export default function SaleStatus() {
             transform: `scale(${scale})`,
           }}
         >
-          {/* Branded header inside the image */}
+          {/* Branded header inside the image (logo only, no round bg or tagline) */}
           <div className="bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white py-3 px-4 flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gold-500 rounded-full flex items-center justify-center shadow-lg">
-                <img src="/logo.png" alt="Logo" className="w-7 h-7 object-contain" />
-              </div>
-              <div className="hidden sm:block">
-                <p className="text-gold-200 text-xs">Premium Gold & Silver Collection</p>
-              </div>
+            <div className="flex items-center">
+              <img src="/logo.png" alt="Logo" className="h-10 w-auto object-contain" />
             </div>
             <div className="text-right">
-              <div className="text-xs font-semibold text-gold-200">
+              <div className="text-sm font-semibold text-gold-200">
                 {format(currentTime, "EEEE dd-MMM-yyyy")}
               </div>
-              <div className="text-sm font-bold text-white">{format(currentTime, "HH:mm")}</div>
+              <div className="text-lg font-extrabold text-white">{format(currentTime, "HH:mm")}</div>
             </div>
           </div>
 
           {/* Title */}
           <div className="bg-gradient-to-r from-gold-600 to-gold-700 text-white text-center py-2">
-            <h2 className="font-display font-bold text-xl">TODAY'S SALE RATES</h2>
+            <h2 className="font-display font-extrabold text-2xl">TODAY'S SALE RATES</h2>
           </div>
 
           {/* Rates only (sale) */}
-          <div className="flex-1 p-4 space-y-3">
-            <RateCard title="24K GOLD (Per 10 gms)" value={currentRates.gold_24k_sale} rateSize={theme.rateSize} />
-            <RateCard title="22K GOLD (Per 10 gms)" value={currentRates.gold_22k_sale} rateSize={theme.rateSize} />
-            <RateCard title="18K GOLD (Per 10 gms)" value={currentRates.gold_18k_sale} rateSize={theme.rateSize} />
-            <RateCard title="SILVER (Per KG)" value={currentRates.silver_per_kg_sale} rateSize={theme.rateSize} />
+          <div className="flex-1 p-4 space-y-4">
+            <RateCard title="24K GOLD (Per 10 gms)" value={currentRates.gold_24k_sale} rateSize={"text-5xl"} />
+            <RateCard title="22K GOLD (Per 10 gms)" value={currentRates.gold_22k_sale} rateSize={"text-5xl"} />
+            <RateCard title="18K GOLD (Per 10 gms)" value={currentRates.gold_18k_sale} rateSize={"text-5xl"} />
+            <RateCard title="SILVER (Per KG)" value={currentRates.silver_per_kg_sale} rateSize={"text-5xl"} />
           </div>
 
           {/* Footer note */}
