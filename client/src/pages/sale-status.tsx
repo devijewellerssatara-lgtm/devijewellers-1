@@ -216,10 +216,10 @@
         </div>
 
         {/* Center stage - no scrolling; capture scaled to fit */}
-        <div ref={stageRef} className="flex-1 flex items-center justify-center overflow-hidden px-2">
+        <div ref={stageRef} className="flex-1 flex items-center justify-center overflow-hidden px-0">
             <div
             ref={captureRef}
-            className="rounded-xl shadow-lg overflow-hidden flex flex-col border border-black/10"
+            className="rounded-none shadow-none overflow-hidden flex flex-col border-0"
             style={{
                 backgroundColor: theme.background,
                 color: theme.text,
@@ -230,7 +230,7 @@
             }}
             >
             {/* Branded header inside the image (logo only, no round bg or tagline) */}
-            <div className="bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white py-4 px-5 flex items-center justify-between">
+            <div className="bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white py-4 px-0 flex items-center justify-between">
                 <div className="flex items-center">
                 <img src="/logo.png" alt="Logo" className="h-12 w-auto object-contain" />
                 </div>
