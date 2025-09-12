@@ -14,6 +14,7 @@ const navItems: NavItem[] = [
   { path: "/admin", label: "Admin Dashboard", icon: "fas fa-cog" },
   { path: "/media", label: "Media Manager", icon: "fas fa-images" },
   { path: "/promo", label: "Promo Manager", icon: "fas fa-bullhorn" },
+  { path: "/sale-status", label: "Sale Status", icon: "fas fa-tags" },
 ];
 
 export function Navigation() {
