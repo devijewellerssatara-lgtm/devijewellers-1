@@ -186,15 +186,15 @@ export default function SaleStatus() {
       style={{ backgroundColor: theme.background, color: theme.text }}
     >
       {/* Mobile Control-like header (full-width banner with logo) */}
-      <div className="bg-gradient-to-r from-gold-600 to-gold-700 text-black p-4 flex justify-center">
+      <div className="bg-gradient-to-r from-gold-600 to-gold-700 text-black p-3 md:p-4 flex justify-center">
         <img
           src="/logo.png"
           alt="Devi Jewellers Logo"
-          className="h-40 w-[350px] object-contain"
+          className="h-24 md:h-40 w-[260px] md:w-[350px] object-contain"
         />
       </div>
 
-      <div className="max-w-5xl mx-auto p-4 md:p-6">
+      <div className="max-w-5xl mx-auto p-4 md:p-6 pb-24">
         {/* Date + Day under the page header */}
         <div className="text-center mb-4">
           <div className="inline-block bg-white/70 backdrop-blur rounded-lg px-4 py-2 shadow-sm">
@@ -206,7 +206,7 @@ export default function SaleStatus() {
         </div>
 
         {/* 9:16 capture area - explicit size for Android reliability */}
-        <div className="mx-auto" style={{ maxWidth: 360 }}>
+        <div className="mx-auto mb-4" style={{ maxWidth: 360 }}>
           {/* Visual scale wrapper so it fits on smaller screens while keeping captureRef explicit px size */}
           <div className="relative w-full" style={{ paddingTop: `${(16 / 9) * 100}%` }}>
             <div className="absolute inset-0 flex items-center justify-center">
