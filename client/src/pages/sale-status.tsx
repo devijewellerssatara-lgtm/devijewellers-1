@@ -90,7 +90,7 @@ export default function SaleStatus() {
     return { blob, url, dataUrl };
   };
 
-  // Save/share image across more Android/iOS variants, including in-app WebViews
+  // Save/share image across Android/iOS browsers and in-app WebViews
   const saveBlobToGallery = async (blob: Blob, filename: string, dataUrl?: string) => {
     try {
       const file = new File([blob], filename, { type: "image/png" });
@@ -103,17 +103,15 @@ export default function SaleStatus() {
         return;
       }
 
-      // 2) iOS Safari often ignores download attribute; prefer opening image directly
-      if (isIOS) {
-        if (dataUrl) {
-          try {
-            window.location.href = dataUrl; // opens image; user can long-press to save
-            return;
-          } catch {}
-        }
+      // 2) iOS Safari: download attribute is ignored; navigate to data URL so user can save
+      if (isIOS && dataUrl) {
+        try {
+          window.location.href = dataUrl;
+          return;
+        } catch {}
       }
 
-      // 3) Anchor download (works in most Android browsers)
+      // 3) Anchor download for full browsers (mostly Android)
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = blobUrl;
@@ -126,7 +124,7 @@ export default function SaleStatus() {
         return;
       }
 
-      // 4) New tab with the image (long-press to save)
+      // 4) New tab with image (long-press to save)
       const newTab = window.open();
       if (newTab) {
         newTab.document.title = filename;
@@ -134,21 +132,35 @@ export default function SaleStatus() {
         img.src = dataUrl || blobUrl;
         img.style.width = "100%";
         img.style.height = "auto";
-        img.style.display = "new FileReader();
+        img.style.display = "block";
+        newTab.document.body.style.margin = "0";
+        newTab.document.body.appendChild(img);
+        return;
+      }
+
+      // 5) Last resort: force navigation to data URL derived from blob
+      const reader = new FileReader();
       reader.onloadend = () => {
-        window.location.href = reader.result as string;
+        try {
+          window.location.href = reader.result as string;
+        } catch {
+          // show inline preview overlay
+          setPreviewUrl((reader.result as string) || dataUrl || blobUrl);
+        }
       };
       reader.readAsDataURL(blob);
+
+      // Also show inline preview overlay as a UX fallback
+      setPreviewUrl(dataUrl || blobUrl);
     } catch (err) {
       console.error("Save image failed", err);
-      // Show inline preview overlay so users can long-press save in restrictive WebViews
+      // Inline preview overlay so users can long-press save in restrictive envs
       try {
         const blobUrl = URL.createObjectURL(blob);
         setPreviewUrl(dataUrl || blobUrl);
       } catch {
         // ignore
       }
-      // Avoid disruptive alerts in in-app browsers; rely on inline preview overlay
     }
   };
 
@@ -298,6 +310,39 @@ export default function SaleStatus() {
           </Button>
         </div>
       </div>
+    {previewUrl && (
+        <div
+          id="preview-overlay"
+          className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4"
+        >
+          <div className="w-full max-w-sm bg-white rounded-xl overflow-hidden shadow-2xl">
+            <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-gray-800">Image Preview</h3>
+              <button
+                onClick={() => setPreviewUrl(null)}
+                className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                aria-label="Close preview"
+              >
+                ×
+              </button>
+            </div>
+            <div className="bg-white">
+              <img src={previewUrl} alt="Preview" className="w-full h-auto block" />
+            </div>
+            <div className="px-4 py-3 text-center text-xs text-gray-600 border-t border-gray-200">
+              Long press the image to Save/Download
+            </div>
+            <div className="px-4 pb-4 flex justify-center">
+              <Button
+                onClick={() => setPreviewUrl(null)}
+                className="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 text-sm font-medium rounded"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -317,6 +362,25 @@ function RateCard({ title, value }: { title: string; value: number | string }) {
           ₹{value}
         </p>
       </div>
-    </div>
-  );
-}
+
+      {previewUrl && (
+       < div
+          id="preview-overlay"
+          className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4"
+        >
+         < div className="w-full max-w-sm bg-white rounded-xl overflow-hidden shadow-2xl">
+           < div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+             < h3 className="text-sm font-semibold text-gray-800">Image Previ</ewh3>
+             < button
+                onClick={() => setPreviewUrl(null)}
+                className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                aria-label="Close preview"
+              >
+                ×
+            </  button>
+          </  div>
+           < div className="bg-white">
+             < img src={previewUrl} alt="Preview" className="w-full h-auto block" />
+          </  div>
+           < div className="px-4 py-3 text-center text-xs text-gray-600 border-t border-gray-200">
+              Long press the image to
