@@ -41,7 +41,7 @@ export default function SaleStatus() {
     };
   }, [settings]);
 
-  const FILENAME = `rates-status-${format(getIndianTime(), "yyyyMMdd-HHmm")}.png`;
+  const FILENAME = `dj_daily_rate-${format(getIndianTime(), "yyyyMMdd")}.png`;
 
   // Generate PNG from the on-screen node to preserve computed layout
   const generateImage = async (): Promise<{ blob: Blob; url: string } | null> => {
@@ -183,7 +183,6 @@ export default function SaleStatus() {
 
   return (
     <div
-      ref={captureRef}
       className="h-screen flex flex-col overflow-hidden"
       style={{ backgroundColor: theme.background, color: theme.text }}
     >
