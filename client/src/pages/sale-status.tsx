@@ -111,15 +111,7 @@ export default function SaleStatus() {
         return;
       }
 
-      // 3) If we have a dataUrl, navigate directly (common WebView pattern)
-      if (dataUrl) {
-        try {
-          window.location.href = dataUrl;
-          return;
-        } catch {}
-      }
-
-      // 4) Try opening a new tab/window with the image (may be blocked in some WebViews)
+      // Fallback 2: open in a new tab so users can long-press and save
       const newTab = window.open();
       if (newTab) {
         newTab.document.title = filename;
@@ -133,7 +125,7 @@ export default function SaleStatus() {
         return;
       }
 
-      // 5) Last resort: force navigation to data URL derived from the blob
+      // Fallback 3: force navigation to data URL (older WebViews)
       const reader = new FileReader();
       reader.onloadend = () => {
         window.location.href = reader.result as string;
@@ -160,7 +152,7 @@ export default function SaleStatus() {
       await saveBlobToGallery(generated.blob, FILENAME, generated.dataUrl);
     } catch (e) {
       console.error("Failed to save image", e);
-      // Avoid disruptive alerts; rely on inline preview overlay for restrictive WebViews
+      // Inline preview overlay will appear in restrictive WebViews to allow long-press save
     } finally {
       setIsWorking("idle");
     }
