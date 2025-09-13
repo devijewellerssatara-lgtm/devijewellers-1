@@ -345,13 +345,12 @@ export default function SaleStatus() {
       )}
     </div>
   );
-}
-
+}>
 // Rate Card Component
 function RateCard({ title, value }: { title: string; value: number | string }) {
   return (
-    <div className="flex-1 bg-white w-full border border-gray-200 flex flex-col shadow-lg rounded-lg">
-      <div className="flex items-center justify-between w-full px-3 py-2">
+   <<div className="flex-1 bg-white w-full border border-gray-200 flex flex-col shadow-lg rounded-lg">
+     <<div className="flex items-center justify-between w-full px-3 py-2">
         <h4 className="text-sm md:text-xl font-semibold text-gray-900">{title}</h4>
         <div className="w-8 h-8 md:w-12 md:h-12 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center shadow-md">
           <i className="fas fa-rupee-sign text-white text-sm md:text-base"></i>
