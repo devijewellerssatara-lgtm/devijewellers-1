@@ -14,6 +14,7 @@ export default function SaleStatus() {
   const [currentTime, setCurrentTime] = useState<Date>(getIndianTime());
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const [isWorking, setIsWorking] = useState<"idle" | "saving" | "sharing">("idle");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const captureRef = useRef<HTMLDivElement>(null);
 
@@ -44,7 +45,7 @@ export default function SaleStatus() {
   const FILENAME = `dj_daily_rate-${format(getIndianTime(), "yyyyMMdd")}.png`;
 
   // Generate PNG from the on-screen node to preserve computed layout
-  const generateImage = async (): Promise<{ blob: Blob; url: string } | null> => {
+  const generateImage = async (): Promise<{ blob: Blob; url: string; dataUrl: string } | null> => {
     if (!captureRef.current) return null;
 
     const node = captureRef.current;
@@ -65,6 +66,8 @@ export default function SaleStatus() {
       style: {
         transform: "none",
       },
+      // Exclude footer (buttons) from the captured image
+      filter: (n: HTMLElement) => !n.closest?.("#action-footer"),
     };
     // Explicitly specify canvas dimensions for some WebViews
     options.canvasWidth = width * 2;
@@ -77,15 +80,16 @@ export default function SaleStatus() {
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     setImageBlob(blob);
-    return { blob, url };
+    setPreviewUrl(dataUrl);
+    return { blob, url, dataUrl };
   };
 
-  // Save/share image across more Android/iOS variants
-  const saveBlobToGallery = async (blob: Blob, filename: string) => {
+  // Save/share image across more Android/iOS variants, including in-app WebViews
+  const saveBlobToGallery = async (blob: Blob, filename: string, dataUrl?: string) => {
     try {
       const file = new File([blob], filename, { type: "image/png" });
 
-      // Prefer native share if available (covers many Android versions, Samsung Internet, some WebViews)
+      // 1) Prefer native share if available (covers many Android versions, Samsung Internet, some WebViews)
       // @ts-expect-error
       if (navigator?.canShare && navigator.canShare({ files: [file] })) {
         // @ts-expect-error
@@ -93,14 +97,12 @@ export default function SaleStatus() {
         return;
       }
 
-      // Fallback 1: anchor download (supported on most modern Android browsers)
+      // 2) Anchor download (works in real browsers; not supported by most in-app WebViews)
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = blobUrl;
       if ("download" in a) {
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
+        a.downloada.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(blobUrl);
         return;
@@ -137,10 +139,10 @@ export default function SaleStatus() {
       setIsWorking("saving");
       const generated = await generateImage();
       if (!generated) throw new Error("Failed to render image");
-      await saveBlobToGallery(generated.blob, FILENAME);
+      await saveBlobToGallery(generated.blob, FILENAME, generated.dataUrl);
     } catch (e) {
       console.error("Failed to save image", e);
-      alert("Saving failed. Please try Chrome/Edge on Android or Safari on iOS.");
+      alert("Saving failed. If you are inside an app, long-press the preview image to save.");
     } finally {
       setIsWorking("idle");
     }
@@ -183,6 +185,7 @@ export default function SaleStatus() {
 
   return (
     <div
+      ref={captureRef}
       className="h-screen flex flex-col overflow-hidden"
       style={{ backgroundColor: theme.background, color: theme.text }}
     >
@@ -228,6 +231,7 @@ export default function SaleStatus() {
 
       {/* Footer */}
       <div
+        id="action-footer"
         className="shrink-0 w-full border-t shadow-inner"
         style={{ backgroundColor: theme.background, borderColor: "rgba(0,0,0,0.1)" }}
       >
@@ -238,7 +242,7 @@ export default function SaleStatus() {
             disabled={isWorking !== "idle"}
           >
             <i className="fas fa-download mr-2"></i>
-            {isWorking === "saving" ? "Saving..." : "Save Image (9:16)"}
+            {isWorking === "saving" ? "Saving..." : "Save Image"}
           </Button>
           <Button
             onClick={handleShareWhatsApp}
