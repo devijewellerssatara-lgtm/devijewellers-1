@@ -41,8 +41,6 @@ export default function SaleStatus() {
     };
   }, [settings]);
 
-  const CAPTURE_WIDTH = 900;
-  const CAPTURE_HEIGHT = 1060;
   const FILENAME = `rates-status-${format(getIndianTime(), "yyyyMMdd-HHmm")}.png`;
 
   // Generate PNG safely using clone
