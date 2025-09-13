@@ -75,17 +75,56 @@ export default function SaleStatus() {
     return { blob, url };
   };
 
-  // Save as download (works on mobile)
+  // Save/share image across more Android/iOS variants
   const saveBlobToGallery = async (blob: Blob, filename: string) => {
-    const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = blobUrl;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(blobUrl);
-    alert("✅ Image saved! Check your Downloads folder.");
+    try {
+      const file = new File([blob], filename, { type: "image/png" });
+
+      // Prefer native share if available (covers many Android versions, Samsung Internet, some WebViews)
+      // @ts-expect-error
+      if (navigator?.canShare && navigator.canShare({ files: [file] })) {
+        // @ts-expect-error
+        await navigator.share({ files: [file], title: "Today's Sale Rates" });
+        return;
+      }
+
+      // Fallback 1: anchor download (supported on most modern Android browsers)
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      if ("download" in a) {
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+        return;
+      }
+
+      // Fallback 2: open in a new tab so users can long-press and save
+      const newTab = window.open();
+      if (newTab) {
+        newTab.document.title = filename;
+        const img = newTab.document.createElement("img");
+        img.src = blobUrl;
+        img.style.width = "100%";
+        img.style.height = "auto";
+        img.style.display = "block";
+        newTab.document.body.style.margin = "0";
+        newTab.document.body.appendChild(img);
+        return;
+      }
+
+      // Fallback 3: force navigation to data URL (older WebViews)
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        window.location.href = reader.result as string;
+      };
+      reader.readAsDataURL(blob);
+    } catch (err) {
+      console.error("Save image failed", err);
+      alert("Saving failed on this browser. Try using the Share button or a different browser.");
+    }
   };
 
   const handleSaveImage = async () => {
