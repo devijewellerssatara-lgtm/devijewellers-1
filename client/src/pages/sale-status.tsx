@@ -43,31 +43,38 @@ export default function SaleStatus() {
 
   const FILENAME = `rates-status-${format(getIndianTime(), "yyyyMMdd-HHmm")}.png`;
 
-  // Generate PNG safely using clone
+  // Generate PNG from the on-screen node to preserve computed layout
   const generateImage = async (): Promise<{ blob: Blob; url: string } | null> => {
     if (!captureRef.current) return null;
 
-    const node = captureRef.current.cloneNode(true) as HTMLElement;
+    const node = captureRef.current;
 
-    // Hidden container
-    node.style.position = "fixed";
-    node.style.left = "-9999px";
-    node.style.top = "-9999px";
-    node.style.width = `${CAPTURE_WIDTH}px`;
-    node.style.height = `${CAPTURE_HEIGHT}px`;
-    document.body.appendChild(node);
+    const { toPng } = await import("html-to-image");
 
-    const { toBlob } = await import("html-to-image");
-    const blob = await toBlob(node, {
+    // Use actual rendered size to avoid blank outputs on some Android browsers
+    const rect = node.getBoundingClientRect();
+    const width = Math.max(1, Math.ceil(rect.width));
+    const height = Math.max(1, Math.ceil(rect.height));
+
+    const options: any = {
       cacheBust: true,
       pixelRatio: 2,
       backgroundColor: theme.background,
-      style: { transform: "none" },
-    });
+      width,
+      height,
+      style: {
+        transform: "none",
+      },
+    };
+    // Explicitly specify canvas dimensions for some WebViews
+    options.canvasWidth = width * 2;
+    options.canvasHeight = height * 2;
 
-    document.body.removeChild(node);
+    const dataUrl = await toPng(node, options);
 
-    if (!blob) return null;
+    // Convert data URL to Blob for saving/sharing
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     setImageBlob(blob);
     return { blob, url };
@@ -176,6 +183,7 @@ export default function SaleStatus() {
 
   return (
     <div
+      ref={captureRef}
       className="h-screen flex flex-col overflow-hidden"
       style={{ backgroundColor: theme.background, color: theme.text }}
     >
@@ -189,7 +197,7 @@ export default function SaleStatus() {
       </div>
 
       {/* Capture Area */}
-      <div ref={captureRef} className="flex-1 flex flex-col w-full">
+      <div className="flex-1 flex flex-col w-full">
         {/* Top bar */}
         <div className="bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white py-3 px-4 flex items-center justify-between shadow-md">
           <img src="/logo.png" alt="Logo" className="h-10 md:h-12 w-auto object-contain" />
