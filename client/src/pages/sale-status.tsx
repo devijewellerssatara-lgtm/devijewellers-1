@@ -66,8 +66,9 @@ export default function SaleStatus() {
       style: {
         transform: "none",
       },
-      // Exclude footer (buttons) from the captured image
-      filter: (n: HTMLElement) => !n.closest?.("#action-footer"),
+      // Exclude footer (buttons) and preview overlay from the captured image
+      filter: (n: HTMLElement) =>
+        !n.closest?.("#action-footer") && !n.closest?.("#preview-overlay"),
     };
     // Explicitly specify canvas dimensions for some WebViews
     options.canvasWidth = width * 2;
@@ -110,7 +111,15 @@ export default function SaleStatus() {
         return;
       }
 
-      // Fallback 2: open in a new tab so users can long-press and save
+      // 3) If we have a dataUrl, navigate directly (common WebView pattern)
+      if (dataUrl) {
+        try {
+          window.location.href = dataUrl;
+          return;
+        } catch {}
+      }
+
+      // 4) Try opening a new tab/window with the image (may be blocked in some WebViews)
       const newTab = window.open();
       if (newTab) {
         newTab.document.title = filename;
@@ -124,7 +133,7 @@ export default function SaleStatus() {
         return;
       }
 
-      // Fallback 3: force navigation to data URL (older WebViews)
+      // 5) Last resort: force navigation to data URL derived from the blob
       const reader = new FileReader();
       reader.onloadend = () => {
         window.location.href = reader.result as string;
