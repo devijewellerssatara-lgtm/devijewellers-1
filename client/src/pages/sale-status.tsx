@@ -102,7 +102,9 @@ export default function SaleStatus() {
       const a = document.createElement("a");
       a.href = blobUrl;
       if ("download" in a) {
-        a.downloada.click();
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(blobUrl);
         return;
@@ -130,7 +132,14 @@ export default function SaleStatus() {
       reader.readAsDataURL(blob);
     } catch (err) {
       console.error("Save image failed", err);
-      alert("Saving failed on this browser. Try using the Share button or a different browser.");
+      // Show inline preview overlay so users can long-press save in restrictive WebViews
+      try {
+        const blobUrl = URL.createObjectURL(blob);
+        setPreviewUrl(dataUrl || blobUrl);
+      } catch {
+        // ignore
+      }
+      // Avoid disruptive alerts in in-app browsers; rely on inline preview overlay
     }
   };
 
@@ -142,7 +151,7 @@ export default function SaleStatus() {
       await saveBlobToGallery(generated.blob, FILENAME, generated.dataUrl);
     } catch (e) {
       console.error("Failed to save image", e);
-      alert("Saving failed. If you are inside an app, long-press the preview image to save.");
+      // Avoid disruptive alerts; rely on inline preview overlay for restrictive WebViews
     } finally {
       setIsWorking("idle");
     }
