@@ -16,6 +16,11 @@ export default function SaleStatus() {
   const [isWorking, setIsWorking] = useState<"idle" | "saving" | "sharing">("idle");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
+  const isIOS = useMemo(() => {
+    if (typeof navigator === "undefined") return false;
+    return /iPad|iPhone|iPod/.test(navigator.userAgent);
+  }, []);
+
   const captureRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -90,7 +95,7 @@ export default function SaleStatus() {
     try {
       const file = new File([blob], filename, { type: "image/png" });
 
-      // 1) Prefer native share if available (covers many Android versions, Samsung Internet, some WebViews)
+      // 1) Prefer native share with files where supported
       // @ts-expect-error
       if (navigator?.canShare && navigator.canShare({ files: [file] })) {
         // @ts-expect-error
@@ -98,11 +103,21 @@ export default function SaleStatus() {
         return;
       }
 
-      // 2) Anchor download (works in real browsers; not supported by most in-app WebViews)
+      // 2) iOS Safari often ignores download attribute; prefer opening image directly
+      if (isIOS) {
+        if (dataUrl) {
+          try {
+            window.location.href = dataUrl; // opens image; user can long-press to save
+            return;
+          } catch {}
+        }
+      }
+
+      // 3) Anchor download (works in most Android browsers)
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = blobUrl;
-      if ("download" in a) {
+      if ("download" in a && !isIOS) {
         a.download = filename;
         document.body.appendChild(a);
         a.click();
@@ -111,22 +126,15 @@ export default function SaleStatus() {
         return;
       }
 
-      // Fallback 2: open in a new tab so users can long-press and save
+      // 4) New tab with the image (long-press to save)
       const newTab = window.open();
       if (newTab) {
         newTab.document.title = filename;
         const img = newTab.document.createElement("img");
-        img.src = blobUrl;
+        img.src = dataUrl || blobUrl;
         img.style.width = "100%";
         img.style.height = "auto";
-        img.style.display = "block";
-        newTab.document.body.style.margin = "0";
-        newTab.document.body.appendChild(img);
-        return;
-      }
-
-      // Fallback 3: force navigation to data URL (older WebViews)
-      const reader = new FileReader();
+        img.style.display = "new FileReader();
       reader.onloadend = () => {
         window.location.href = reader.result as string;
       };
@@ -152,7 +160,7 @@ export default function SaleStatus() {
       await saveBlobToGallery(generated.blob, FILENAME, generated.dataUrl);
     } catch (e) {
       console.error("Failed to save image", e);
-      // Inline preview overlay will appear in restrictive WebViews to allow long-press save
+      // No alert; a preview overlay will appear in restrictive WebViews to allow long-press save
     } finally {
       setIsWorking("idle");
     }
@@ -163,20 +171,46 @@ export default function SaleStatus() {
       setIsWorking("sharing");
       const generated = await generateImage();
       if (!generated) throw new Error("Failed to render image for sharing");
-      const { blob } = generated;
+      const { blob, dataUrl } = generated;
 
-      // Native share
+      const file = new File([blob], FILENAME, { type: "image/png" });
+      // 1) Try full Web Share with files (Android Chrome/Edge/Samsung, modern iOS)
       // @ts-expect-error
-      if (navigator?.share) {
-        const file = new File([blob], FILENAME, { type: "image/png" });
+      if (navigator?.canShare && navigator.canShare({ files: [file] })) {
         // @ts-expect-error
         await navigator.share({ files: [file], title: "Today's Sale Rates" });
         return;
-      } else {
-        alert("Sharing not supported on this browser.");
       }
+
+      // 2) Try basic Web Share with text/url (older Safari/Android)
+      // @ts-expect-error
+      if (navigator?.share) {
+        // Some browsers cannot share files but can share text/url
+        // We include a short caption and instruct to save from preview if needed
+        await navigator.share({
+          title: "Today's Sale Rates",
+          text: "Today's sale rates from Devi Jewellers. If the image didn't attach, long-press the preview to save first.",
+        });
+        // Also show preview to allow user to save image if file-sharing wasn't supported
+        setPreviewUrl(dataUrl);
+        return;
+      }
+
+      // 3) WhatsApp web deep-link fallback (cannot attach image programmatically)
+      const message = "Today's sale rates from Devi Jewellers. Please see the attached image.";
+      const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+      window.open(waUrl, "_blank");
+
+      // Show preview so user can long-press/save and attach in WhatsApp
+      setPreviewUrl(dataUrl);
     } catch (e) {
       console.error("Share failed", e);
+      // Show preview so user can save manually
+      try {
+        setPreviewUrl((await generateImage())?.dataUrl || null);
+      } catch {
+        // ignore
+      }
     } finally {
       setIsWorking("idle");
     }
