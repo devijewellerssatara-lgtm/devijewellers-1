@@ -309,13 +309,13 @@ export default function TVDisplay() {
                   </div>
 
                   {promoImages.length > 0 && (
-                   <<div className="bg-white rounded-lg shadow-md overflow-hidden fade-in flex-1 min-h-0">
-                     <<div className="relative w-full h-full bg-gradient-to-br from-gold-100 to-gold-200 flex items-center justify-center p-2 pb-10">
-                       <AAnimatePresence mode="wait">
+                    <div className="bg-white rounded-lg shadow-md overflow-hidden fade-in flex-1 min-h-0">
+                      <div className="relative w-full h-full bg-gradient-to-br from-gold-100 to-gold-200 flex items-center justify-center p-2 pb-10">
+                        <AnimatePresence mode="wait">
                           {currentPromo && (
-                           <mmotion.img
+                            <motion.img
                               key={currentPromo.id}
-                              src={currentPromoimage_url || ""}
+                              src={currentPromo.image_url || ""}
                               alt={currentPromo.name || "Promotional Image"}
                               className="max-w-full max-h-full w-auto h-auto object-contain"
                               initial="initial"
