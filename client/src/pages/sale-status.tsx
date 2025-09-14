@@ -257,8 +257,7 @@ export default function SaleStatus() {
       {/* Capture Area */}
       <div className="flex-1 flex flex-col w-full">
         {/* Top bar */}
-        <div className="bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white py-3 px-4 flex items-center justify-between shadow-md">
-          <img src="/logo.png" alt="Logo" className="h-10 md:h-12 w-auto object-contain" />
+        <div className="bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white py-3 px-4 flex items-center justify-end shadow-md">
           <div className="text-right">
             <div className="text-sm md:text-lg font-semibold text-gold-200">
               {format(currentTime, "EEEE dd-MMM-yyyy")}
