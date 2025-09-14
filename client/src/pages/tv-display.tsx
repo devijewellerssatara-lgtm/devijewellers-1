@@ -189,14 +189,31 @@ export default function TVDisplay() {
             transition={{ duration_seconds: 0.5, ease: "easeInOut" }}
             className="flex-1 flex flex-col"
           >
-            {/* Header with centered logo (reduced height, no circular badge) */}
+            {/* Header with centered logo and left-aligned date/time (reduced height, no circular badge) */}
             <div className={`relative bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white flex-shrink-0 ${screenSize === 'tv' ? 'py-1' : 'py-1 md:py-2'}`}>
-              <div className="w-full flex items-center justify-center">
-                <img
-                  src="/logo.png"
-                  alt="Devi Jewellers Logo"
-                  className="h-12 md:h-16 w-auto object-contain"
-                />
+              <div className="w-full flex items-center justify-between px-2 md:px-4">
+                {/* Left: Date/Time */}
+                <div className="text-left bg-black/20 rounded px-2 py-1">
+                  <div className="text-[10px] md:text-sm font-semibold text-gold-200 leading-tight">
+                    {format(currentTime, "EEE dd-MMM-yyyy")}
+                  </div>
+                  <div className="text-xs md:text-base font-bold text-white leading-tight">
+                    {format(currentTime, "HH:mm:ss")}
+                  </div>
+                </div>
+                {/* Center: Logo */}
+                <div className="flex-1 flex items-center justify-center">
+                  <img
+                    src="/logo.png"
+                    alt="Devi Jewellers Logo"
+                    className="h-12 md:h-16 w-auto object-contain"
+                  />
+                </div>
+                {/* Right spacer to keep logo centered */}
+                <div className="opacity-0 text-left bg-black/20 rounded px-2 py-1 select-none">
+                  <div className="text-[10px] md:text-sm font-semibold">.</div>
+                  <div className="text-xs md:text-base font-bold">.</div>
+                </div>
               </div>
             </div>
 
@@ -216,17 +233,18 @@ export default function TVDisplay() {
                   <div className="rate-card bg-white rounded-lg shadow-md p-2 md:p-3 border-l-4 md:border-l-6 border-jewelry-primary">
                     <div className="flex justify-between items-center mb-1 md:mb-2">
                       <h4 className="text-sm md:text-lg font-bold text-gray-800">24K GOLD (Per 10 GMS)</h4>
-                      <div className="w-7 h-7 md:w-8 md:h-8 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
-                        <i className="fas fa-star text-white text-xs"></i>
-                      </div>
+                      <div className="w-6 h-6 md:w-7 md:h-7 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
+                       <<i className="fas fa-star text-white text-[10p"></
+ i>
+                    </v>div
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
-                        <p className="text-[9px] md:text-[10px] text-blue-600 font-semibold mb-0.5">SALE</p>
+                        <p className="text-xs md:text-sm text-blue-700 font-bold mb-0.5 uppercase tracking-wide">SALE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800 leading-tight`}>₹{currentRates.gold_24k_sale}</p>
                       </div>
                       <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
-                        <p className="text-[9px] md:text-[10px] text-blue-600 font-semibold mb-0.5">PURCHASE</p>
+                        <p className="text-xs md:text-sm text-blue-700 font-bold mb-0.5 uppercase tracking-wide">PURCHASE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800 leading-tight`}>₹{currentRates.gold_24k_purchase}</p>
                       </div>
                     </div>
@@ -236,17 +254,17 @@ export default function TVDisplay() {
                   <div className="rate-card bg-white rounded-lg shadow-md p-2 md:p-3 border-l-4 md:border-l-6 border-jewelry-primary">
                     <div className="flex justify-between items-center mb-1 md:mb-2">
                       <h4 className="text-sm md:text-lg font-bold text-gray-800">22K GOLD (Per 10 GMS)</h4>
-                      <div className="w-7 h-7 md:w-8 md:h-8 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
-                        <i className="fas fa-medal text-white text-xs"></i>
+                      <div className="w-6 h-6 md:w-7 md:h-7 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
+                        <i className="fas fa-medal text-white text-[10px]"></i>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
-                        <p className="text-[9px] md:text-[10px] text-blue-600 font-semibold mb-0.5">SALE</p>
+                        <p className="text-xs md:text-sm text-blue-700 font-bold mb-0.5 uppercase tracking-wide">SALE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800 leading-tight`}>₹{currentRates.gold_22k_sale}</p>
                       </div>
                       <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
-                        <p className="text-[9px] md:text-[10px] text-blue-600 font-semibold mb-0.5">PURCHASE</p>
+                        <p className="text-xs md:text-sm text-blue-700 font-bold mb-0.5 uppercase tracking-wide">PURCHASE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800 leading-tight`}>₹{currentRates.gold_22k_purchase}</p>
                       </div>
                     </div>
@@ -256,7 +274,7 @@ export default function TVDisplay() {
                   <div className="rate-card bg-white rounded-lg shadow-md p-2 md:p-3 border-l-4 md:border-l-6 border-jewelry-primary">
                     <div className="flex justify-between items-center mb-1 md:mb-2">
                       <h4 className="text-sm md:text-lg font-bold text-gray-800">18K GOLD (Per 10 GMS)</h4>
-                      <div className="w-7 h-7 md:w-8 md:h-8 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
+                      <div className="w-6 h-6 md:w-7 md:h-7 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
                         <i className="fas fa-crown text-white text-xs"></i>
                       </div>
                     </div>
@@ -274,29 +292,29 @@ export default function TVDisplay() {
                 </div>
 
                 {/* Right column: SILVER on top, PROMO underneath */}
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4 h-full">
                   <div className="rate-card bg-white rounded-lg shadow-md p-3 md:p-4 border-l-4 md:border-l-6 border-jewelry-primary">
                     <div className="flex justify-between items-center mb-2 md:mb-3">
                       <h4 className="text-base md:text-xl font-bold text-gray-800">SILVER (Per KG)</h4>
-                      <div className="w-8 h-8 md:w-9 md:h-9 bg-jewelry-primary rounded-full shadow-lg flex items-center justify-center">
-                        <i className="fas fa-circle text-white text-xs md:text-sm"></i>
+                      <div className="w-6 h-6 md:w-7 md:h-7 bg-jewelry-primary rounded-full shadow-lg flex items-center justify-center">
+                        <i className="fas fa-circle text-white text-[10px] md:text-xs"></i>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
-                        <p className="text-[10px] md:text-xs text-blue-600 font-semibold mb-1">SALE</p>
+                        <p className="text-xs md:text-sm text-blue-700 font-bold mb-0.5 uppercase tracking-wide">SALE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.silver_per_kg_sale}</p>
                       </div>
                       <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
-                        <p className="text-[10px] md:text-xs text-blue-600 font-semibold mb-1">PURCHASE</p>
+                        <p className="text-xs md:text-sm text-blue-700 font-bold mb-0.5 uppercase tracking-wide">PURCHASE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.silver_per_kg_purchase}</p>
                       </div>
                     </div>
                   </div>
 
                   {promoImages.length > 0 && (
-                    <div className="bg-white rounded-lg shadow-md overflow-hidden fade-in">
-                      <div className="relative aspect-video bg-gradient-to-br from-gold-100 to-gold-200">
+                    <div className="bg-white rounded-lg shadow-md overflow-hidden fade-in flex-1 min-h-0">
+                      <div className={`${screenSize === 'tv' ? 'relative w-full h-full' : 'relative aspect-video'} bg-gradient-to-br from-gold-100 to-gold-200`}>
                         <AnimatePresence mode="wait">
                           {currentPromo && (
                             <motion.img
