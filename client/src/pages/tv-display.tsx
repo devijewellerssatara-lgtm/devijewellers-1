@@ -223,8 +223,8 @@ export default function TVDisplay() {
             </div>
 
             {/* Rates Display - Main Content */}
-            <div className={`flex-1 container mx-auto ${screenSize === 'tv' ? 'px-10 py-6' : screenSize === 'tablet' ? 'px-4 py-6' : 'px-2 md:px-6 py-4 md:py-8'}`}>
-              <div className={`grid ${screenSize === 'tv' ? 'gap-6' : screenSize === 'tablet' ? 'gap-6' : 'gap-4 md:gap-6'} ${screenSize === 'mobile' || isVertical ? 'grid-cols-1' : 'grid-cols-2'}`}>
+            <div className={`flex-1 w-full ${screenSize === 'tv' ? 'px-2 py-4' : screenSize === 'tablet' ? 'px-4 py-6' : 'px-2 md:px-6 py-4 md:py-8'}`}>
+              <div className={`grid ${screenSize === 'tv' ? 'gap-4' : screenSize === 'tablet' ? 'gap-6' : 'gap-4 md:gap-6'} ${screenSize === 'mobile' || isVertical ? 'grid-cols-1' : 'grid-cols-2'}`} style={screenSize !== 'mobile' && !isVertical ? { gridTemplateColumns: '1.6fr 1fr' } : undefined}>
                 {/* Left column: 24K, 22K, 18K stacked */}
                 <div className="flex flex-col gap-4">
                   {/* 24K GOLD */}
