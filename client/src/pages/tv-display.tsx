@@ -206,7 +206,7 @@ export default function TVDisplay() {
                 </div>
                 {/* Right: Date/Time */}
                 <div className="justify-self-end text-right bg-black/20 rounded px-2 py-1">
-                  <div className="font-semibold text-gold-200 leading-tight text-sm md:text-xl">
+                  <div className="leading-tight text-lg md:text-xl font-bold text-black">
                     {format(currentTime, "EEE dd-MMM-yyyy")}
                   </div>
                   <div className="font-extrabold text-white leading-tight text-base md:text-3xl">
