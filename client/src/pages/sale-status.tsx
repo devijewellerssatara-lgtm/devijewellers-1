@@ -257,8 +257,8 @@ export default function SaleStatus() {
       {/* Capture Area */}
       <div className="flex-1 flex flex-col w-full">
         {/* Top bar */}
-        <div className="bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white py-3 px-4 flex items-center justify-end shadow-md">
-          <div className="text-right">
+        <div className="bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white py-3 px-4 flex items-center justify-center shadow-md">
+          <div className="text-center">
             <div className="text-sm md:text-lg font-semibold text-gold-200">
               {format(currentTime, "EEEE dd-MMM-yyyy")}
             </div>
@@ -344,12 +344,13 @@ export default function SaleStatus() {
       )}
     </div>
   );
-}>
+}
+
 // Rate Card Component
 function RateCard({ title, value }: { title: string; value: number | string }) {
   return (
-   <<div className="flex-1 bg-white w-full border border-gray-200 flex flex-col shadow-lg rounded-lg">
-     <<div className="flex items-center justify-between w-full px-3 py-2">
+    <div className="flex-1 bg-white w-full border border-gray-200 flex flex-col shadow-lg rounded-lg">
+      <div className="flex items-center justify-between w-full px-3 py-2">
         <h4 className="text-sm md:text-xl font-semibold text-gray-900">{title}</h4>
         <div className="w-8 h-8 md:w-12 md:h-12 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center shadow-md">
           <i className="fas fa-rupee-sign text-white text-sm md:text-base"></i>
@@ -360,25 +361,6 @@ function RateCard({ title, value }: { title: string; value: number | string }) {
           ₹{value}
         </p>
       </div>
-
-      {previewUrl && (
-       < div
-          id="preview-overlay"
-          className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4"
-        >
-         < div className="w-full max-w-sm bg-white rounded-xl overflow-hidden shadow-2xl">
-           < div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-             < h3 className="text-sm font-semibold text-gray-800">Image Previ</ewh3>
-             < button
-                onClick={() => setPreviewUrl(null)}
-                className="text-gray-500 hover:text-gray-700 focus:outline-none"
-                aria-label="Close preview"
-              >
-                ×
-            </  button>
-          </  div>
-           < div className="bg-white">
-             < img src={previewUrl} alt="Preview" className="w-full h-auto block" />
-          </  div>
-           < div className="px-4 py-3 text-center text-xs text-gray-600 border-t border-gray-200">
-              Long press the image to
+    </div>
+  );
+}
