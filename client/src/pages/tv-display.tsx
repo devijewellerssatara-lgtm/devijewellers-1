@@ -189,28 +189,25 @@ export default function TVDisplay() {
             transition={{ duration_seconds: 0.5, ease: "easeInOut" }}
             className="flex-1 flex flex-col"
           >
-            {/* Header with centered logo and right-aligned date/time (reduced height, no circular badge) */}
+            {/* Header with centered logo aligned with TODAY'S RATES and right-aligned date/time */}
             <div className={`relative bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white flex-shrink-0 ${screenSize === 'tv' ? 'py-1' : 'py-1 md:py-2'}`}>
-              <div className="w-full flex items-center justify-between px-2 md:px-4">
-                {/* Left spacer to keep logo centered */}
-                <div className="opacity-0 text-left bg-black/20 rounded px-2 py-1 select-none">
-                  <div className="text-[10px] md:text-sm font-semibold">.</div>
-                  <div className="text-xs md:text-base font-bold">.</div>
-                </div>
-                {/* Center: Logo */}
-                <div className="flex-1 flex items-center justify-center">
+              <div className="w-full grid grid-cols-3 items-center px-2 md:px-4">
+                {/* Left spacer to ensure true visual center for logo */}
+                <div />
+                {/* Center: Logo (aligned to the exact center of the page, matching TODAY'S RATES center) */}
+                <div className="flex justify-center">
                   <img
                     src="/logo.png"
                     alt="Devi Jewellers Logo"
                     className="h-12 md:h-16 w-auto object-contain"
                   />
                 </div>
-                {/* Right: Date/Time */}
-                <div className="text-right bg-black/20 rounded px-2 py-1">
-                  <div className="text-[10px] md:text-sm font-semibold text-gold-200 leading-tight">
+                {/* Right: Date/Time with larger fonts */}
+                <div className="justify-self-end text-right bg-black/20 rounded px-2 py-1">
+                  <div className="font-semibold text-gold-200 leading-tight text-sm md:text-xl">
                     {format(currentTime, "EEE dd-MMM-yyyy")}
                   </div>
-                  <div className="text-xs md:text-base font-bold text-white leading-tight">
+                  <div className="font-extrabold text-white leading-tight text-base md:text-3xl">
                     {format(currentTime, "HH:mm:ss")}
                   </div>
                 </div>
