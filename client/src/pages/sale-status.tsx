@@ -312,32 +312,24 @@ export default function SaleStatus() {
     {previewUrl && (
         <div
           id="preview-overlay"
-          className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/80 p-0"
+          onClick={() => setPreviewUrl(null)}
         >
-          <div className="w-full max-w-sm bg-white rounded-xl overflow-hidden shadow-2xl">
-            <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-gray-800">Image Preview</h3>
-              <button
+          <div className="relative w-full h-full flex items-center justify-center">
+            <img
+              src={previewUrl}
+              alt="Preview"
+              className="max-h-full max-w-full w-full h-auto object-contain"
+              onClick={(e) => e.stopPropagation()} /* allow long-press without closing */
+            />
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div
+                className="pointer-events-auto bg-white/90 rounded-lg px-4 py-3 text-gray-800 shadow-lg text-center"
                 onClick={() => setPreviewUrl(null)}
-                className="text-gray-500 hover:text-gray-700 focus:outline-none"
-                aria-label="Close preview"
               >
-                ×
-              </button>
-            </div>
-            <div className="bg-white">
-              <img src={previewUrl} alt="Preview" className="w-full h-auto block" />
-            </div>
-            <div className="px-4 py-3 text-center text-xs text-gray-600 border-t border-gray-200">
-              Long press the image to Save/Download
-            </div>
-            <div className="px-4 pb-4 flex justify-center">
-              <Button
-                onClick={() => setPreviewUrl(null)}
-                className="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 text-sm font-medium rounded"
-              >
-                Close
-              </Button>
+                <div className="text-sm font-semibold">Long press the image to Save/Download</div>
+                <div className="text-[10px] mt-1 text-gray-600">Tap anywhere to go back</div>
+              </div>
             </div>
           </div>
         </div>
