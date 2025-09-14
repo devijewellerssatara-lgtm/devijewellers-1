@@ -310,14 +310,14 @@ export default function TVDisplay() {
 
                   {promoImages.length > 0 && (
                     <div className="bg-white rounded-lg shadow-md overflow-hidden fade-in flex-1 min-h-0">
-                      <div className="relative w-full h-full bg-gradient-to-br from-gold-100 to-gold-200">
+                      <div className="relative w-full h-full bg-gradient-to-br from-gold-100 to-gold-200 flex items-center justify-center p-2 pb-6">
                         <AnimatePresence mode="wait">
                           {currentPromo && (
                             <motion.img
                               key={currentPromo.id}
                               src={currentPromo.image_url || ""}
                               alt={currentPromo.name || "Promotional Image"}
-                              className="w-full h-full object-contain"
+                              className="max-w-full max-h-full w-auto h-auto object-contain"
                               initial="initial"
                               animate="animate"
                               exit="exit"
@@ -328,7 +328,7 @@ export default function TVDisplay() {
                         </AnimatePresence>
 
                         {promoImages.length > 1 && (
-                          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-2">
+                          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex space-x-2">
                             {promoImages.map((_, index) => (
                               <div
                                 key={index}
