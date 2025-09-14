@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -127,28 +127,7 @@ export default function TVDisplay() {
   const isVertical = settings?.orientation === "vertical";
   const currentPromo = promoImages[currentPromoIndex];
 
-  // Measure a rate card to size the promo to half its height (on TV)
-  const rateCardRef = useRef<HTMLDivElement | null>(null);
-  const [promoHeight, setPromoHeight] = useState<number | null>(null);
-
-  useEffect(() => {
-    const measure = () => {
-      if (rateCardRef.current) {
-        const rect = rateCardRef.current.getBoundingClientRect();
-        const h = rect.height;
-        if (h && h > 0) {
-          setPromoHeight(Math.max(100, Math.round(h * 0.5)));
-        }
-      }
-    };
-    measure();
-    window.addEventListener('resize', measure);
-    const id = setInterval(measure, 1000);
-    return () => {
-      window.removeEventListener('resize', measure);
-      clearInterval(id);
-    };
-  }, [screenSize]);
+  
 
   // Enhanced responsive font sizing
   const getRateFontSize = () => {
@@ -250,7 +229,7 @@ export default function TVDisplay() {
                 {/* Left column: 24K, 22K, 18K stacked */}
                 <div className="flex flex-col gap-4">
                   {/* 24K GOLD */}
-                  <div ref={rateCardRef} className="rate-card bg-white rounded-lg shadow-md p-2 md:p-3 border-l-4 md:border-l-6 border-jewelry-primary">
+                  <div className="rate-card bg-white rounded-lg shadow-md p-2 md:p-3 border-l-4 md:border-l-6 border-jewelry-primary">
                     <div className="flex justify-between items-center mb-1 md:mb-2">
                       <h4 className="text-sm md:text-lg font-bold text-gray-800">24K GOLD (Per 10 GMS)</h4>
                       <div className="w-6 h-6 md:w-7 md:h-7 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
@@ -335,7 +314,7 @@ export default function TVDisplay() {
                     <div className="bg-white rounded-lg shadow-md overflow-hidden fade-in self-start">
                       <div
                         className={`relative w-full ${screenSize === 'tv' ? '' : 'aspect-video'} bg-gradient-to-br from-gold-100 to-gold-200 flex items-center justify-center p-2 pb-6`}
-                        style={screenSize === 'tv' && promoHeight ? { height: promoHeight } : undefined}
+                        style={screenSize === 'tv' && promoHeight ? { height: promoHeight + EXTRA_PROMO_OFFSET } : undefined}
                       >
                         <AnimatePresence mode="wait">
                           {currentPromo && (
