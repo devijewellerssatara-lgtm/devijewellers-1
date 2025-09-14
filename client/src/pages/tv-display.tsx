@@ -223,141 +223,93 @@ export default function TVDisplay() {
             </div>
 
             {/* Rates Display - Main Content */}
-            <div className={`flex-1 container mx-auto ${screenSize === 'tv' ? 'px-12 py-12' : screenSize === 'tablet' ? 'px-4 py-6' : 'px-2 md:px-6 py-4 md:py-8'}`}>
-              <div className={`grid ${screenSize === 'tv' ? 'gap-12' : screenSize === 'tablet' ? 'gap-6' : 'gap-4 md:gap-8'} ${screenSize === 'mobile' || isVertical ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                {/* Gold Rates */}
-                <div className="space-y-4 md:space-y-6">
-                  <h3 className="text-lg md:text-2xl font-display font-bold text-center text-jewelry-primary mb-4 md:mb-6">GOLD RATES (Per 10 GMS)</h3>
-                  
-                  {/* 24K Gold */}
-                  <div className="rate-card bg-white rounded-lg md:rounded-xl shadow-md md:shadow-xl p-3 md:p-6 border-l-4 md:border-l-8 border-jewelry-primary fade-in">
-                    <div className="flex justify-between items-center mb-2 md:mb-4">
-                      <h4 className="text-lg md:text-2xl font-bold text-gray-800">24K GOLD</h4>
-                      <div className="w-8 h-8 md:w-10 md:h-10 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
-                        <i className="fas fa-star text-white text-sm md:text-base"></i>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 md:gap-4">
-                      <div className="text-center p-2 md:p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-xs md:text-sm text-blue-600 font-semibold mb-1">SALE RATE</p>
-                        <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.gold_24k_sale}</p>
-                      </div>
-                      <div className="text-center p-2 md:p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-xs md:text-sm text-blue-600 font-semibold mb-1">PURCHASE RATE</p>
-                        <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.gold_24k_purchase}</p>
-                      </div>
+            <div className={`flex-1 container mx-auto ${screenSize === 'tv' ? 'px-10 py-6' : screenSize === 'tablet' ? 'px-4 py-6' : 'px-2 md:px-6 py-4 md:py-8'}`}>
+              <div className={`grid ${screenSize === 'tv' ? 'gap-6' : screenSize === 'tablet' ? 'gap-6' : 'gap-4 md:gap-6'} ${screenSize === 'mobile' || isVertical ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                {/* Four compact rate cards to fit within TV viewport */}
+                {/* 24K GOLD */}
+                <div className="rate-card bg-white rounded-lg shadow-md p-3 md:p-4 border-l-4 md:border-l-6 border-jewelry-primary">
+                  <div className="flex justify-between items-center mb-2 md:mb-3">
+                    <h4 className="text-base md:text-xl font-bold text-gray-800">24K GOLD (Per 10 GMS)</h4>
+                    <div className="w-8 h-8 md:w-9 md:h-9 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
+                      <i className="fas fa-star text-white text-xs md:text-sm"></i>
                     </div>
                   </div>
-
-                  {/* 22K Gold */}
-                  <div className="rate-card bg-white rounded-lg md:rounded-xl shadow-md md:shadow-xl p-3 md:p-6 border-l-4 md:border-l-8 border-jewelry-primary fade-in">
-                    <div className="flex justify-between items-center mb-2 md:mb-4">
-                      <h4 className="text-lg md:text-2xl font-bold text-gray-800">22K GOLD</h4>
-                      <div className="w-8 h-8 md:w-10 md:h-10 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
-                        <i className="fas fa-medal text-white text-sm md:text-base"></i>
-                      </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
+                      <p className="text-[10px] md:text-xs text-blue-600 font-semibold mb-1">SALE</p>
+                      <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.gold_24k_sale}</p>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 md:gap-4">
-                      <div className="text-center p-2 md:p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-xs md:text-sm text-blue-600 font-semibold mb-1">SALE RATE</p>
-                        <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.gold_22k_sale}</p>
-                      </div>
-                      <div className="text-center p-2 md:p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-xs md:text-sm text-blue-600 font-semibold mb-1">PURCHASE RATE</p>
-                        <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.gold_22k_purchase}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 18K Gold */}
-                  <div className="rate-card bg-white rounded-lg md:rounded-xl shadow-md md:shadow-xl p-3 md:p-6 border-l-4 md:border-l-8 border-jewelry-primary fade-in">
-                    <div className="flex justify-between items-center mb-2 md:mb-4">
-                      <h4 className="text-lg md:text-2xl font-bold text-gray-800">18K GOLD</h4>
-                      <div className="w-8 h-8 md:w-10 md:h-10 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
-                        <i className="fas fa-crown text-white text-sm md:text-base"></i>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 md:gap-4">
-                      <div className="text-center p-2 md:p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-xs md:text-sm text-blue-600 font-semibold mb-1">SALE RATE</p>
-                        <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.gold_18k_sale}</p>
-                      </div>
-                      <div className="text-center p-2 md:p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-xs md:text-sm text-blue-600 font-semibold mb-1">PURCHASE RATE</p>
-                        <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.gold_18k_purchase}</p>
-                      </div>
+                    <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
+                      <p className="text-[10px] md:text-xs text-blue-600 font-semibold mb-1">PURCHASE</p>
+                      <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.gold_24k_purchase}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Silver Rates & Promo Column */}
-                <div className="space-y-4 md:space-y-6">
-                  {/* Silver Rates */}
-                  <div>
-                    <h3 className="text-lg md:text-2xl font-display font-bold text-center text-jewelry-primary mb-4 md:mb-6">SILVER RATES (Per KG)</h3>
-                    
-                    <div className="rate-card bg-white rounded-lg md:rounded-xl shadow-md md:shadow-xl p-3 md:p-6 border-l-4 md:border-l-8 border-jewelry-primary fade-in">
-                      <div className="flex justify-between items-center mb-2 md:mb-4">
-                        <h4 className="text-lg md:text-2xl font-bold text-gray-800">SILVER</h4>
-                        <div className="w-8 h-8 md:w-10 md:h-10 bg-jewelry-primary rounded-full shadow-lg flex items-center justify-center">
-                          <i className="fas fa-circle text-white text-sm md:text-base"></i>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 md:gap-4">
-                        <div className="text-center p-2 md:p-4 bg-blue-50 rounded-lg border border-blue-200">
-                          <p className="text-xs md:text-sm text-blue-600 font-semibold mb-1">SALE RATE</p>
-                          <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.silver_per_kg_sale}</p>
-                        </div>
-                        <div className="text-center p-2 md:p-4 bg-blue-50 rounded-lg border border-blue-200">
-                          <p className="text-xs md:text-sm text-blue-600 font-semibold mb-1">PURCHASE RATE</p>
-                          <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.silver_per_kg_purchase}</p>
-                        </div>
-                      </div>
+                {/* 22K GOLD */}
+                <div className="rate-card bg-white rounded-lg shadow-md p-3 md:p-4 border-l-4 md:border-l-6 border-jewelry-primary">
+                  <div className="flex justify-between items-center mb-2 md:mb-3">
+                    <h4 className="text-base md:text-xl font-bold text-gray-800">22K GOLD (Per 10 GMS)</h4>
+                    <div className="w-8 h-8 md:w-9 md:h-9 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
+                      <i className="fas fa-medal text-white text-xs md:text-sm"></i>
                     </div>
                   </div>
-
-                  {/* Promotional Slideshow */}
-                  {promoImages.length > 0 && (
-                    <div className="bg-white rounded-lg md:rounded-xl shadow-md md:shadow-xl overflow-hidden fade-in flex-1">
-                      <div className="relative aspect-video bg-gradient-to-br from-gold-100 to-gold-200 h-full">
-                        <AnimatePresence mode="wait">
-                          {currentPromo && (
-                            <motion.img
-                              key={currentPromo.id}
-                              src={currentPromo.image_url || ""}
-                              alt={currentPromo.name || "Promotional Image"}
-                              className="w-full h-full object-cover"
-                              initial="initial"
-                              animate="animate"
-                              exit="exit"
-                              variants={animationVariants}
-                              transition={transitionProps}
-                            />
-                          )}
-                        </AnimatePresence>
-                        
-                        {/* Slideshow Indicators */}
-                        {promoImages.length > 1 && (
-                          <div className="absolute bottom-2 md:bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-1 md:space-x-2">
-                            {promoImages.map((_, index) => (
-                              <div
-                                key={index}
-                                className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full transition-colors ${
-                                  index === currentPromoIndex ? 'bg-jewelry-primary' : 'bg-gray-400'
-                                }`}
-                              />
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
+                      <p className="text-[10px] md:text-xs text-blue-600 font-semibold mb-1">SALE</p>
+                      <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.gold_22k_sale}</p>
                     </div>
-                  )}
+                    <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
+                      <p className="text-[10px] md:text-xs text-blue-600 font-semibold mb-1">PURCHASE</p>
+                      <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.gold_22k_purchase}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 18K GOLD */}
+                <div className="rate-card bg-white rounded-lg shadow-md p-3 md:p-4 border-l-4 md:border-l-6 border-jewelry-primary">
+                  <div className="flex justify-between items-center mb-2 md:mb-3">
+                    <h4 className="text-base md:text-xl font-bold text-gray-800">18K GOLD (Per 10 GMS)</h4>
+                    <div className="w-8 h-8 md:w-9 md:h-9 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
+                      <i className="fas fa-crown text-white text-xs md:text-sm"></i>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
+                      <p className="text-[10px] md:text-xs text-blue-600 font-semibold mb-1">SALE</p>
+                      <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.gold_18k_sale}</p>
+                    </div>
+                    <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
+                      <p className="text-[10px] md:text-xs text-blue-600 font-semibold mb-1">PURCHASE</p>
+                      <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.gold_18k_purchase}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* SILVER */}
+                <div className="rate-card bg-white rounded-lg shadow-md p-3 md:p-4 border-l-4 md:border-l-6 border-jewelry-primary">
+                  <div className="flex justify-between items-center mb-2 md:mb-3">
+                    <h4 className="text-base md:text-xl font-bold text-gray-800">SILVER (Per KG)</h4>
+                    <div className="w-8 h-8 md:w-9 md:h-9 bg-jewelry-primary rounded-full shadow-lg flex items-center justify-center">
+                      <i className="fas fa-circle text-white text-xs md:text-sm"></i>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
+                      <p className="text-[10px] md:text-xs text-blue-600 font-semibold mb-1">SALE</p>
+                      <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.silver_per_kg_sale}</p>
+                    </div>
+                    <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
+                      <p className="text-[10px] md:text-xs text-blue-600 font-semibold mb-1">PURCHASE</p>
+                      <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.silver_per_kg_purchase}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Footer Banner */}
-            {bannerSettings?.banner_image_url && (
+            {/* Footer Banner - hide on TV to ensure all rates fit */}
+            {screenSize !== 'tv' && bannerSettings?.banner_image_url && (
               <div 
                 className="flex-shrink-0 bg-white border-t-2 md:border-t-4 border-jewelry-primary shadow-md md:shadow-lg"
                 style={{ 
