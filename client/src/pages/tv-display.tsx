@@ -222,10 +222,12 @@ export default function TVDisplay() {
                 <motion.div
                   initial={{ x: '100%' }}
                   animate={{ x: '-100%' }}
-                  transition={{ repeat: Infinity, repeatType: 'loop', duration: 12, ease: 'linear' }}
+                  transition={{ repeat: Infinity, repeatType: 'loop', duration: 20, ease: 'linear' }}
                   className={`whitespace-nowrap font-display font-bold ${screenSize === 'tv' ? 'text-4xl' : screenSize === 'tablet' ? 'text-2xl' : 'text-xl md:text-3xl'}`}
                 >
-                  TODAY'S RATES • TODAY'S RATES • TODAY'S RATES • TODAY'S RATES • TODAY'S RATES
+                  <span className="mx-8">TODAYS RATE</span>
+                  <span className="mx-8">TODAYS RATE</span>
+                  <span className="mx-8">TODAYS RATE</span>
                 </motion.div>
               </div>
             </div>
