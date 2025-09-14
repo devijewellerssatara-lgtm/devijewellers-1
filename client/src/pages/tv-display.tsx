@@ -172,13 +172,13 @@ export default function TVDisplay() {
   const currentMedia = mediaItems[currentMediaIndex];
 
   return (
-   <<div 
+    <div 
       className={`w-full h-screen ${screenSize === 'mobile' ? 'overflow-y-auto' : 'overflow-hidden'} flex flex-col ${screenSize === 'mobile' ? 'p-2' : ''}`}
       style={{ 
         backgroundColor: settings?.background_color || "#FFF8E1",
         color: settings?.text_color || "#212529"
       }}
- _code  new </>
+    >
       <AnimatePresence mode="wait">
         {showingRates ? (
           <motion.div
