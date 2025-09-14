@@ -172,13 +172,13 @@ export default function TVDisplay() {
   const currentMedia = mediaItems[currentMediaIndex];
 
   return (
-    <div 
-      className={`w-full h-screen overflow-hidden flex flex-col ${screenSize === 'mobile' ? 'p-2' : ''}`}
+   <<div 
+      className={`w-full h-screen ${screenSize === 'mobile' ? 'overflow-y-auto' : 'overflow-hidden'} flex flex-col ${screenSize === 'mobile' ? 'p-2' : ''}`}
       style={{ 
         backgroundColor: settings?.background_color || "#FFF8E1",
         color: settings?.text_color || "#212529"
       }}
-    >
+ _code  new </>
       <AnimatePresence mode="wait">
         {showingRates ? (
           <motion.div
@@ -224,8 +224,7 @@ export default function TVDisplay() {
 
             {/* Rates Display - Main Content */}
             <div className={`flex-1 container mx-auto ${screenSize === 'tv' ? 'px-10 py-6' : screenSize === 'tablet' ? 'px-4 py-6' : 'px-2 md:px-6 py-4 md:py-8'}`}>
-              <div className={`grid ${screenSize === 'tv' ? 'gap-6' : screenSize === 'tablet' ? 'gap-6' : 'gap-4 md:gap-6'} ${screenSize === 'mobile' || isVertical ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                {/* Four compact rate cards to fit within TV viewport */}
+              <div className={`grid ${screenSize === 'tv' ? 'gap-6' : screenSize === 'tablet' ? 'gap-6' : 'gap-4 md:gap-6'} ${screenSize === 'mobile' || isVertical ? 'grid-cols-1' : 'grid-cols-3'}`}>
                 {/* 24K GOLD */}
                 <div className="rate-card bg-white rounded-lg shadow-md p-3 md:p-4 border-l-4 md:border-l-6 border-jewelry-primary">
                   <div className="flex justify-between items-center mb-2 md:mb-3">
@@ -286,29 +285,64 @@ export default function TVDisplay() {
                   </div>
                 </div>
 
-                {/* SILVER */}
-                <div className="rate-card bg-white rounded-lg shadow-md p-3 md:p-4 border-l-4 md:border-l-6 border-jewelry-primary">
-                  <div className="flex justify-between items-center mb-2 md:mb-3">
-                    <h4 className="text-base md:text-xl font-bold text-gray-800">SILVER (Per KG)</h4>
-                    <div className="w-8 h-8 md:w-9 md:h-9 bg-jewelry-primary rounded-full shadow-lg flex items-center justify-center">
-                      <i className="fas fa-circle text-white text-xs md:text-sm"></i>
+                {/* SILVER + PROMO stacked in one column under SILVER */}
+                <div className="flex flex-col gap-4">
+                  <div className="rate-card bg-white rounded-lg shadow-md p-3 md:p-4 border-l-4 md:border-l-6 border-jewelry-primary">
+                    <div className="flex justify-between items-center mb-2 md:mb-3">
+                      <h4 className="text-base md:text-xl font-bold text-gray-800">SILVER (Per KG)</h4>
+                      <div className="w-8 h-8 md:w-9 md:h-9 bg-jewelry-primary rounded-full shadow-lg flex items-center justify-center">
+                        <i className="fas fa-circle text-white text-xs md:text-sm"></i>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
+                        <p className="text-[10px] md:text-xs text-blue-600 font-semibold mb-1">SALE</p>
+                        <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.silver_per_kg_sale}</p>
+                      </div>
+                      <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
+                        <p className="text-[10px] md:text-xs text-blue-600 font-semibold mb-1">PURCHASE</p>
+                        <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.silver_per_kg_purchase}</p>
+                      </div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
-                      <p className="text-[10px] md:text-xs text-blue-600 font-semibold mb-1">SALE</p>
-                      <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.silver_per_kg_sale}</p>
+
+                  {promoImages.length > 0 && (
+                    <div className="bg-white rounded-lg shadow-md overflow-hidden fade-in">
+                      <div className="relative aspect-video bg-gradient-to-br from-gold-100 to-gold-200">
+                        <AnimatePresence mode="wait">
+                          {currentPromo && (
+                            <motion.img
+                              key={currentPromo.id}
+                              src={currentPromo.image_url || ""}
+                              alt={currentPromo.name || "Promotional Image"}
+                              className="w-full h-full object-cover"
+                              initial="initial"
+                              animate="animate"
+                              exit="exit"
+                              variants={animationVariants}
+                              transition={transitionProps}
+                            />
+                          )}
+                        </AnimatePresence>
+
+                        {promoImages.length > 1 && (
+                          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-2">
+                            {promoImages.map((_, index) => (
+                              <div
+                                key={index}
+                                className={`w-2 h-2 rounded-full transition-colors ${index === currentPromoIndex ? 'bg-jewelry-primary' : 'bg-gray-400'}`}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
-                      <p className="text-[10px] md:text-xs text-blue-600 font-semibold mb-1">PURCHASE</p>
-                      <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.silver_per_kg_purchase}</p>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Footer Banner - hide on TV to ensure all rates fit */}
+            {/* Footer Banner - keep visible on all except TV if you prefer; current behavior: hidden on TV */}
             {screenSize !== 'tv' && bannerSettings?.banner_image_url && (
               <div 
                 className="flex-shrink-0 bg-white border-t-2 md:border-t-4 border-jewelry-primary shadow-md md:shadow-lg"
