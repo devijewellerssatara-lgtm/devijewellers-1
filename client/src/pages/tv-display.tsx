@@ -218,9 +218,9 @@ export default function TVDisplay() {
             </div>
 
             {/* Today's Rate Header */}
-           <<div className={`bg-gradient-to-r from-gold-600 to-gold-700 text-white text-center flex-shrink-0 ${screenSize === 'tv' ? 'py-2' : 'py-2 md:py-3'}`}>
-             <<h2 className={`font-display font-bold ${screenSize === 'tv' ? 'text-4xl' : screenSize === 'tablet' ? 'text-2xl' : 'text-xl md:text-3xl'}`}>TODAY'S RAT</</h2>
-          </</_code
+            <div className={`bg-gradient-to-r from-gold-600 to-gold-700 text-white text-center flex-shrink-0 ${screenSize === 'tv' ? 'py-2' : 'py-2 md:py-3'}`}>
+              <h2 className={`font-display font-bold ${screenSize === 'tv' ? 'text-4xl' : screenSize === 'tablet' ? 'text-2xl' : 'text-xl md:text-3xl'}`}>TODAY'S RATES</h2>
+            </div>
             {/* Rates Display - Main Content */}
             <div className={`flex-1 w-full ${screenSize === 'tv' ? 'px-2 py-4' : screenSize === 'tablet' ? 'px-4 py-6' : 'px-2 md:px-6 py-4 md:py-8'}`}>
               <div className={`grid ${screenSize === 'tv' ? 'gap-4' : screenSize === 'tablet' ? 'gap-6' : 'gap-4 md:gap-6'} ${screenSize === 'mobile' || isVertical ? 'grid-cols-1' : 'grid-cols-2'}`} style={screenSize !== 'mobile' && !isVertical ? { gridTemplateColumns: '1.6fr 1fr' } : undefined}>
