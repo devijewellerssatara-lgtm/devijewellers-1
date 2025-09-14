@@ -313,7 +313,7 @@ export default function TVDisplay() {
                   {promoImages.length > 0 && (
                     <div className="bg-white rounded-lg shadow-md overflow-hidden fade-in self-start">
                       <div
-                        className={`relative w-full ${screenSize === 'tv' ? 'aspect-[12/12]' : 'aspect-video'} bg-gradient-to-br from-gold-100 to-gold-200 flex items-center justify-center p-0 pb-0`}
+                        className={`relative w-full ${screenSize === 'tv' ? 'aspect-[12/12]' : 'aspect-video'} bg-transparent flex items-center justify-center p-0 pb-0`}
                       >
                         <AnimatePresence mode="wait">
                           {currentPromo && (
