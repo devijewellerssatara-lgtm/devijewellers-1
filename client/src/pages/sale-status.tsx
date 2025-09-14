@@ -407,66 +407,21 @@ export default function SaleStatus() {
           id="preview-overlay"
           className="fixed inset-0 z-50 bg-black/80 p-0"
           onClick={() => setPreviewUrl(null)}
-          onDoubleClick={() => setPreviewUrl(null)}
-          role="dialog"
-          aria-modal="true"
         >
           <div className="relative w-full h-full flex items-center justify-center">
             <img
               src={previewUrl}
               alt="Preview"
               className="max-h-full max-w-full w-full h-auto object-contain"
-              onClick={(e) => e.stopPropagation()}
-              onTouchStart={() => {
-                touchStartRef.current = Date.now();
-                longPressRef.current = false;
-              }}
-              onTouchEnd={(e) => {
-                const elapsed = Date.now() - (touchStartRef.current || 0);
-                if (elapsed >= 500) {
-                  // treat as long-press; don't close overlay
-                  longPressRef.current = true;
-                  e.stopPropagation();
-                }
-              }}
+              onClick={(e) => e.stopPropagation()} /* allow long-press without closing */
             />
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-4">
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div
-                className="pointer-events-auto bg-white/95 rounded-lg px-4 py-3 text-gray-900 shadow-lg text-center max-w-xs"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setPreviewUrl(null);
-                }}
+                className="pointer-events-auto bg-white/90 rounded-lg px-4 py-3 text-gray-800 shadow-lg text-center"
+                onClick={() => setPreviewUrl(null)}
               >
                 <div className="text-sm font-semibold">Long press the image to Save/Download</div>
-                <div className="text-[10px] mt-1 text-gray-600">
-                  Tap anywhere or double-tap to exit. Auto-exits in 30s.
-                </div>
-                {dirHandle?.name ? (
-                  <div className="text-[10px] mt-2 text-gray-600">
-                    Save folder: {dirHandle.name}
-                  </div>
-                ) : null}
-                <div className="mt-3 flex items-center justify-center gap-2">
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDownloadFromPreview();
-                    }}
-                    className="bg-jewelry-primary text-white px-3 py-1.5 text-xs font-medium rounded"
-                  >
-                    Download
-                  </Button>
-                  <Button
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      await chooseFolder();
-                    }}
-                    className="bg-gray-800 hover:bg-gray-900 text-white px-3 py-1.5 text-xs font-medium rounded"
-                  >
-                    Set Folder
-                  </Button>
-                </div>
+                <div className="text-[10px] mt-1 text-gray-600">Tap anywhere to go back</div>
               </div>
             </div>
           </div>

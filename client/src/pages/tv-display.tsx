@@ -131,7 +131,7 @@ export default function TVDisplay() {
   const getRateFontSize = () => {
     if (screenSize === 'mobile') return "text-xl";
     if (screenSize === 'tablet') return "text-3xl";
-    if (screenSize === 'tv') return "text-6xl";
+    if (screenSize === 'tv') return "text-5xl";
     return settings?.rate_number_font_size || "text-4xl";
   };
   const rateFontSize = getRateFontSize();
@@ -173,7 +173,7 @@ export default function TVDisplay() {
 
   return (
     <div 
-      className={`w-full h-screen overflow-y-auto flex flex-col ${screenSize === 'mobile' ? 'p-2' : ''}`}
+      className={`w-full h-screen overflow-hidden flex flex-col ${screenSize === 'mobile' ? 'p-2' : ''}`}
       style={{ 
         backgroundColor: settings?.background_color || "#FFF8E1",
         color: settings?.text_color || "#212529"
@@ -190,7 +190,7 @@ export default function TVDisplay() {
             className="flex-1 flex flex-col"
           >
             {/* Header with Company Logo - Responsive for all devices */}
-            <div className={`relative bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white flex-shrink-0 ${screenSize === 'tv' ? 'py-6' : screenSize === 'tablet' ? 'py-3' : 'py-2 md:py-4'}`}>
+            <div className={`relative bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white flex-shrink-0 ${screenSize === 'tv' ? 'py-4' : screenSize === 'tablet' ? 'py-3' : 'py-2 md:py-4'}`}>
               <div className="container mx-auto px-2 md:px-4 flex items-center justify-between">
                 <div className="flex items-center space-x-2 md:space-x-4">
                   <div className="w-10 h-10 md:w-16 md:h-16 bg-gold-500 rounded-full flex items-center justify-center shadow-lg">
