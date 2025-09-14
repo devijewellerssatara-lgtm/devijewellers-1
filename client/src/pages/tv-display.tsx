@@ -234,9 +234,8 @@ export default function TVDisplay() {
                     <div className="flex justify-between items-center mb-1 md:mb-2">
                       <h4 className="text-sm md:text-lg font-bold text-gray-800">24K GOLD (Per 10 GMS)</h4>
                       <div className="w-6 h-6 md:w-7 md:h-7 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
-                       <<i className="fas fa-star text-white text-[10p"></
- i>
-                    </v>div
+                        <i className="fas fa-star text-white text-[10px]"></i>
+                      </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
