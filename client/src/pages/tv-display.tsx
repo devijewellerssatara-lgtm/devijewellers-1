@@ -309,8 +309,8 @@ export default function TVDisplay() {
                   </div>
 
                   {promoImages.length > 0 && (
-                    <div className="bg-white rounded-lg shadow-md overflow-hidden fade-in flex-1 min-h-0">
-                      <div className="relative w-full h-full bg-gradient-to-br from-gold-100 to-gold-200 flex items-center justify-center p-2 pb-10">
+                    <div className="bg-white rounded-lg shadow-md overflow-hidden fade-in self-start">
+                      <div className="relative w-full aspect-video bg-gradient-to-br from-gold-100 to-gold-200 flex items-center justify-center p-2 pb-6">
                         <AnimatePresence mode="wait">
                           {currentPromo && (
                             <motion.img
