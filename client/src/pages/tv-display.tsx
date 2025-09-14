@@ -288,7 +288,7 @@ export default function TVDisplay() {
                 </div>
 
                 {/* Right column: SILVER on top, PROMO underneath */}
-                <div className="flex flex-col gap-4 h-full">
+                <div className="flex flex-col gap-3 h-full">
                   <div className="rate-card bg-white rounded-lg shadow-md p-3 md:p-4 border-l-4 md:border-l-6 border-jewelry-primary">
                     <div className="flex justify-between items-center mb-2 md:mb-3">
                       <h4 className="text-base md:text-xl font-bold text-gray-800">SILVER (Per KG)</h4>
