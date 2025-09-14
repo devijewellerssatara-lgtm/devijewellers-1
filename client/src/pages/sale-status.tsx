@@ -15,11 +15,93 @@ export default function SaleStatus() {
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const [isWorking, setIsWorking] = useState<"idle" | "saving" | "sharing">("idle");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  // Optional directory handle if user selects a folder (File System Access API)
+  const [dirHandle, setDirHandle] = useState<any>(null);
 
   const isIOS = useMemo(() => {
     if (typeof navigator === "undefined") return false;
     return /iPad|iPhone|iPod/.test(navigator.userAgent);
   }, []);
+
+  // Try modern file picker (lets user choose exact save location and filename)
+  const saveWithPicker = async (blob: Blob, suggestedName: string) => {
+    try {
+      // @ts-expect-error
+      if (window?.showSaveFilePicker) {
+        // @ts-expect-error
+        const handle = await window.showSaveFilePicker({
+          suggestedName,
+          types: [{ description: "PNG Image", accept: { "image/png": [".png"] } }],
+        });
+        // @ts-expect-error
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  };
+
+  // Let user choose a folder and remember it (for capable browsers)
+  const chooseFolder = async () => {
+    try {
+      // @ts-expect-error
+      if (window?.showDirectoryPicker) {
+        // @ts-expect-error
+        const handle = await window.showDirectoryPicker();
+        setDirHandle(handle);
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  };
+
+  // Save directly into a chosen folder (File System Access API)
+  const saveToChosenFolder = async (blob: Blob, filename: string) => {
+    try {
+      if (!dirHandle) return false;
+      // @ts-expect-error
+      const hasPerm = (await dirHandle.queryPermission?.({ mode: "readwrite" })) === "granted"
+        // @ts-expect-error
+        || (await dirHandle.requestPermission?.({ mode: "readwrite" })) === "granted";
+      if (!hasPerm) return false;
+      // @ts-expect-error
+      const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
+      // @ts-expect-error
+      const writable = await fileHandle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  // Download from preview overlay (picker/folder if possible, else anchor/dataUrl)
+  const handleDownloadFromPreview = async () => {
+    try {
+      if (!imageBlob && !previewUrl) return;
+      const blob = imageBlob || (await (await fetch(previewUrl as string)).blob());
+      // Prefer picker, then chosen folder, then anchor/dataUrl via saveBlobToGallery fallbacks
+      if (await saveWithPicker(blob, FILENAME)) {
+        setPreviewUrl(null);
+        return;
+      }
+      if (await saveToChosenFolder(blob, FILENAME)) {
+        setPreviewUrl(null);
+        return;
+      }
+      await saveBlobToGallery(blob, FILENAME, previewUrl || undefined);
+      setPreviewUrl(null);
+    } catch {
+      // ignore; overlay remains
+    }
+  };
 
   const captureRef = useRef<HTMLDivElement>(null);
 
