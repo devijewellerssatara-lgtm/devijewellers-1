@@ -201,7 +201,7 @@ export default function TVDisplay() {
                   <img
                     src="/logo.png"
                     alt="Devi Jewellers Logo"
-                    className="h-16 md:h-20 w-auto object-contain"
+                    className="h-20 md:h-24 w-auto object-contain"
                   />
                 </div>
                 {/* Right: Date/Time */}
@@ -216,9 +216,18 @@ export default function TVDisplay() {
               </div>
             </div>
 
-            {/* Today's Rate Header */}
-            <div className={`bg-gradient-to-r from-gold-600 to-gold-700 text-white text-center flex-shrink-0 ${screenSize === 'tv' ? 'py-0' : 'py-2 md:py-2'}`}>
-              <h2 className={`font-display font-bold ${screenSize === 'tv' ? 'text-4xl' : screenSize === 'tablet' ? 'text-2xl' : 'text-xl md:text-3xl'}`}>TODAY'S RATES</h2>
+            {/* Today's Rate Header - Running text */}
+            <div className={`bg-gradient-to-r from-gold-600 to-gold-700 text-white flex-shrink-0 ${screenSize === 'tv' ? 'py-0' : 'py-2 md:py-2'}`}>
+              <div className="overflow-hidden">
+                <motion.div
+                  initial={{ x: '100%' }}
+                  animate={{ x: '-100%' }}
+                  transition={{ repeat: Infinity, repeatType: 'loop', duration: 12, ease: 'linear' }}
+                  className={`whitespace-nowrap font-display font-bold ${screenSize === 'tv' ? 'text-4xl' : screenSize === 'tablet' ? 'text-2xl' : 'text-xl md:text-3xl'}`}
+                >
+                  TODAY'S RATES • TODAY'S RATES • TODAY'S RATES • TODAY'S RATES • TODAY'S RATES
+                </motion.div>
+              </div>
             </div>
             {/* Rates Display - Main Content */}
             <div className={`flex-1 w-full ${screenSize === 'tv' ? 'px-2 py-2' : screenSize === 'tablet' ? 'px-4 py-6' : 'px-2 md:px-6 py-4 md:py-8'}`}>
