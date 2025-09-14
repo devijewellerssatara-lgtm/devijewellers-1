@@ -191,7 +191,7 @@ export default function TVDisplay() {
             transition={{ duration_seconds: 0.5, ease: "easeInOut" }}
             className="flex-1 flex flex-col"
           >
-            {/* Header transparent - only centered logo visible */}
+            {/* Header - transparent with centered logo and right-aligned date/time */}
             <div className={`relative bg-transparent flex-shrink-0 ${screenSize === 'tv' ? 'py-1' : 'py-1 md:py-2'}`}>
               <div className="w-full grid grid-cols-3 items-center px-2 md:px-4">
                 {/* Left spacer to ensure true visual center for logo */}
@@ -204,13 +204,20 @@ export default function TVDisplay() {
                     className="h-16 md:h-20 w-auto object-contain"
                   />
                 </div>
-                {/* Right spacer - hide date/time to show only logo */}
-                <div />
+                {/* Right: Date/Time */}
+                <div className="justify-self-end text-right bg-black/20 rounded px-2 py-1">
+                  <div className="font-semibold text-gold-200 leading-tight text-sm md:text-xl">
+                    {format(currentTime, "EEE dd-MMM-yyyy")}
+                  </div>
+                  <div className="font-extrabold text-white leading-tight text-base md:text-3xl">
+                    {format(currentTime, "HH:mm:ss")}
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Today's Rate Header */}
-            <div className={`bg-gradient-to-r from-gold-600 to-gold-700 text-white text-center flex-shrink-0 ${screenSize === 'tv' ? 'py-1' : 'py-2 md:py-2'}`}>
+            <div className={`bg-gradient-to-r from-gold-600 to-gold-700 text-white text-center flex-shrink-0 ${screenSize === 'tv' ? 'py-0' : 'py-2 md:py-2'}`}>
               <h2 className={`font-display font-bold ${screenSize === 'tv' ? 'text-4xl' : screenSize === 'tablet' ? 'text-2xl' : 'text-xl md:text-3xl'}`}>TODAY'S RATES</h2>
             </div>
             {/* Rates Display - Main Content */}
