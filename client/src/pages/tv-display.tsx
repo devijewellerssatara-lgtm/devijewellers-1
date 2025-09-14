@@ -201,7 +201,7 @@ export default function TVDisplay() {
                   <img
                     src="/logo.png"
                     alt="Devi Jewellers Logo"
-                    className="h-12 md:h-16 w-auto object-contain"
+                    className="h-16 md:h-20 w-auto object-contain"
                   />
                 </div>
                 {/* Right: Date/Time with larger fonts */}
@@ -221,7 +221,7 @@ export default function TVDisplay() {
               <h2 className={`font-display font-bold ${screenSize === 'tv' ? 'text-4xl' : screenSize === 'tablet' ? 'text-2xl' : 'text-xl md:text-3xl'}`}>TODAY'S RATES</h2>
             </div>
             {/* Rates Display - Main Content */}
-            <div className={`flex-1 w-full ${screenSize === 'tv' ? 'px-2 py-4' : screenSize === 'tablet' ? 'px-4 py-6' : 'px-2 md:px-6 py-4 md:py-8'}`}>
+            <div className={`flex-1 w-full ${screenSize === 'tv' ? 'px-2 py-2' : screenSize === 'tablet' ? 'px-4 py-6' : 'px-2 md:px-6 py-4 md:py-8'}`}>
               <div
                 className={`grid h-full ${screenSize === 'tv' ? 'gap-2' : screenSize === 'tablet' ? 'gap-4' : 'gap-3 md:gap-4'} ${screenSize === 'mobile' || isVertical ? 'grid-cols-1' : 'grid-cols-2'}`}
                 style={screenSize !== 'mobile' && !isVertical ? { gridTemplateColumns: '1.6fr 1fr' } : undefined}
