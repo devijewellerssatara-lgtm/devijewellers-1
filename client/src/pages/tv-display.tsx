@@ -223,11 +223,11 @@ export default function TVDisplay() {
                   initial={{ x: '100%' }}
                   animate={{ x: '-100%' }}
                   transition={{ repeat: Infinity, repeatType: 'loop', duration: 20, ease: 'linear' }}
-                  className={`whitespace-nowrap font-display font-bold ${screenSize === 'tv' ? 'text-4xl' : screenSize === 'tablet' ? 'text-2xl' : 'text-xl md:text-3xl'}`}
+                  className={`font-display font-bold ${screenSize === 'tv' ? 'text-4xl' : screenSize === 'tablet' ? 'text-2xl' : 'text-xl md:text-3xl'} flex items-center justify-between w-full`}
                 >
-                  <span className="mx-8">TODAYS RATE</span>
-                  <span className="mx-8">TODAYS RATE</span>
-                  <span className="mx-8">TODAYS RATE</span>
+                  <span className="px-6">TODAYS RATE</span>
+                  <span className="px-6">TODAYS RATE</span>
+                  <span className="px-6">TODAYS RATE</span>
                 </motion.div>
               </div>
             </div>
