@@ -248,20 +248,20 @@ export default function TVDisplay() {
 
                   {/* 22K GOLD */}
                   <div className="rate-card bg-white rounded-lg shadow-md p-2 md:p-3 border-l-4 md:border-l-6 border-jewelry-primary">
-                   <<div className="flex justify-between items-center mb-1 md:mb-2">
-                     <<h4 className="text-sm md:text-lg font-bold text-gray-800">22K GOLD (Per 10 G)</S)h4>
-                     < div className="w-7 h-7 md:w-8 md:h-8 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
-                       < i className="fas fa-medal text-white text-"></ mi>
-                    </  div>
-                  </  div>
-                   < div className="grid grid-cols-2 gap-2">
-                     < div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
-                       < p className="text-[9px] md:text-[10px] text-blue-600 font-semibold mb-0.5">SA</-1p>
-                       < p className={`${rateFontSizeFontSize} font-bold text-blue-800`}>₹{currentRates.gold_22k_sale}</p>
+                    <div className="flex justify-between items-center mb-1 md:mb-2">
+                      <h4 className="text-sm md:text-lg font-bold text-gray-800">22K GOLD (Per 10 GMS)</h4>
+                      <div className="w-7 h-7 md:w-8 md:h-8 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
+                        <i className="fas fa-medal text-white text-xs"></i>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
+                        <p className="text-[9px] md:text-[10px] text-blue-600 font-semibold mb-0.5">SALE</p>
+                        <p className={`${rateFontSize} font-bold text-blue-800 leading-tight`}>₹{currentRates.gold_22k_sale}</p>
                       </div>
                       <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
-                        <p className="text-[10px] md:text-xs text-blue-600 font-semibold mb-1">PURCHASE</p>
-                        <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.gold_22k_purchase}</p>
+                        <p className="text-[9px] md:text-[10px] text-blue-600 font-semibold mb-0.5">PURCHASE</p>
+                        <p className={`${rateFontSize} font-bold text-blue-800 leading-tight`}>₹{currentRates.gold_22k_purchase}</p>
                       </div>
                     </div>
                   </div>
