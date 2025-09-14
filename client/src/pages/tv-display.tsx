@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "rea_codereact";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -313,8 +313,8 @@ export default function TVDisplay() {
                   {promoImages.length > 0 && (
                     <div className="bg-white rounded-lg shadow-md overflow-hidden fade-in self-start">
                       <div
-                        className={`relative w-full ${screenSize === 'tv' ? '' : 'aspect-video'} bg-gradient-to-br from-gold-100 to-gold-200 flex items-center justify-center p-2 pb-6`}
-                        style={screenSize === 'tv' && promoHeight ? { height: promoHeight + EXTRA_PROMO_OFFSET } : undefined}
+                        className={`relative w-full ${screenSize === 'tv' ? 'aspect-[16/11]' : 'aspect-video'} bg-gradient-to-br from-gold-100 to-gold-200 flex items-center justify-center p-2 pb-6`}
+                   _codeize === 'tv' && promoHeight ? { height: promoHeight + EXTRA_PROMO_OFFSET } : undefined}
                       >
                         <AnimatePresence mode="wait">
                           {currentPromo && (
