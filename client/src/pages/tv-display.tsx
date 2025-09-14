@@ -189,17 +189,13 @@ export default function TVDisplay() {
             transition={{ duration_seconds: 0.5, ease: "easeInOut" }}
             className="flex-1 flex flex-col"
           >
-            {/* Header with centered logo and left-aligned date/time (reduced height, no circular badge) */}
+            {/* Header with centered logo and right-aligned date/time (reduced height, no circular badge) */}
             <div className={`relative bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white flex-shrink-0 ${screenSize === 'tv' ? 'py-1' : 'py-1 md:py-2'}`}>
               <div className="w-full flex items-center justify-between px-2 md:px-4">
-                {/* Left: Date/Time */}
-                <div className="text-left bg-black/20 rounded px-2 py-1">
-                  <div className="text-[10px] md:text-sm font-semibold text-gold-200 leading-tight">
-                    {format(currentTime, "EEE dd-MMM-yyyy")}
-                  </div>
-                  <div className="text-xs md:text-base font-bold text-white leading-tight">
-                    {format(currentTime, "HH:mm:ss")}
-                  </div>
+                {/* Left spacer to keep logo centered */}
+                <div className="opacity-0 text-left bg-black/20 rounded px-2 py-1 select-none">
+                  <div className="text-[10px] md:text-sm font-semibold">.</div>
+                  <div className="text-xs md:text-base font-bold">.</div>
                 </div>
                 {/* Center: Logo */}
                 <div className="flex-1 flex items-center justify-center">
@@ -209,22 +205,26 @@ export default function TVDisplay() {
                     className="h-12 md:h-16 w-auto object-contain"
                   />
                 </div>
-                {/* Right spacer to keep logo centered */}
-                <div className="opacity-0 text-left bg-black/20 rounded px-2 py-1 select-none">
-                  <div className="text-[10px] md:text-sm font-semibold">.</div>
-                  <div className="text-xs md:text-base font-bold">.</div>
+                {/* Right: Date/Time */}
+                <div className="text-right bg-black/20 rounded px-2 py-1">
+                  <div className="text-[10px] md:text-sm font-semibold text-gold-200 leading-tight">
+                    {format(currentTime, "EEE dd-MMM-yyyy")}
+                  </div>
+                  <div className="text-xs md:text-base font-bold text-white leading-tight">
+                    {format(currentTime, "HH:mm:ss")}
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Today's Rate Header */}
-            <div className={`bg-gradient-to-r from-gold-600 to-gold-700 text-white text-center flex-shrink-0 ${screenSize === 'tv' ? 'py-2' : 'py-2 md:py-3'}`}>
+            <div className={`bg-gradient-to-r from-gold-600 to-gold-700 text-white text-center flex-shrink-0 ${screenSize === 'tv' ? 'py-1' : 'py-2 md:py-2'}`}>
               <h2 className={`font-display font-bold ${screenSize === 'tv' ? 'text-4xl' : screenSize === 'tablet' ? 'text-2xl' : 'text-xl md:text-3xl'}`}>TODAY'S RATES</h2>
             </div>
             {/* Rates Display - Main Content */}
             <div className={`flex-1 w-full ${screenSize === 'tv' ? 'px-2 py-4' : screenSize === 'tablet' ? 'px-4 py-6' : 'px-2 md:px-6 py-4 md:py-8'}`}>
               <div
-                className={`grid ${screenSize === 'tv' ? 'gap-3' : screenSize === 'tablet' ? 'gap-6' : 'gap-4 md:gap-6'} ${screenSize === 'mobile' || isVertical ? 'grid-cols-1' : 'grid-cols-2'}`}
+                className={`grid h-full ${screenSize === 'tv' ? 'gap-3' : screenSize === 'tablet' ? 'gap-6' : 'gap-4 md:gap-6'} ${screenSize === 'mobile' || isVertical ? 'grid-cols-1' : 'grid-cols-2'}`}
                 style={screenSize !== 'mobile' && !isVertical ? { gridTemplateColumns: '1.6fr 1fr' } : undefined}
               >
                 {/* Left column: 24K, 22K, 18K stacked */}
@@ -274,16 +274,16 @@ export default function TVDisplay() {
                     <div className="flex justify-between items-center mb-1 md:mb-2">
                       <h4 className="text-sm md:text-lg font-bold text-gray-800">18K GOLD (Per 10 GMS)</h4>
                       <div className="w-6 h-6 md:w-7 md:h-7 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
-                        <i className="fas fa-crown text-white text-xs"></i>
+                        <i className="fas fa-crown text-white text-[10px]"></i>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
-                        <p className="text-[9px] md:text-[10px] text-blue-600 font-semibold mb-0.5">SALE</p>
+                        <p className="text-xs md:text-sm text-blue-700 font-bold mb-0.5 uppercase tracking-wide">SALE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800 leading-tight`}>₹{currentRates.gold_18k_sale}</p>
                       </div>
                       <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
-                        <p className="text-[9px] md:text-[10px] text-blue-600 font-semibold mb-0.5">PURCHASE</p>
+                        <p className="text-xs md:text-sm text-blue-700 font-bold mb-0.5 uppercase tracking-wide">PURCHASE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800 leading-tight`}>₹{currentRates.gold_18k_purchase}</p>
                       </div>
                     </div>
