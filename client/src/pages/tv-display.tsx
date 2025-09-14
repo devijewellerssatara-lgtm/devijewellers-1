@@ -310,14 +310,14 @@ export default function TVDisplay() {
 
                   {promoImages.length > 0 && (
                     <div className="bg-white rounded-lg shadow-md overflow-hidden fade-in flex-1 min-h-0">
-                      <div className={`${screenSize === 'tv' ? 'relative w-full h-full' : 'relative aspect-video'} bg-gradient-to-br from-gold-100 to-gold-200`}>
+                      <div className="relative w-full h-full bg-gradient-to-br from-gold-100 to-gold-200">
                         <AnimatePresence mode="wait">
                           {currentPromo && (
                             <motion.img
                               key={currentPromo.id}
                               src={currentPromo.image_url || ""}
                               alt={currentPromo.name || "Promotional Image"}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-contain"
                               initial="initial"
                               animate="animate"
                               exit="exit"
