@@ -260,7 +260,7 @@ export default function TVDisplay() {
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
-                        <p className={`${screenSize === 'tv' ? 'text-2xl font-extrabold' : 'text-xs md:text-sm font-bold'} text-blue-700 mb-0.5 uppercase tracking-wide`}>SALE</p>
+                        <p className={`${screenSize === 'tv' ? 'text-2xl font-extrabold' : 'text-xs md:text-4xl font-bold'} text-blue-700 mb-0.5 uppercase tracking-wide`}>SALE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800 leading-tight`}>₹{currentRates.gold_24k_sale}</p>
                       </div>
                       <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
