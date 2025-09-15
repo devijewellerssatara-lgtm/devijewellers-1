@@ -307,7 +307,7 @@ export default function TVDisplay() {
                 <div className="flex flex-col gap-3 h-full">
                   <div className="rate-card bg-white rounded-lg shadow-md p-3 md:p-4 border-l-4 md:border-l-6 border-jewelry-primary">
                     <div className="flex justify-between items-center mb-2 md:mb-3">
-                      <h4 className={`font-bold text-gray-800 ${screenSize === 'tv' ? 'text-4xl' : 'text-base md:text-xl'}`}>SILVER (Per KG)</h4>
+                      <h4 className={`font-bold text-gray-800 ${screenSize === 'tv' ? 'text-4xl' : 'text-base md:text-4xl'}`}>SILVER (Per KG)</h4>
                       <div className="w-6 h-6 md:w-7 md:h-7 bg-jewelry-primary rounded-full shadow-lg flex items-center justify-center">
                         <i className="fas fa-circle text-white text-[10px] md:text-xs"></i>
                       </div>
