@@ -14,6 +14,105 @@ export default function SaleStatus() {
   const [currentTime, setCurrentTime] = useState<Date>(getIndianTime());
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const [isWorking, setIsWorking] = useState<"idle" | "saving" | "sharing">("idle");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  // Optional directory handle if user selects a folder (File System Access API)
+  const [dirHandle, setDirHandle] = useState<any>(null);
+
+  const isIOS = useMemo(() => {
+    if (typeof navigator === "undefined") return false;
+    return /iPad|iPhone|iPod/.test(navigator.userAgent);
+  }, []);
+
+  // Track tap vs long-press on the preview image to avoid closing on long-press
+  const touchStartRef = useRef<number>(0);
+  const longPressRef = useRef<boolean>(false);
+
+  // Auto-close preview after 30 seconds
+  useEffect(() => {
+    if (!previewUrl) return;
+    const timer = setTimeout(() => setPreviewUrl(null), 30000);
+    return () => clearTimeout(timer);
+  }, [previewUrl]);
+
+  // Try modern file picker (lets user choose exact save location and filename)
+  const saveWithPicker = async (blob: Blob, suggestedName: string) => {
+    try {
+      // @ts-expect-error
+      if (window?.showSaveFilePicker) {
+        // @ts-expect-error
+        const handle = await window.showSaveFilePicker({
+          suggestedName,
+          types: [{ description: "PNG Image", accept: { "image/png": [".png"] } }],
+        });
+        // @ts-expect-error
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  };
+
+  // Let user choose a folder and remember it (for capable browsers)
+  const chooseFolder = async () => {
+    try {
+      // @ts-expect-error
+      if (window?.showDirectoryPicker) {
+        // @ts-expect-error
+        const handle = await window.showDirectoryPicker();
+        setDirHandle(handle);
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  };
+
+  // Save directly into a chosen folder (File System Access API)
+  const saveToChosenFolder = async (blob: Blob, filename: string) => {
+    try {
+      if (!dirHandle) return false;
+      // @ts-expect-error
+      const hasPerm = (await dirHandle.queryPermission?.({ mode: "readwrite" })) === "granted"
+        // @ts-expect-error
+        || (await dirHandle.requestPermission?.({ mode: "readwrite" })) === "granted";
+      if (!hasPerm) return false;
+      // @ts-expect-error
+      const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
+      // @ts-expect-error
+      const writable = await fileHandle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  // Download from preview overlay (picker/folder if possible, else anchor/dataUrl)
+  const handleDownloadFromPreview = async () => {
+    try {
+      if (!imageBlob && !previewUrl) return;
+      const blob = imageBlob || (await (await fetch(previewUrl as string)).blob());
+      // Prefer picker, then chosen folder, then anchor/dataUrl via saveBlobToGallery fallbacks
+      if (await saveWithPicker(blob, FILENAME)) {
+        setPreviewUrl(null);
+        return;
+      }
+      if (await saveToChosenFolder(blob, FILENAME)) {
+        setPreviewUrl(null);
+        return;
+      }
+      await saveBlobToGallery(blob, FILENAME, previewUrl || undefined);
+      setPreviewUrl(null);
+    } catch {
+      // ignore; overlay remains
+    }
+  };
 
   const captureRef = useRef<HTMLDivElement>(null);
 
@@ -41,51 +140,121 @@ export default function SaleStatus() {
     };
   }, [settings]);
 
-  const CAPTURE_WIDTH = 900;
-  const CAPTURE_HEIGHT = 1060;
-  const FILENAME = `rates-status-${format(getIndianTime(), "yyyyMMdd-HHmm")}.png`;
+  const FILENAME = `dj_daily_rate-${format(getIndianTime(), "yyyyMMdd")}.png`;
 
-  // Generate PNG safely using clone
-  const generateImage = async (): Promise<{ blob: Blob; url: string } | null> => {
+  // Generate PNG from the on-screen node to preserve computed layout
+  const generateImage = async (): Promise<{ blob: Blob; url: string; dataUrl: string } | null> => {
     if (!captureRef.current) return null;
 
-    const node = captureRef.current.cloneNode(true) as HTMLElement;
+    const node = captureRef.current;
 
-    // Hidden container
-    node.style.position = "fixed";
-    node.style.left = "-9999px";
-    node.style.top = "-9999px";
-    node.style.width = `${CAPTURE_WIDTH}px`;
-    node.style.height = `${CAPTURE_HEIGHT}px`;
-    document.body.appendChild(node);
+    const { toPng } = await import("html-to-image");
 
-    const { toBlob } = await import("html-to-image");
-    const blob = await toBlob(node, {
+    // Use actual rendered size to avoid blank outputs on some Android browsers
+    const rect = node.getBoundingClientRect();
+    const width = Math.max(1, Math.ceil(rect.width));
+    const height = Math.max(1, Math.ceil(rect.height));
+
+    const options: any = {
       cacheBust: true,
       pixelRatio: 2,
       backgroundColor: theme.background,
-      style: { transform: "none" },
-    });
+      width,
+      height,
+      style: {
+        transform: "none",
+      },
+      // Exclude footer (buttons) and preview overlay from the captured image
+      filter: (n: HTMLElement) =>
+        !n.closest?.("#action-footer") && !n.closest?.("#preview-overlay"),
+    };
+    // Explicitly specify canvas dimensions for some WebViews
+    options.canvasWidth = width * 2;
+    options.canvasHeight = height * 2;
 
-    document.body.removeChild(node);
+    const dataUrl = await toPng(node, options);
 
-    if (!blob) return null;
+    // Convert data URL to Blob for saving/sharing
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     setImageBlob(blob);
-    return { blob, url };
+    setPreviewUrl(dataUrl);
+    return { blob, url, dataUrl };
   };
 
-  // Save as download (works on mobile)
-  const saveBlobToGallery = async (blob: Blob, filename: string) => {
-    const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = blobUrl;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(blobUrl);
-    alert("✅ Image saved! Check your Downloads folder.");
+  // Save/share image across Android/iOS browsers and in-app WebViews
+  const saveBlobToGallery = async (blob: Blob, filename: string, dataUrl?: string) => {
+    try {
+      const file = new File([blob], filename, { type: "image/png" });
+
+      // 1) Prefer native share with files where supported
+      // @ts-expect-error
+      if (navigator?.canShare && navigator.canShare({ files: [file] })) {
+        // @ts-expect-error
+        await navigator.share({ files: [file], title: "Today's Sale Rates" });
+        return;
+      }
+
+      // 2) iOS Safari: download attribute is ignored; navigate to data URL so user can save
+      if (isIOS && dataUrl) {
+        try {
+          window.location.href = dataUrl;
+          return;
+        } catch {}
+      }
+
+      // 3) Anchor download for full browsers (mostly Android)
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      if ("download" in a && !isIOS) {
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+        return;
+      }
+
+      // 4) New tab with image (long-press to save)
+      const newTab = window.open();
+      if (newTab) {
+        newTab.document.title = filename;
+        const img = newTab.document.createElement("img");
+        img.src = dataUrl || blobUrl;
+        img.style.width = "100%";
+        img.style.height = "auto";
+        img.style.display = "block";
+        newTab.document.body.style.margin = "0";
+        newTab.document.body.appendChild(img);
+        return;
+      }
+
+      // 5) Last resort: force navigation to data URL derived from blob
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        try {
+          window.location.href = reader.result as string;
+        } catch {
+          // show inline preview overlay
+          setPreviewUrl((reader.result as string) || dataUrl || blobUrl);
+        }
+      };
+      reader.readAsDataURL(blob);
+
+      // Also show inline preview overlay as a UX fallback
+      setPreviewUrl(dataUrl || blobUrl);
+    } catch (err) {
+      console.error("Save image failed", err);
+      // Inline preview overlay so users can long-press save in restrictive envs
+      try {
+        const blobUrl = URL.createObjectURL(blob);
+        setPreviewUrl(dataUrl || blobUrl);
+      } catch {
+        // ignore
+      }
+    }
   };
 
   const handleSaveImage = async () => {
@@ -93,10 +262,10 @@ export default function SaleStatus() {
       setIsWorking("saving");
       const generated = await generateImage();
       if (!generated) throw new Error("Failed to render image");
-      await saveBlobToGallery(generated.blob, FILENAME);
+      await saveBlobToGallery(generated.blob, FILENAME, generated.dataUrl);
     } catch (e) {
       console.error("Failed to save image", e);
-      alert("Saving failed. Please try Chrome/Edge on Android or Safari on iOS.");
+      // No alert; a preview overlay will appear in restrictive WebViews to allow long-press save
     } finally {
       setIsWorking("idle");
     }
@@ -107,20 +276,46 @@ export default function SaleStatus() {
       setIsWorking("sharing");
       const generated = await generateImage();
       if (!generated) throw new Error("Failed to render image for sharing");
-      const { blob } = generated;
+      const { blob, dataUrl } = generated;
 
-      // Native share
+      const file = new File([blob], FILENAME, { type: "image/png" });
+      // 1) Try full Web Share with files (Android Chrome/Edge/Samsung, modern iOS)
       // @ts-expect-error
-      if (navigator?.share) {
-        const file = new File([blob], FILENAME, { type: "image/png" });
+      if (navigator?.canShare && navigator.canShare({ files: [file] })) {
         // @ts-expect-error
         await navigator.share({ files: [file], title: "Today's Sale Rates" });
         return;
-      } else {
-        alert("Sharing not supported on this browser.");
       }
+
+      // 2) Try basic Web Share with text/url (older Safari/Android)
+      // @ts-expect-error
+      if (navigator?.share) {
+        // Some browsers cannot share files but can share text/url
+        // We include a short caption and instruct to save from preview if needed
+        await navigator.share({
+          title: "Today's Sale Rates",
+          text: "Today's sale rates from Devi Jewellers. If the image didn't attach, long-press the preview to save first.",
+        });
+        // Also show preview to allow user to save image if file-sharing wasn't supported
+        setPreviewUrl(dataUrl);
+        return;
+      }
+
+      // 3) WhatsApp web deep-link fallback (cannot attach image programmatically)
+      const message = "Today's sale rates from Devi Jewellers. Please see the attached image.";
+      const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+      window.open(waUrl, "_blank");
+
+      // Show preview so user can long-press/save and attach in WhatsApp
+      setPreviewUrl(dataUrl);
     } catch (e) {
       console.error("Share failed", e);
+      // Show preview so user can save manually
+      try {
+        setPreviewUrl((await generateImage())?.dataUrl || null);
+      } catch {
+        // ignore
+      }
     } finally {
       setIsWorking("idle");
     }
@@ -139,6 +334,7 @@ export default function SaleStatus() {
 
   return (
     <div
+      ref={captureRef}
       className="h-screen flex flex-col overflow-hidden"
       style={{ backgroundColor: theme.background, color: theme.text }}
     >
@@ -152,11 +348,10 @@ export default function SaleStatus() {
       </div>
 
       {/* Capture Area */}
-      <div ref={captureRef} className="flex-1 flex flex-col w-full">
+      <div className="flex-1 flex flex-col w-full">
         {/* Top bar */}
-        <div className="bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white py-3 px-4 flex items-center justify-between shadow-md">
-          <img src="/logo.png" alt="Logo" className="h-10 md:h-12 w-auto object-contain" />
-          <div className="text-right">
+        <div className="bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white py-3 px-4 flex items-center justify-center shadow-md">
+          <div className="text-center">
             <div className="text-sm md:text-lg font-semibold text-gold-200">
               {format(currentTime, "EEEE dd-MMM-yyyy")}
             </div>
@@ -184,6 +379,7 @@ export default function SaleStatus() {
 
       {/* Footer */}
       <div
+        id="action-footer"
         className="shrink-0 w-full border-t shadow-inner"
         style={{ backgroundColor: theme.background, borderColor: "rgba(0,0,0,0.1)" }}
       >
@@ -194,7 +390,7 @@ export default function SaleStatus() {
             disabled={isWorking !== "idle"}
           >
             <i className="fas fa-download mr-2"></i>
-            {isWorking === "saving" ? "Saving..." : "Save Image (9:16)"}
+            {isWorking === "saving" ? "Saving..." : "Save Image"}
           </Button>
           <Button
             onClick={handleShareWhatsApp}
@@ -206,6 +402,31 @@ export default function SaleStatus() {
           </Button>
         </div>
       </div>
+    {previewUrl && (
+        <div
+          id="preview-overlay"
+          className="fixed inset-0 z-50 bg-black/80 p-0"
+          onClick={() => setPreviewUrl(null)}
+        >
+          <div className="relative w-full h-full flex items-center justify-center">
+            <img
+              src={previewUrl}
+              alt="Preview"
+              className="max-h-full max-w-full w-full h-auto object-contain"
+              onClick={(e) => e.stopPropagation()} /* allow long-press without closing */
+            />
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div
+                className="pointer-events-auto bg-white/90 rounded-lg px-4 py-3 text-gray-800 shadow-lg text-center"
+                onClick={() => setPreviewUrl(null)}
+              >
+                <div className="text-sm font-semibold">Long press the image to Save/Download</div>
+                <div className="text-[10px] mt-1 text-gray-600">Tap anywhere to go back</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
