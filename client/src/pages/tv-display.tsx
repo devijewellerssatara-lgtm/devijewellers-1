@@ -239,11 +239,11 @@ export default function TVDisplay() {
                     </div>
                     <div className="grid grid-cols-2 gap-2 md:gap-4">
                       <div className="text-center p-2 md:p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-xs md:text-sm text-blue-600 font-semibold mb-1">SALE RATE</p>
+                        <p className="text-xs md:text-4xl text-blue-600 font-semibold mb-1">SALE RATE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.gold_24k_sale}</p>
                       </div>
                       <div className="text-center p-2 md:p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-xs md:text-sm text-blue-600 font-semibold mb-1">PURCHASE RATE</p>
+                        <p className="text-xs md:text-4xl text-blue-600 font-semibold mb-1">PURCHASE RATE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.gold_24k_purchase}</p>
                       </div>
                     </div>
@@ -259,11 +259,11 @@ export default function TVDisplay() {
                     </div>
                     <div className="grid grid-cols-2 gap-2 md:gap-4">
                       <div className="text-center p-2 md:p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-xs md:text-sm text-blue-600 font-semibold mb-1">SALE RATE</p>
+                        <p className="text-xs md:text-4xl text-blue-600 font-semibold mb-1">SALE RATE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.gold_22k_sale}</p>
                       </div>
                       <div className="text-center p-2 md:p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-xs md:text-sm text-blue-600 font-semibold mb-1">PURCHASE RATE</p>
+                        <p className="text-xs md:text-4xl text-blue-600 font-semibold mb-1">PURCHASE RATE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.gold_22k_purchase}</p>
                       </div>
                     </div>
@@ -279,11 +279,11 @@ export default function TVDisplay() {
                     </div>
                     <div className="grid grid-cols-2 gap-2 md:gap-4">
                       <div className="text-center p-2 md:p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-xs md:text-sm text-blue-600 font-semibold mb-1">SALE RATE</p>
+                        <p className="text-xs md:text-4xl text-blue-600 font-semibold mb-1">SALE RATE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.gold_18k_sale}</p>
                       </div>
                       <div className="text-center p-2 md:p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-xs md:text-sm text-blue-600 font-semibold mb-1">PURCHASE RATE</p>
+                        <p className="text-xs md:text-4xl text-blue-600 font-semibold mb-1">PURCHASE RATE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.gold_18k_purchase}</p>
                       </div>
                     </div>
@@ -305,11 +305,11 @@ export default function TVDisplay() {
                       </div>
                       <div className="grid grid-cols-2 gap-2 md:gap-4">
                         <div className="text-center p-2 md:p-4 bg-blue-50 rounded-lg border border-blue-200">
-                          <p className="text-xs md:text-sm text-blue-600 font-semibold mb-1">SALE RATE</p>
+                          <p className="text-xs md:text-4xl text-blue-600 font-semibold mb-1">SALE RATE</p>
                           <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.silver_per_kg_sale}</p>
                         </div>
                         <div className="text-center p-2 md:p-4 bg-blue-50 rounded-lg border border-blue-200">
-                          <p className="text-xs md:text-sm text-blue-600 font-semibold mb-1">PURCHASE RATE</p>
+                          <p className="text-xs md:text-4xl text-blue-600 font-semibold mb-1">PURCHASE RATE</p>
                           <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.silver_per_kg_purchase}</p>
                         </div>
                       </div>
