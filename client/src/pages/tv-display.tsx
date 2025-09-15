@@ -226,9 +226,17 @@ export default function TVDisplay() {
                   className={`font-display font-bold ${screenSize === 'tv' ? 'text-4xl' : screenSize === 'tablet' ? 'text-2xl' : 'text-xl md:text-3xl'} flex items-center w-full gap-24`}
                 >
                   <span className="flex-none text-center">TODAYS RATE</span>
+                  <span className="flex-none text-center">JOIN OUR VARIOUS SAVINGS SCHEME</span>
+
                   <span className="flex-none text-center">TODAYS RATE</span>
+                  <span className="flex-none text-center">JOIN OUR VARIOUS SAVINGS SCHEME</span>
+
                   <span className="flex-none text-center">TODAYS RATE</span>
+                  <span className="flex-none text-center">JOIN OUR VARIOUS SAVINGS SCHEME</span>
+
                   <span className="flex-none text-center">TODAYS RATE</span>
+                  <span className="flex-none text-center">JOIN OUR VARIOUS SAVINGS SCHEME</span>
+
                   {/* Spacer to add a short blank gap after the four labels */}
                   <span className="flex-none w-64"></span>
                 </motion.div>
