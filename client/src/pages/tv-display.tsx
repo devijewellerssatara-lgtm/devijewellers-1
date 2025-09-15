@@ -252,11 +252,11 @@ export default function TVDisplay() {
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
-                        <p className={`${screenSize === 'tv' ? 'text-base font-extrabold' : 'text-xs md:text-sm font-bold'} text-blue-700 mb-0.5 uppercase tracking-wide`}>SALE</p>
+                        <p className={`${screenSize === 'tv' ? 'text-2xl font-extrabold' : 'text-xs md:text-sm font-bold'} text-blue-700 mb-0.5 uppercase tracking-wide`}>SALE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800 leading-tight`}>₹{currentRates.gold_24k_sale}</p>
                       </div>
                       <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
-                        <p className={`${screenSize === 'tv' ? 'text-base font-extrabold' : 'text-xs md:text-sm font-bold'} text-blue-700 mb-0.5 uppercase tracking-wide`}>PURCHASE</p>
+                        <p className={`${screenSize === 'tv' ? 'text-2xl font-extrabold' : 'text-xs md:text-sm font-bold'} text-blue-700 mb-0.5 uppercase tracking-wide`}>PURCHASE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800 leading-tight`}>₹{currentRates.gold_24k_purchase}</p>
                       </div>
                     </div>
@@ -272,11 +272,11 @@ export default function TVDisplay() {
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
-                        <p className={`${screenSize === 'tv' ? 'text-base font-extrabold' : 'text-xs md:text-sm font-bold'} text-blue-700 mb-0.5 uppercase tracking-wide`}>SALE</p>
+                        <p className={`${screenSize === 'tv' ? 'text-2xl font-extrabold' : 'text-xs md:text-sm font-bold'} text-blue-700 mb-0.5 uppercase tracking-wide`}>SALE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800 leading-tight`}>₹{currentRates.gold_22k_sale}</p>
                       </div>
                       <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
-                        <p className={`${screenSize === 'tv' ? 'text-base font-extrabold' : 'text-xs md:text-sm font-bold'} text-blue-700 mb-0.5 uppercase tracking-wide`}>PURCHASE</p>
+                        <p className={`${screenSize === 'tv' ? 'text-2xl font-extrabold' : 'text-xs md:text-sm font-bold'} text-blue-700 mb-0.5 uppercase tracking-wide`}>PURCHASE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800 leading-tight`}>₹{currentRates.gold_22k_purchase}</p>
                       </div>
                     </div>
@@ -285,18 +285,18 @@ export default function TVDisplay() {
                   {/* 18K GOLD */}
                   <div className="rate-card bg-white rounded-lg shadow-md p-2 md:p-3 border-l-4 md:border-l-6 border-jewelry-primary">
                     <div className="flex justify-between items-center mb-1 md:mb-2">
-                      <h4 className={`font-bold text-gray-800 ${screenSize === 'tv' ? 'text-2xl' : 'text-sm md:text-lg'}`}>18K GOLD (Per 10 GMS)</h4>
+                      <h4 className={`font-bold text-gray-800 ${screenSize === 'tv' ? 'text-4xl' : 'text-sm md:text-lg'}`}>18K GOLD (Per 10 GMS)</h4>
                       <div className="w-6 h-6 md:w-7 md:h-7 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
                         <i className="fas fa-crown text-white text-[10px]"></i>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
-                        <p className={`${screenSize === 'tv' ? 'text-base font-extrabold' : 'text-xs md:text-sm font-bold'} text-blue-700 mb-0.5 uppercase tracking-wide`}>SALE</p>
+                        <p className={`${screenSize === 'tv' ? 'text-2xl font-extrabold' : 'text-xs md:text-sm font-bold'} text-blue-700 mb-0.5 uppercase tracking-wide`}>SALE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800 leading-tight`}>₹{currentRates.gold_18k_sale}</p>
                       </div>
                       <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
-                        <p className="text-xs md:text-sm text-blue-700 font-bold mb-0.5 uppercase tracking-wide">PURCHASE</p>
+                        <p className={`${screenSize === 'tv' ? 'text-2xl font-extrabold' : 'text-xs md:text-sm font-bold'} text-blue-700 mb-0.5 uppercase tracking-wide`}>PURCHASE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800 leading-tight`}>₹{currentRates.gold_18k_purchase}</p>
                       </div>
                     </div>
@@ -307,18 +307,18 @@ export default function TVDisplay() {
                 <div className="flex flex-col gap-3 h-full">
                   <div className="rate-card bg-white rounded-lg shadow-md p-3 md:p-4 border-l-4 md:border-l-6 border-jewelry-primary">
                     <div className="flex justify-between items-center mb-2 md:mb-3">
-                      <h4 className={`font-bold text-gray-800 ${screenSize === 'tv' ? 'text-2xl' : 'text-base md:text-xl'}`}>SILVER (Per KG)</h4>
+                      <h4 className={`font-bold text-gray-800 ${screenSize === 'tv' ? 'text-4xl' : 'text-base md:text-xl'}`}>SILVER (Per KG)</h4>
                       <div className="w-6 h-6 md:w-7 md:h-7 bg-jewelry-primary rounded-full shadow-lg flex items-center justify-center">
                         <i className="fas fa-circle text-white text-[10px] md:text-xs"></i>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
-                        <p className={`${screenSize === 'tv' ? 'text-base font-extrabold' : 'text-xs md:text-sm font-bold'} text-blue-700 mb-0.5 uppercase tracking-wide`}>SALE</p>
+                        <p className={`${screenSize === 'tv' ? 'text-2xl font-extrabold' : 'text-xs md:text-sm font-bold'} text-blue-700 mb-0.5 uppercase tracking-wide`}>SALE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.silver_per_kg_sale}</p>
                       </div>
                       <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
-                        <p className={`${screenSize === 'tv' ? 'text-base font-extrabold' : 'text-xs md:text-sm font-bold'} text-blue-700 mb-0.5 uppercase tracking-wide`}>PURCHASE</p>
+                        <p className={`${screenSize === 'tv' ? 'text-2xl font-extrabold' : 'text-xs md:text-sm font-bold'} text-blue-700 mb-0.5 uppercase tracking-wide`}>PURCHASE</p>
                         <p className={`${rateFontSize} font-bold text-blue-800`}>₹{currentRates.silver_per_kg_purchase}</p>
                       </div>
                     </div>
