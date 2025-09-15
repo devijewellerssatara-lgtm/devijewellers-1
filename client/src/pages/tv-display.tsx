@@ -222,13 +222,15 @@ export default function TVDisplay() {
                 <motion.div
                   initial={{ x: '100%' }}
                   animate={{ x: '-100%' }}
-                  transition={{ repeat: Infinity, repeatType: 'loop', duration: 28, ease: 'linear' }}
-                  className={`font-display font-bold ${screenSize === 'tv' ? 'text-4xl' : screenSize === 'tablet' ? 'text-2xl' : 'text-xl md:text-3xl'} grid grid-cols-4 items-center w-full`}
+                  transition={{ repeat: Infinity, repeatType: 'loop', duration: 36, ease: 'linear' }}
+                  className={`font-display font-bold ${screenSize === 'tv' ? 'text-4xl' : screenSize === 'tablet' ? 'text-2xl' : 'text-xl md:text-3xl'} flex items-center w-full gap-24`}
                 >
-                  <span className="text-center">TODAYS RATE</span>
-                  <span className="text-center">TODAYS RATE</span>
-                  <span className="text-center">TODAYS RATE</span>
-                  <span className="text-center">TODAYS RATE</span>
+                  <span className="flex-none text-center">TODAYS RATE</span>
+                  <span className="flex-none text-center">TODAYS RATE</span>
+                  <span className="flex-none text-center">TODAYS RATE</span>
+                  <span className="flex-none text-center">TODAYS RATE</span>
+                  {/* Spacer to add a short blank gap after the four labels */}
+                  <span className="flex-none w-64"></span>
                 </motion.div>
               </div>
             </div>
