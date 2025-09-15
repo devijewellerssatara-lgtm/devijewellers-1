@@ -245,7 +245,7 @@ export default function TVDisplay() {
                   {/* 24K GOLD */}
                   <div className="rate-card bg-white rounded-lg shadow-md p-2 md:p-3 border-l-4 md:border-l-6 border-jewelry-primary">
                     <div className="flex justify-between items-center mb-1 md:mb-2">
-                      <h4 className={`font-bold text-gray-800 ${screenSize === 'tv' ? 'text-2xl' : 'text-sm md:text-lg'}`}>24K GOLD (Per 10 GMS)</h4>
+                      <h4 className={`font-bold text-gray-800 ${screenSize === 'tv' ? 'text-4xl' : 'text-sm md:text-lg'}`}>24K GOLD (Per 10 GMS)</h4>
                       <div className="w-6 h-6 md:w-7 md:h-7 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
                         <i className="fas fa-star text-white text-[10px]"></i>
                       </div>
@@ -265,7 +265,7 @@ export default function TVDisplay() {
                   {/* 22K GOLD */}
                   <div className="rate-card bg-white rounded-lg shadow-md p-2 md:p-3 border-l-4 md:border-l-6 border-jewelry-primary">
                     <div className="flex justify-between items-center mb-1 md:mb-2">
-                      <h4 className={`font-bold text-gray-800 ${screenSize === 'tv' ? 'text-2xl' : 'text-sm md:text-lg'}`}>22K GOLD (Per 10 GMS)</h4>
+                      <h4 className={`font-bold text-gray-800 ${screenSize === 'tv' ? 'text-4xl' : 'text-sm md:text-lg'}`}>22K GOLD (Per 10 GMS)</h4>
                       <div className="w-6 h-6 md:w-7 md:h-7 bg-jewelry-primary rounded-full gold-shimmer flex items-center justify-center">
                         <i className="fas fa-medal text-white text-[10px]"></i>
                       </div>
