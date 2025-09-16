@@ -306,19 +306,32 @@ export default function SaleStatus() {
       const { blob, dataUrl } = generated;
 
       const file = new File([blob], FILENAME, { type: "image/png" });
-      // 1) Prefer full Web Share with files (this will let user choose WhatsApp directly)
+
+      // 1) Prefer full Web Share with files (Android 13 Chrome/Edge/Samsung Internet should support this)
       // @ts-expect-error
       if (navigator?.canShare && navigator.canShare({ files: [file] })) {
         // @ts-expect-error
-        await navigator.share({ files: [file], title: "Today's Sale Rates" });
+        await navigator.share({
+          files: [file],
+          title: "Today's Sale Rates",
+          text: "Today's sale rates",
+        });
         return;
       }
 
-      // 2) Direct WhatsApp share intent with text (native app) or WhatsApp Web fallback
-      const message =
-        "Today's sale rates from Devi Jewellers. Please open and view the image preview, save it if needed, then share.";
-      openWhatsAppWithText(message);
-      // Also show preview so the user can long-press/save the image if it wasn't attached automatically
+      // 2) If file sharing isn't supported (common in in-app WebViews), ensure the image is saved first,
+      //    then open WhatsApp so the user can attach from the Gallery/Photos.
+      // Try modern picker, then chosen folder, else our download fallbacks.
+      const savedViaPicker = await saveWithPicker(blob, FILENAME);
+      const savedViaFolder = !savedViaPicker ? await saveToChosenFolder(blob, FILENAME) : false;
+      if (!savedViaPicker && !savedViaFolder) {
+        await saveBlobToGallery(blob, FILENAME, dataUrl);
+      }
+
+      // Open WhatsApp app (or WhatsApp Web) directly with no text (image is saved on device now).
+      openWhatsAppWithText("");
+
+      // Show preview as an additional fallback so the user can long-press to save if needed.
       setPreviewUrl(dataUrl);
       return;
     } catch (e) {
