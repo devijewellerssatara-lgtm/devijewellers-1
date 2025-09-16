@@ -421,7 +421,6 @@ export default function AdminDashboard() {
                           <Input
                             type="number"
                             min="5"
-                            max="60"
                             {...field}
                             value={field.value ?? 15}
                             onChange={(e) =>
@@ -430,7 +429,7 @@ export default function AdminDashboard() {
                           />
                         </FormControl>
                         <p className="text-xs text-gray-600">
-                          How long to show rates before switching to media
+                          How long to show rates before switching to media (no hard max; enter any value you need)
                         </p>
                         <FormMessage />
                       </FormItem>
