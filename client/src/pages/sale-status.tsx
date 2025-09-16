@@ -271,6 +271,33 @@ export default function SaleStatus() {
     }
   };
 
+  // Attempt to open WhatsApp directly; fallback to wa.me if the native scheme fails
+  const openWhatsAppWithText = (text: string) => {
+    const encoded = encodeURIComponent(text);
+    const waIntent = `whatsapp://send?text=${encoded}`;
+    const waWeb = `https://wa.me/?text=${encoded}`;
+    let opened = false;
+    try {
+      // Try native app intent first
+      window.location.href = waIntent;
+      opened = true;
+      // Fallback to web after a short delay if nothing happened
+      setTimeout(() => {
+        try {
+          // Heuristic: if still on the page after 800ms, open web link
+          if (document.visibilityState === "visible") {
+            window.open(waWeb, "_blank");
+          }
+        } catch {
+          window.open(waWeb, "_blank");
+        }
+      }, 800);
+    } catch {
+      // Directly fallback to web link
+      window.open(waWeb, "_blank");
+    }
+  };
+
   const handleShareWhatsApp = async () => {
     try {
       setIsWorking("sharing");
@@ -279,7 +306,7 @@ export default function SaleStatus() {
       const { blob, dataUrl } = generated;
 
       const file = new File([blob], FILENAME, { type: "image/png" });
-      // 1) Try full Web Share with files (Android Chrome/Edge/Samsung, modern iOS)
+      // 1) Prefer full Web Share with files (this will let user choose WhatsApp directly)
       // @ts-expect-error
       if (navigator?.canShare && navigator.canShare({ files: [file] })) {
         // @ts-expect-error
@@ -287,27 +314,13 @@ export default function SaleStatus() {
         return;
       }
 
-      // 2) Try basic Web Share with text/url (older Safari/Android)
-      // @ts-expect-error
-      if (navigator?.share) {
-        // Some browsers cannot share files but can share text/url
-        // We include a short caption and instruct to save from preview if needed
-        await navigator.share({
-          title: "Today's Sale Rates",
-          text: "Today's sale rates from Devi Jewellers. If the image didn't attach, long-press the preview to save first.",
-        });
-        // Also show preview to allow user to save image if file-sharing wasn't supported
-        setPreviewUrl(dataUrl);
-        return;
-      }
-
-      // 3) WhatsApp web deep-link fallback (cannot attach image programmatically)
-      const message = "Today's sale rates from Devi Jewellers. Please see the attached image.";
-      const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-      window.open(waUrl, "_blank");
-
-      // Show preview so user can long-press/save and attach in WhatsApp
+      // 2) Direct WhatsApp share intent with text (native app) or WhatsApp Web fallback
+      const message =
+        "Today's sale rates from Devi Jewellers. Please open and view the image preview, save it if needed, then share.";
+      openWhatsAppWithText(message);
+      // Also show preview so the user can long-press/save the image if it wasn't attached automatically
       setPreviewUrl(dataUrl);
+      return;
     } catch (e) {
       console.error("Share failed", e);
       // Show preview so user can save manually
