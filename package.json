@@ -17,7 +17,8 @@
     "android:sync": "npx cap sync android",
     "android:open": "npx cap open android",
     "android:env:public": "node scripts/use-env.mjs .env.mobile && node scripts/set-cap-url.mjs http://103.159.153.24:3000",
-    "android:env:local": "node scripts/use-env.mjs .env.mobile.local && node scripts/set-cap-url.mjs"
+    "android:env:local": "node scripts/use-env.mjs .env.mobile.local && node scripts/set-cap-url.mjs",
+    "android:assets": "npx @capacitor/assets generate --android"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -116,7 +117,8 @@
     "vite": "^5.4.19",
     "@capacitor/cli": "^6.2.0",
     "@capacitor/android": "^6.2.0",
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "@capacitor/assets": "^3.0.5"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.8"
