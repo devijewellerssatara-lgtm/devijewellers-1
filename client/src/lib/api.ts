@@ -7,6 +7,7 @@ import type {
   PromoImage,
   BannerSettings 
 } from "@shared/schema";
+import { apiUrl } from "./config";
 
 // Helper function for API requests
 const apiRequest = async (method: string, url: string, data?: any): Promise<Response> => {
@@ -21,7 +22,7 @@ const apiRequest = async (method: string, url: string, data?: any): Promise<Resp
     options.body = JSON.stringify(data);
   }
 
-  const response = await fetch(url, options);
+  const response = await fetch(apiUrl(url), options);
   
   if (!response.ok) {
     const errorText = await response.text();
@@ -51,6 +52,11 @@ export const ratesApi = {
 
   create: async (rates: InsertGoldRate): Promise<GoldRate> => {
     const response = await apiRequest("POST", "/api/rates", rates);
+    return response.json();
+  },
+
+  update: async (id: number, rates: Partial<InsertGoldRate>): Promise<GoldRate> => {
+    const response = await apiRequest("PUT", `/api/rates/${id}`, rates);
     return response.json();
   }
 };
@@ -113,7 +119,7 @@ export const mediaApi = {
     const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
     
     try {
-      const response = await fetch("/api/media/upload", {
+      const response = await fetch(apiUrl("/api/media/upload"), {
         method: "POST",
         body: formData,
         signal: controller.signal
@@ -181,7 +187,7 @@ export const promoApi = {
     const timeoutId = setTimeout(() => controller.abort(), 60000); // 1 minute timeout for images
     
     try {
-      const response = await fetch("/api/promo/upload", {
+      const response = await fetch(apiUrl("/api/promo/upload"), {
         method: "POST",
         body: formData,
         signal: controller.signal
@@ -232,7 +238,7 @@ export const bannerApi = {
     const formData = new FormData();
     formData.append('banner', file);
 
-    const response = await fetch("/api/banner/upload", {
+    const response = await fetch(apiUrl("/api/banner/upload"), {
       method: "POST",
       body: formData
     });

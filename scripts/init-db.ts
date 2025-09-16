@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { 
@@ -17,7 +18,7 @@ async function initDatabase() {
   const client = postgres(connectionString);
   const db = drizzle(client);
 
-  // Create tables (execute each table creation separately)
+  // Create tables with columns expected by current schema/routes
   await client`
     CREATE TABLE IF NOT EXISTS gold_rates (
       id SERIAL PRIMARY KEY,
@@ -52,7 +53,8 @@ async function initDatabase() {
     CREATE TABLE IF NOT EXISTS media_items (
       id SERIAL PRIMARY KEY,
       name TEXT NOT NULL,
-      file_url TEXT NOT NULL,
+      file_url TEXT,
+      file_data TEXT,
       media_type TEXT NOT NULL,
       duration_seconds INTEGER DEFAULT 30,
       order_index INTEGER DEFAULT 0,
@@ -67,7 +69,8 @@ async function initDatabase() {
     CREATE TABLE IF NOT EXISTS promo_images (
       id SERIAL PRIMARY KEY,
       name TEXT NOT NULL,
-      image_url TEXT NOT NULL,
+      image_url TEXT,
+      image_data TEXT,
       duration_seconds INTEGER DEFAULT 5,
       transition_effect TEXT DEFAULT 'fade',
       order_index INTEGER DEFAULT 0,
@@ -81,6 +84,7 @@ async function initDatabase() {
     CREATE TABLE IF NOT EXISTS banner_settings (
       id SERIAL PRIMARY KEY,
       banner_image_url TEXT,
+      banner_image_data TEXT,
       banner_height INTEGER DEFAULT 120,
       is_active BOOLEAN DEFAULT true,
       created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
