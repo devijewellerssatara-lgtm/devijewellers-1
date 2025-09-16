@@ -178,7 +178,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const settings = await storage.getDisplaySettings();
       res.json(settings || {});
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch display settings" });
+      // Fallback to safe defaults in development if storage/db is unavailable
+      console.error("Error fetching display settings:", error);
+      const fallback = {
+        orientation: "horizontal",
+        background_color: "#FFF8E1",
+        text_color: "#212529",
+        rate_number_font_size: "text-4xl",
+        show_media: true,
+        rates_display_duration_seconds: 15,
+        refresh_interval: 30,
+      };
+      res.json(fallback);
     }
   });
 
