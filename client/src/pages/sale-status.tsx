@@ -271,30 +271,32 @@ export default function SaleStatus() {
     }
   };
 
-  // Attempt to open WhatsApp directly; fallback to wa.me if the native scheme fails
+  // Attempt to open WhatsApp directly; fallback to api.whatsapp.com if the native scheme fails
   const openWhatsAppWithText = (text: string) => {
-    const encoded = encodeURIComponent(text);
+    // WhatsApp shows "invalid chat link" if the URL is malformed.
+    // Use api.whatsapp.com which is broadly supported across mobile and desktop.
+    const safeText = text && text.trim().length > 0 ? text : " ";
+    const encoded = encodeURIComponent(safeText);
     const waIntent = `whatsapp://send?text=${encoded}`;
-    const waWeb = `https://wa.me/?text=${encoded}`;
-    let opened = false;
+    const waApi = `https://api.whatsapp.com/send?text=${encoded}`;
+
     try {
-      // Try native app intent first
+      // Try native app intent first (works only on devices with WhatsApp installed)
       window.location.href = waIntent;
-      opened = true;
-      // Fallback to web after a short delay if nothing happened
+
+      // Fallback to web after a short delay if nothing happened (still on page)
       setTimeout(() => {
         try {
-          // Heuristic: if still on the page after 800ms, open web link
           if (document.visibilityState === "visible") {
-            window.open(waWeb, "_blank");
+            window.open(waApi, "_blank");
           }
         } catch {
-          window.open(waWeb, "_blank");
+          window.open(waApi, "_blank");
         }
       }, 800);
     } catch {
       // Directly fallback to web link
-      window.open(waWeb, "_blank");
+      window.open(waApi, "_blank");
     }
   };
 
