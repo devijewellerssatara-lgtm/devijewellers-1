@@ -271,14 +271,12 @@ export default function SaleStatus() {
     }
   };
 
-  // Attempt to open WhatsApp directly; fallback to api.whatsapp.com if the native scheme fails
-  const openWhatsAppWithText = (text: string) => {
-    // WhatsApp shows "invalid chat link" if the URL is malformed.
-    // Use api.whatsapp.com which is broadly supported across mobile and desktop.
-    const safeText = text && text.trim().length > 0 ? text : " ";
-    const encoded = encodeURIComponent(safeText);
-    const waIntent = `whatsapp://send?text=${encoded}`;
-    const waApi = `https://api.whatsapp.com/send?text=${encoded}`;
+  // Attempt to open WhatsApp directly; build URL with or without prefilled text
+  const openWhatsApp = (text?: string) => {
+    const hasText = !!(text && text.trim().length > 0);
+    const encoded = hasText ? encodeURIComponent(text as string) : "";
+    const waIntent = hasText ? `whatsapp://send?text=${encoded}` : `whatsapp://send`;
+    const waApi = hasText ? `https://api.whatsapp.com/send?text=${encoded}` : `https://api.whatsapp.com/send`;
 
     try {
       // Try native app intent first (works only on devices with WhatsApp installed)
@@ -291,7 +289,7 @@ export default function SaleStatus() {
             window.open(waApi, "_blank");
           }
         } catch {
-          window.open(waApi, "_blank");
+            window.open(waApi, "_blank");
         }
       }, 800);
     } catch {
@@ -310,13 +308,12 @@ export default function SaleStatus() {
       const file = new File([blob], FILENAME, { type: "image/png" });
 
       // 1) Prefer full Web Share with files (Android 13 Chrome/Edge/Samsung Internet should support this)
+      // Send image only (no text)
       // @ts-expect-error
       if (navigator?.canShare && navigator.canShare({ files: [file] })) {
         // @ts-expect-error
         await navigator.share({
-          files: [file],
-          title: "Today's Sale Rates",
-          text: "Today's sale rates",
+          files: [file]
         });
         return;
       }
@@ -331,7 +328,7 @@ export default function SaleStatus() {
       }
 
       // Open WhatsApp app (or WhatsApp Web) directly with no text (image is saved on device now).
-      openWhatsAppWithText("");
+      openWhatsApp();
 
       // Show preview as an additional fallback so the user can long-press to save if needed.
       setPreviewUrl(dataUrl);
