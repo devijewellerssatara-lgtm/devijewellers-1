@@ -274,9 +274,10 @@ export default function SaleStatus() {
   // Attempt to open WhatsApp directly; build URL with or without prefilled text
   const openWhatsApp = (text?: string) => {
     const hasText = !!(text && text.trim().length > 0);
-    const encoded = hasText ? encodeURIComponent(text as string) : "";
+    // When no text is provided, use a single space for web fallback to avoid "invalid chat link"
+    const encoded = hasText ? encodeURIComponent(text as string) : "%20";
     const waIntent = hasText ? `whatsapp://send?text=${encoded}` : `whatsapp://send`;
-    const waApi = hasText ? `https://api.whatsapp.com/send?text=${encoded}` : `https://api.whatsapp.com/send`;
+    const waApi = `https://api.whatsapp.com/send?text=${encoded}`;
 
     try {
       // Try native app intent first (works only on devices with WhatsApp installed)
@@ -289,7 +290,7 @@ export default function SaleStatus() {
             window.open(waApi, "_blank");
           }
         } catch {
-            window.open(waApi, "_blank");
+          window.open(waApi, "_blank");
         }
       }, 800);
     } catch {
