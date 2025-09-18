@@ -71,6 +71,46 @@ const uploadBanner = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Simple CORS helper for public endpoints
+  const setPublicCors = (res: express.Response) => {
+    res.set({
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0",
+    });
+  };
+
+  // Preflight for public endpoints
+  app.options("/public/*", (req, res) => {
+    setPublicCors(res);
+    res.sendStatus(204);
+  });
+
+  // Public endpoint to expose current sale rates as simple JSON for external sites (e.g., Vercel)
+  app.get("/public/rates", async (req, res) => {
+    try {
+      const rates = await storage.getCurrentRates();
+      setPublicCors(res);
+      if (!rates) {
+        return res.status(200).json(null);
+      }
+      // Return lean JSON shape that's easy to consume
+      res.json({
+        gold_24k_sale: rates.gold_24k_sale,
+        gold_22k_sale: rates.gold_22k_sale,
+        gold_18k_sale: rates.gold_18k_sale,
+        silver_per_kg_sale: rates.silver_per_kg_sale,
+        updated_at: rates.created_date,
+      });
+    } catch (error) {
+      setPublicCors(res);
+      res.status(500).json({ message: "Failed to fetch public rates" });
+    }
+  });
+
   // Serve binary data from database
   app.get("/api/media/:id/file", async (req, res) => {
     try {
