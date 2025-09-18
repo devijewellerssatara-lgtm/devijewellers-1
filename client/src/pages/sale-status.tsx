@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { ratesApi, settingsApi } from "@/lib/api";
+import { ratesApi, settingsApi, externalRatesApi, type PublicSaleRates } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 
 export default function SaleStatus() {
@@ -22,9 +22,27 @@ export default function SaleStatus() {
     return () => clearInterval(timer);
   }, []);
 
+  // Decide source of rates:
+  // - If VITE_PUBLIC_SALE_RATES_URL is configured, fetch from external public endpoint (e.g., Vercel site)
+  // - Otherwise, fall back to internal API
+  const useExternal = Boolean((import.meta as any).env?.VITE_PUBLIC_SALE_RATES_URL);
+
   const { data: currentRates } = useQuery({
-    queryKey: ["/api/rates/current"],
-    queryFn: ratesApi.getCurrent,
+    queryKey: [useExternal ? "external/sale-rates" : "/api/rates/current"],
+    queryFn: async () => {
+      if (useExternal) {
+        const ext = await externalRatesApi.getPublicSale();
+        // Map to the shape used below
+        return {
+          gold_24k_sale: ext?.gold_24k_sale ?? "-",
+          gold_22k_sale: ext?.gold_22k_sale ?? "-",
+          gold_18k_sale: ext?.gold_18k_sale ?? "-",
+          silver_per_kg_sale: ext?.silver_per_kg_sale ?? "-",
+        } as Record<string, number | string>;
+      } else {
+        return (await ratesApi.getCurrent()) as Record<string, number | string> | null;
+      }
+    },
     refetchInterval: 30000,
   });
 
