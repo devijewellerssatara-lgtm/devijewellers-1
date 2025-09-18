@@ -8,6 +8,32 @@ import type {
   BannerSettings 
 } from "@shared/schema";
 
+// Optional external API base (e.g. TV-display deployment on Vercel)
+// If VITE_API_BASE_URL is defined, all API calls will be prefixed with it.
+// Example: VITE_API_BASE_URL=https://your-tv-display.vercel.app
+const API_BASE_URL: string = (import.meta as any)?.env?.VITE_API_BASE_URL || "";
+
+// Normalize join to avoid double slashes when base URL is set
+const withBase = (path: string) => {
+  if (!API_BASE_URL) return path;
+  const base = API_BASE_URL.endsWith("/") ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+  const p = path.startsWith("/") ? path : `/${path}`;
+  return `${base}${p}`;
+};
+
+// Optional external API base (e.g. TV-display deployment on Vercel)
+// If VITE_API_BASE_URL is defined, all API calls will be prefixed with it.
+// Example: VITE_API_BASE_URL=https://your-tv-display.vercel.app
+const API_BASE_URL: string = (import.meta as any)?.env?.VITE_API_BASE_URL || "";
+
+// Normalize join to avoid double slashes when base URL is set
+const withBase = (path: string) => {
+  if (!API_BASE_URL) return path;
+  const base = API_BASE_URL.endsWith("/") ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+  const p = path.startsWith("/") ? path : `/${path}`;
+  return `${base}${p}`;
+};
+
 // Helper function for API requests
 const apiRequest = async (method: string, url: string, data?: any): Promise<Response> => {
   const options: RequestInit = {
@@ -21,7 +47,8 @@ const apiRequest = async (method: string, url: string, data?: any): Promise<Resp
     options.body = JSON.stringify(data);
   }
 
-  const response = await fetch(url, options);
+  // Use external base URL if provided
+  const response = await fetch(withBase(url), options);
   
   if (!response.ok) {
     const errorText = await response.text();
