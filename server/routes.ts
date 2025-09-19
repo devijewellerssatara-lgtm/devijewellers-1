@@ -70,6 +70,18 @@ const uploadBanner = multer({
   },
 });
 
+// Simple middleware to protect sensitive mutations with a bearer token
+const requireRateUpdateToken: express.RequestHandler = (req, res, next) => {
+  const token = process.env.RATE_UPDATE_TOKEN;
+  if (!token) return res.status(500).json({ message: "Server misconfigured: RATE_UPDATE_TOKEN not set" });
+  const auth = req.headers.authorization || "";
+  const expected = `Bearer ${token}`;
+  if (auth !== expected) {
+    return res.status(401).json({ message: "Unauthorized: invalid token" });
+  }
+  next();
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Serve binary data from database
   app.get("/api/media/:id/file", async (req, res) => {
@@ -158,7 +170,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/rates", async (req, res) => {
+  // Protect rate updates with bearer token
+  app.post("/api/rates", requireRateUpdateToken, async (req, res) => {
     try {
       const validatedData = insertGoldRateSchema.parse(req.body);
       const newRates = await storage.createGoldRate(validatedData);

@@ -11,6 +11,9 @@ import type {
 // Base URL for API: configure VITE_API_BASE_URL in env for cross-origin calls (e.g. https://www.devi-jewellers.com)
 const API_BASE = (import.meta as any)?.env?.VITE_API_BASE_URL || "";
 
+// Optional client-side token for protected endpoints (e.g. POST /api/rates)
+const CLIENT_RATE_UPDATE_TOKEN = (import.meta as any)?.env?.VITE_RATE_UPDATE_TOKEN || "";
+
 // Helper to join base and path safely
 const withBase = (url: string) => {
   try {
@@ -25,11 +28,18 @@ const withBase = (url: string) => {
 
 // Helper function for API requests
 const apiRequest = async (method: string, url: string, data?: any): Promise<Response> => {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  // Attach Authorization for sensitive writes if token is available
+  if (CLIENT_RATE_UPDATE_TOKEN && method !== 'GET' && method !== 'HEAD') {
+    headers['Authorization'] = `Bearer ${CLIENT_RATE_UPDATE_TOKEN}`;
+  }
+
   const options: RequestInit = {
     method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
   };
 
   if (data && method !== 'GET' && method !== 'HEAD') {
@@ -131,7 +141,8 @@ export const mediaApi = {
       const response = await fetch(withBase("/api/media/upload"), {
         method: "POST",
         body: formData,
-        signal: controller.signal
+        signal: controller.signal,
+        headers: CLIENT_RATE_UPDATE_TOKEN ? { Authorization: `Bearer ${CLIENT_RATE_UPDATE_TOKEN}` } : undefined
       });
       
       clearTimeout(timeoutId);
@@ -199,7 +210,8 @@ export const promoApi = {
       const response = await fetch(withBase("/api/promo/upload"), {
         method: "POST",
         body: formData,
-        signal: controller.signal
+        signal: controller.signal,
+        headers: CLIENT_RATE_UPDATE_TOKEN ? { Authorization: `Bearer ${CLIENT_RATE_UPDATE_TOKEN}` } : undefined
       });
       
       clearTimeout(timeoutId);
@@ -249,7 +261,8 @@ export const bannerApi = {
 
     const response = await fetch(withBase("/api/banner/upload"), {
       method: "POST",
-      body: formData
+      body: formData,
+      headers: CLIENT_RATE_UPDATE_TOKEN ? { Authorization: `Bearer ${CLIENT_RATE_UPDATE_TOKEN}` } : undefined
     });
     
     if (!response.ok) {

@@ -7,15 +7,32 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Lightweight CORS to allow admin UIs hosted on a different origin to update rates
+// Strict CORS: allow only configured origins (comma-separated), block others for API routes
 app.use((req, res, next) => {
-  const allowedOrigin = process.env.CORS_ALLOW_ORIGIN || "*";
-  res.header("Access-Control-Allow-Origin", allowedOrigin);
+  const origin = req.headers.origin as string | undefined;
+  const allowEnv = process.env.CORS_ALLOW_ORIGIN || "";
+  const allowed = allowEnv
+    .split(",")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  if (origin && allowed.length > 0 && allowed.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+    res.header("Vary", "Origin");
+  }
   res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  // Preflight
   if (req.method === "OPTIONS") {
     return res.sendStatus(204);
   }
+
+  // If this is an API request from a browser with an Origin, and it's not allowed, block it
+  if (req.path.startsWith("/api") && origin && allowed.length > 0 && !allowed.includes(origin)) {
+    return res.status(403).json({ message: "CORS: origin not allowed" });
+  }
+
   next();
 });
 
