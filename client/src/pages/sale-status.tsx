@@ -22,16 +22,24 @@ export default function SaleStatus() {
     return () => clearInterval(timer);
   }, []);
 
-  const { data: currentRates } = useQuery({
-    queryKey: ["/api/rates/current"],
-    queryFn: ratesApi.getCurrent,
-    refetchInterval: 30000,
-  });
-
+  // Fetch display settings (includes refresh interval)
   const { data: settings } = useQuery({
     queryKey: ["/api/settings/display"],
     queryFn: settingsApi.getDisplay,
     refetchInterval: 30000,
+  });
+
+  // Use settings.refresh_interval (seconds) to control rates polling; fallback to 30s
+  const ratesRefetchMs = useMemo(() => {
+    const seconds = settings?.refresh_interval ?? 30;
+    // guard against invalid values
+    return Math.max(5, Number(seconds)) * 1000;
+  }, [settings?.refresh_interval]);
+
+  const { data: currentRates } = useQuery({
+    queryKey: ["/api/rates/current"],
+    queryFn: ratesApi.getCurrent,
+    refetchInterval: ratesRefetchMs,
   });
 
   const theme = useMemo(() => {
@@ -212,6 +220,14 @@ export default function SaleStatus() {
 
 // Rate Card Component
 function RateCard({ title, value }: { title: string; value: number | string }) {
+  const formatted = useMemo(() => {
+    const num = typeof value === "string" ? Number(value) : value;
+    if (typeof num === "number" && !isNaN(num)) {
+      return num.toLocaleString("en-IN");
+    }
+    return value;
+  }, [value]);
+
   return (
     <div className="flex-1 bg-white w-full border border-gray-200 flex flex-col shadow-lg rounded-lg">
       <div className="flex items-center justify-between w-full px-3 py-2">
@@ -222,7 +238,7 @@ function RateCard({ title, value }: { title: string; value: number | string }) {
       </div>
       <div className="flex-1 flex items-center justify-center">
         <p className="text-3xl md:text-6xl font-extrabold text-blue-900 leading-tight drop-shadow-md">
-          ₹{value}
+          ₹{formatted}
         </p>
       </div>
     </div>
