@@ -34,6 +34,14 @@ export default function MobileControl() {
     queryFn: ratesApi.getCurrent
   });
 
+  // Percentage settings (purchase = sale - (sale * pct/100))
+  const [purchasePerc, setPurchasePerc] = useState({
+    k24: 0,
+    k22: 0,
+    k18: 0,
+    silverKg: 0,
+  });
+
   // Form setup with custom schema
   const form = useForm<z.infer<typeof goldRateFormSchema>>({
     resolver: zodResolver(goldRateFormSchema),
@@ -49,6 +57,24 @@ export default function MobileControl() {
       is_active: true,
     }
   });
+
+  // Helper: recompute purchase rates based on current sale rates and percentage
+  const recomputePurchases = () => {
+    const s24 = Number(form.getValues("gold_24k_sale")) || 0;
+    const s22 = Number(form.getValues("gold_22k_sale")) || 0;
+    const s18 = Number(form.getValues("gold_18k_sale")) || 0;
+    const sAg = Number(form.getValues("silver_per_kg_sale")) || 0;
+
+    const p24 = Math.round(s24 * (1 - (purchasePerc.k24 || 0) / 100));
+    const p22 = Math.round(s22 * (1 - (purchasePerc.k22 || 0) / 100));
+    const p18 = Math.round(s18 * (1 - (purchasePerc.k18 || 0) / 100));
+    const pAg = Math.round(sAg * (1 - (purchasePerc.silverKg || 0) / 100));
+
+    form.setValue("gold_24k_purchase", p24);
+    form.setValue("gold_22k_purchase", p22);
+    form.setValue("gold_18k_purchase", p18);
+    form.setValue("silver_per_kg_purchase", pAg);
+  };
 
   // Update rates mutation
   const updateRatesMutation = useMutation({
@@ -72,14 +98,16 @@ export default function MobileControl() {
   });
 
   const onSubmit = (data: z.infer<typeof goldRateFormSchema>) => {
-    // Data is already converted to numbers by zod's coerce.number()
+    // Ensure purchase is computed before submit
+    recomputePurchases();
+
     const submitData = {
-      ...data,
+      ...form.getValues(),
       is_active: true
     };
     
     console.log('Submitting data:', submitData);
-    updateRatesMutation.mutate(submitData);
+    updateRatesMutation.mutate(submitData as z.infer<typeof goldRateFormSchema>);
   };
 
   // Update form values when current rates change
@@ -98,6 +126,50 @@ export default function MobileControl() {
       });
     }
   }, [currentRates, form]);
+
+  // Watch sale rate or percentage changes to auto recompute purchases
+  React.useEffect(() => {
+    const subscription = form.watch(() => {
+      recomputePurchases();
+    });
+    return () => subscription.unsubscribe();
+  }, [form, purchasePerc.k24, purchasePerc.k22, purchasePerc.k18, purchasePerc.silverKg]);
+
+  // Fetch sales rates from external API and populate form
+  const fetchSalesFromExternal = async () => {
+    try {
+      const resp = await fetch("https://www.businessmantra.info/gold_rates/devi_gold_rate/api.php", {
+        method: "GET",
+        headers: { "Accept": "application/json" }
+      });
+      const data = await resp.json() as Record<string, number>;
+      // Expected keys: "24K Gold", "22K Gold", "18K Gold", "Silver"
+      const sale24 = Number(data["24K Gold"]) || 0; // per 10g
+      const sale22 = Number(data["22K Gold"]) || 0; // per 10g
+      const sale18 = Number(data["18K Gold"]) || 0; // per 10g
+      const silverPer10g = Number(data["Silver"]) || 0; // per 10g -> convert to per kg
+      const silverPerKg = Math.round(silverPer10g * 100); // 10g = 0.01kg, so multiply by 100
+
+      form.setValue("gold_24k_sale", sale24);
+      form.setValue("gold_22k_sale", sale22);
+      form.setValue("gold_18k_sale", sale18);
+      form.setValue("silver_per_kg_sale", silverPerKg);
+
+      recomputePurchases();
+
+      toast({
+        title: "Fetched latest sales rates",
+        description: "Sales rates populated from external API. Purchase rates auto-calculated.",
+      });
+    } catch (error: any) {
+      console.error("Failed to fetch external sales rates:", error);
+      toast({
+        title: "Fetch failed",
+        description: error?.message || "Unable to fetch sales rates from external API.",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -148,6 +220,63 @@ export default function MobileControl() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
+            {/* Fetch Sales Button + Percentage Settings */}
+            <div className="mb-6 grid grid-cols-1 gap-3">
+              <Button 
+                type="button"
+                onClick={fetchSalesFromExternal}
+                className="w-full bg-gold-600 text-black border-2 border-black rounded-lg hover:bg-gold-700"
+              >
+                Fetch Sales Rates from External API
+              </Button>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div>
+                  <label className="block text-sm font-medium">24K Purchase %</label>
+                  <Input 
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={purchasePerc.k24}
+                    onChange={(e) => setPurchasePerc(p => ({ ...p, k24: Number(e.target.value) }))}
+                    className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium">22K Purchase %</label>
+                  <Input 
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={purchasePerc.k22}
+                    onChange={(e) => setPurchasePerc(p => ({ ...p, k22: Number(e.target.value) }))}
+                    className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium">18K Purchase %</label>
+                  <Input 
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={purchasePerc.k18}
+                    onChange={(e) => setPurchasePerc(p => ({ ...p, k18: Number(e.target.value) }))}
+                    className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium">Silver (KG) Purchase %</label>
+                  <Input 
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={purchasePerc.silverKg}
+                    onChange={(e) => setPurchasePerc(p => ({ ...p, silverKg: Number(e.target.value) }))}
+                    className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                  />
+                </div>
+              </div>
+            </div>
+
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 {/* 24K Gold */}
@@ -180,14 +309,15 @@ export default function MobileControl() {
                       name="gold_24k_purchase"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Purchase Rate</FormLabel>
+                          <FormLabel>Purchase Rate (auto)</FormLabel>
                           <FormControl>
                             <Input 
                               type="number"
                               step="50"
                               min="0"
                               {...field}
-                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                              disabled
+                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold bg-gray-100"
                             />
                           </FormControl>
                           <FormMessage />
@@ -227,14 +357,15 @@ export default function MobileControl() {
                       name="gold_22k_purchase"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Purchase Rate</FormLabel>
+                          <FormLabel>Purchase Rate (auto)</FormLabel>
                           <FormControl>
                             <Input 
                               type="number"
                               step="50"
                               min="0"
                               {...field}
-                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                              disabled
+                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold bg-gray-100"
                             />
                           </FormControl>
                           <FormMessage />
@@ -274,14 +405,15 @@ export default function MobileControl() {
                       name="gold_18k_purchase"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Purchase Rate</FormLabel>
+                          <FormLabel>Purchase Rate (auto)</FormLabel>
                           <FormControl>
                             <Input 
                               type="number"
                               step="50"
                               min="0"
                               {...field}
-                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                              disabled
+                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold bg-gray-100"
                             />
                           </FormControl>
                           <FormMessage />
@@ -321,14 +453,15 @@ export default function MobileControl() {
                       name="silver_per_kg_purchase"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Purchase Rate</FormLabel>
+                          <FormLabel>Purchase Rate (auto)</FormLabel>
                           <FormControl>
                             <Input 
                               type="number"
                               step="50"
                               min="0"
                               {...field}
-                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                              disabled
+                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold bg-gray-100"
                             />
                           </FormControl>
                           <FormMessage />
