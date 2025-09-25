@@ -158,6 +158,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Fetch latest rates from external API and persist
+  app.get("/api/rates/fetch-external", async (req, res) => {
+    try {
+      const externalUrl = "https://www.businessmantra.info/gold_rates/devi_gold_rate/api.php";
+      const response = await fetch(externalUrl);
+      if (!response.ok) {
+        const text = await response.text();
+        return res.status(502).json({ message: `External API error: ${response.status}`, error: text });
+      }
+      const data = await response.json() as Record<string, number>;
+
+      // Map external fields to our schema
+      const gold24 = Number(data["24K Gold"]);
+      const gold22 = Number(data["22K Gold"]);
+      const gold18 = Number(data["18K Gold"]);
+      const silverPerGram = Number(data["Silver"]);
+
+      if (
+        !isFinite(gold24) ||
+        !isFinite(gold22) ||
+        !isFinite(gold18) ||
+        !isFinite(silverPerGram)
+      ) {
+        return res.status(400).json({ message: "Invalid data from external API", data });
+      }
+
+      // Assuming external values represent sale price; use same for purchase if not provided.
+      // Convert silver to per kg if API provides per gram.
+      const silverPerKg = silverPerGram * 1000;
+
+      const newRate = await storage.createGoldRate({
+        gold_24k_sale: gold24,
+        gold_24k_purchase: gold24,
+        gold_22k_sale: gold22,
+        gold_22k_purchase: gold22,
+        gold_18k_sale: gold18,
+        gold_18k_purchase: gold18,
+        silver_per_kg_sale: silverPerKg,
+        silver_per_kg_purchase: silverPerKg,
+        is_active: true
+      });
+
+      res.json(newRate);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch external rates" });
+    }
+  });
+
   app.post("/api/rates", async (req, res) => {
     try {
       const validatedData = insertGoldRateSchema.parse(req.body);
