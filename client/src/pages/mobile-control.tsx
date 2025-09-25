@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { ratesApi } from "@/lib/api";
 import { queryClient } from "@/lib/queryClient";
-import { insertGoldRateSchema } from "@shared/schema";
+import { insertGoldRateSchema } from "@/shared/schema";
 
 // Create a custom schema that converts strings to numbers
 const goldRateFormSchema = insertGoldRateSchema.extend({
@@ -27,6 +27,12 @@ const goldRateFormSchema = insertGoldRateSchema.extend({
 
 export default function MobileControl() {
   const { toast } = useToast();
+
+  // Calculation settings (percent vs 24K). 24K stays 100% fixed.
+  const [percentages, setPercentages] = useState<{ gold22: number; gold18: number }>({
+    gold22: 92,
+    gold18: 75,
+  });
 
   // Get current rates
   const { data: currentRates, isLoading } = useQuery({
@@ -50,6 +56,27 @@ export default function MobileControl() {
     }
   });
 
+  // Round to nearest 50 to match UI step
+  const roundTo50 = (n: number) => Math.round(n / 50) * 50;
+
+  // Auto-calculate 22K / 18K when 24K changes or percentage changes
+  const gold24Sale = form.watch("gold_24k_sale");
+  const gold24Purchase = form.watch("gold_24k_purchase");
+
+  React.useEffect(() => {
+    const p22 = percentages.gold22 / 100;
+    const p18 = percentages.gold18 / 100;
+    const sale22 = roundTo50((gold24Sale || 0) * p22);
+    const purchase22 = roundTo50((gold24Purchase || 0) * p22);
+    const sale18 = roundTo50((gold24Sale || 0) * p18);
+    const purchase18 = roundTo50((gold24Purchase || 0) * p18);
+
+    form.setValue("gold_22k_sale", sale22, { shouldValidate: true, shouldDirty: true });
+    form.setValue("gold_22k_purchase", purchase22, { shouldValidate: true, shouldDirty: true });
+    form.setValue("gold_18k_sale", sale18, { shouldValidate: true, shouldDirty: true });
+    form.setValue("gold_18k_purchase", purchase18, { shouldValidate: true, shouldDirty: true });
+  }, [gold24Sale, gold24Purchase, percentages.gold22, percentages.gold18]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Update rates mutation
   const updateRatesMutation = useMutation({
     mutationFn: ratesApi.create,
@@ -72,9 +99,15 @@ export default function MobileControl() {
   });
 
   const onSubmit = (data: z.infer<typeof goldRateFormSchema>) => {
-    // Data is already converted to numbers by zod's coerce.number()
+    // Ensure derived fields are consistent before submit
+    const p22 = percentages.gold22 / 100;
+    const p18 = percentages.gold18 / 100;
     const submitData = {
       ...data,
+      gold_22k_sale: roundTo50(data.gold_24k_sale * p22),
+      gold_22k_purchase: roundTo50(data.gold_24k_purchase * p22),
+      gold_18k_sale: roundTo50(data.gold_24k_sale * p18),
+      gold_18k_purchase: roundTo50(data.gold_24k_purchase * p18),
       is_active: true
     };
     
@@ -197,6 +230,44 @@ export default function MobileControl() {
                   </div>
                 </div>
 
+                {/* Calculation Settings */}
+                <div className="p-4 border-b border-gray-100">
+                  <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
+                    <span className="text-yellow-600 mr-2">⚙</span>Calculation Settings (Percent vs 24K)
+                  </h3>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium">24K</label>
+                      <Input type="number" value={100} readOnly className="border-2 border-black rounded px-2 py-1 text-sm font-semibold bg-gray-100" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium">22K (%)</label>
+                      <Input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        max="100"
+                        value={percentages.gold22}
+                        onChange={(e) => setPercentages((p) => ({ ...p, gold22: Number(e.target.value || 0) }))}
+                        className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium">18K (%)</label>
+                      <Input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        max="100"
+                        value={percentages.gold18}
+                        onChange={(e) => setPercentages((p) => ({ ...p, gold18: Number(e.target.value || 0) }))}
+                        className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-2">Example: If 24K is ₹24,000, then 22K at 92% becomes ₹22,080 (rounded to nearest 50).</p>
+                </div>
+
                 {/* 22K Gold */}
                 <div className="p-4 border-b border-gray-100">
                   <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
@@ -208,14 +279,16 @@ export default function MobileControl() {
                       name="gold_22k_sale"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Sale Rate</FormLabel>
+                          <FormLabel>Sale Rate (auto)</FormLabel>
                           <FormControl>
                             <Input 
                               type="number"
                               step="50"
                               min="0"
                               {...field}
-                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                              disabled
+                              readOnly
+                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold bg-gray-100"
                             />
                           </FormControl>
                           <FormMessage />
@@ -227,14 +300,16 @@ export default function MobileControl() {
                       name="gold_22k_purchase"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Purchase Rate</FormLabel>
+                          <FormLabel>Purchase Rate (auto)</FormLabel>
                           <FormControl>
                             <Input 
                               type="number"
                               step="50"
                               min="0"
                               {...field}
-                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                              disabled
+                              readOnly
+                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold bg-gray-100"
                             />
                           </FormControl>
                           <FormMessage />
@@ -255,14 +330,16 @@ export default function MobileControl() {
                       name="gold_18k_sale"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Sale Rate</FormLabel>
+                          <FormLabel>Sale Rate (auto)</FormLabel>
                           <FormControl>
                             <Input 
                               type="number"
                               step="50"
                               min="0"
                               {...field}
-                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                              disabled
+                              readOnly
+                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold bg-gray-100"
                             />
                           </FormControl>
                           <FormMessage />
@@ -274,14 +351,16 @@ export default function MobileControl() {
                       name="gold_18k_purchase"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Purchase Rate</FormLabel>
+                          <FormLabel>Purchase Rate (auto)</FormLabel>
                           <FormControl>
                             <Input 
                               type="number"
                               step="50"
                               min="0"
                               {...field}
-                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold"
+                              disabled
+                              readOnly
+                              className="border-2 border-black rounded px-2 py-1 text-sm font-semibold bg-gray-100"
                             />
                           </FormControl>
                           <FormMessage />
