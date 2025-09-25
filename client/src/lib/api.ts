@@ -49,6 +49,12 @@ export const ratesApi = {
     return response.json();
   },
 
+  // Fetch latest rates from external source and persist
+  fetchExternal: async (): Promise<GoldRate> => {
+    const response = await apiRequest("GET", "/api/rates/fetch-external");
+    return response.json();
+  },
+
   create: async (rates: InsertGoldRate): Promise<GoldRate> => {
     const response = await apiRequest("POST", "/api/rates", rates);
     return response.json();
