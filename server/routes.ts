@@ -172,6 +172,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Fetch and store rates from external API
+  // GET /api/rates/sync - fetches latest rates from BusinessMantra API and stores to Postgres
+  app.get("/api/rates/sync", async (_req, res) => {
+    try {
+      const apiUrl = "https://www.businessmantra.info/gold_rates/devi_gold_rate/api.php";
+      const resp = await fetch(apiUrl, { cache: "no-store" });
+      if (!resp.ok) {
+        return res.status(502).json({ message: "Failed to fetch external rates", status: resp.status });
+      }
+      const data = await resp.json() as Record<string, number>;
+
+      // Map API fields to our InsertGoldRate schema.
+      // Assumption: API provides a single price per metal; we store the same value for sale and purchase.
+      const payload = {
+        gold_24k_sale: Number(data["24K Gold"]),
+        gold_24k_purchase: Number(data["24K Gold"]),
+        gold_22k_sale: Number(data["22K Gold"]),
+        gold_22k_purchase: Number(data["22K Gold"]),
+        gold_18k_sale: Number(data["18K Gold"]),
+        gold_18k_purchase: Number(data["18K Gold"]),
+        silver_per_kg_sale: Number(data["Silver"]),
+        silver_per_kg_purchase: Number(data["Silver"]),
+        is_active: true,
+      };
+
+      // Validate against schema
+      const validatedData = insertGoldRateSchema.parse(payload);
+      const newRates = await storage.createGoldRate(validatedData);
+
+      res.status(201).json({ message: "Rates synced", rates: newRates });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid rate data from external API", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to sync rates", error: (error as Error).message });
+      }
+    }
+  });
+
   // Display Settings Routes
   app.get("/api/settings/display", async (req, res) => {
     try {
