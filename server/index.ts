@@ -118,18 +118,17 @@ function scheduleRateSync() {
   const loop = async () => {
     if (cancelled) return;
 
+    // perform an immediate sync
+    await performRateSync();
+
     // read interval from settings each cycle to reflect updates
     const calc = await storage.getRateSettings();
     const minutes = calc?.check_interval_minutes ?? 5;
     const intervalMs = Math.max(1, minutes) * 60_000;
 
-    // wait
+    // wait, then repeat
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
-
     if (cancelled) return;
-    await performRateSync();
-
-    // repeat
     loop();
   };
 
