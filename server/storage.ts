@@ -6,6 +6,7 @@ import {
   mediaItems, 
   promoImages, 
   bannerSettings,
+  rateSettings,
   type GoldRate,
   type InsertGoldRate,
   type DisplaySettings,
@@ -15,7 +16,9 @@ import {
   type PromoImage,
   type InsertPromoImage,
   type BannerSettings,
-  type InsertBannerSettings
+  type InsertBannerSettings,
+  type RateSettings,
+  type InsertRateSettings
 } from "@shared/schema";
 import { eq, desc, asc } from "drizzle-orm";
 import { mkdirSync } from "fs";
@@ -45,6 +48,11 @@ export interface IStorage {
   getDisplaySettings(): Promise<DisplaySettings | undefined>;
   createDisplaySettings(settings: InsertDisplaySettings): Promise<DisplaySettings>;
   updateDisplaySettings(id: number, settings: Partial<InsertDisplaySettings>): Promise<DisplaySettings | undefined>;
+  
+  // Rate Calculation Settings
+  getRateSettings(): Promise<import("@shared/schema").RateSettings | undefined>;
+  createRateSettings(settings: import("@shared/schema").InsertRateSettings): Promise<import("@shared/schema").RateSettings>;
+  updateRateSettings(id: number, settings: Partial<import("@shared/schema").InsertRateSettings>): Promise<import("@shared/schema").RateSettings | undefined>;
   
   // Media Items
   getMediaItems(activeOnly?: boolean): Promise<MediaItem[]>;
@@ -110,6 +118,27 @@ async createDisplaySettings(settings: InsertDisplaySettings): Promise<DisplaySet
     const result = await db.update(displaySettings)
       .set(settings)
       .where(eq(displaySettings.id, id))
+      .returning();
+    return result[0];
+  }
+
+  // Rate Calculation Settings
+  async getRateSettings(): Promise<RateSettings | undefined> {
+    const settings = await db.select().from(rateSettings)
+      .orderBy(desc(rateSettings.created_date))
+      .limit(1);
+    return settings[0];
+  }
+
+  async createRateSettings(settings: InsertRateSettings): Promise<RateSettings> {
+    const result = await db.insert(rateSettings).values(settings).returning();
+    return result[0];
+  }
+
+  async updateRateSettings(id: number, settings: Partial<InsertRateSettings>): Promise<RateSettings | undefined> {
+    const result = await db.update(rateSettings)
+      .set(settings)
+      .where(eq(rateSettings.id, id))
       .returning();
     return result[0];
   }

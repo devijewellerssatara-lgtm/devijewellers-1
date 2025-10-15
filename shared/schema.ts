@@ -69,6 +69,17 @@ export const bannerSettings = pgTable("banner_settings", {
   created_date: timestamp("created_date").defaultNow()
 });
 
+// Rate Calculation Settings
+export const rateSettings = pgTable("rate_settings", {
+  id: serial("id").primaryKey(),
+  perc_22k_sale: real("perc_22k_sale").default(0.92),
+  perc_22k_purchase: real("perc_22k_purchase").default(0.90),
+  perc_18k_sale: real("perc_18k_sale").default(0.86),
+  perc_18k_purchase: real("perc_18k_purchase").default(0.80),
+  silver_purchase_percent: real("silver_purchase_percent").default(1.0),
+  created_date: timestamp("created_date").defaultNow()
+});
+
 // Insert schemas
 export const insertGoldRateSchema = createInsertSchema(goldRates).omit({
   id: true,
@@ -95,6 +106,11 @@ export const insertBannerSettingsSchema = createInsertSchema(bannerSettings).omi
   created_date: true
 });
 
+export const insertRateSettingsSchema = createInsertSchema(rateSettings).omit({
+  id: true,
+  created_date: true
+});
+
 // Types
 export type GoldRate = typeof goldRates.$inferSelect;
 export type InsertGoldRate = z.infer<typeof insertGoldRateSchema>;
@@ -110,3 +126,6 @@ export type InsertPromoImage = z.infer<typeof insertPromoImageSchema>;
 
 export type BannerSettings = typeof bannerSettings.$inferSelect;
 export type InsertBannerSettings = z.infer<typeof insertBannerSettingsSchema>;
+
+export type RateSettings = typeof rateSettings.$inferSelect;
+export type InsertRateSettings = z.infer<typeof insertRateSettingsSchema>;

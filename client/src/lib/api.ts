@@ -5,7 +5,9 @@ import type {
   InsertDisplaySettings,
   MediaItem,
   PromoImage,
-  BannerSettings 
+  BannerSettings,
+  RateSettings,
+  InsertRateSettings
 } from "@shared/schema";
 
 // Helper function for API requests
@@ -52,6 +54,11 @@ export const ratesApi = {
   create: async (rates: InsertGoldRate): Promise<GoldRate> => {
     const response = await apiRequest("POST", "/api/rates", rates);
     return response.json();
+  },
+
+  sync: async (): Promise<{ message: string; rates: GoldRate }> => {
+    const response = await apiRequest("GET", "/api/rates/sync");
+    return response.json();
   }
 };
 
@@ -84,6 +91,26 @@ export const settingsApi = {
     }
     const response = await apiRequest("PUT", `/api/settings/display/${id}`, settings);
     return (await response.json()) as DisplaySettings;
+  },
+
+  // Rate Calculation Settings API
+  getRate: async (): Promise<RateSettings | null> => {
+    try {
+      const response = await apiRequest("GET", "/api/settings/rates");
+      return response.json();
+    } catch (error) {
+      return null;
+    }
+  },
+
+  createRate: async (settings: InsertRateSettings): Promise<RateSettings> => {
+    const response = await apiRequest("POST", "/api/settings/rates", settings);
+    return response.json();
+  },
+
+  updateRate: async (id: number, settings: Partial<InsertRateSettings>): Promise<RateSettings> => {
+    const response = await apiRequest("PUT", `/api/settings/rates/${id}`, settings);
+    return response.json();
   }
 };
 // Media API

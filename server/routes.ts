@@ -172,8 +172,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rate Calculation Settings Routes
+  app.get("/api/settings/rates", async (_req, res) => {
+    try {
+      const settings = await storage.getRateSettings();
+      res.json(settings || {
+        perc_22k_sale: 0.92,
+        perc_22k_purchase: 0.90,
+        perc_18k_sale: 0.86,
+        perc_18k_purchase: 0.80,
+        silver_purchase_percent: 1.0
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch rate settings" });
+    }
+  });
+
+  app.post("/api/settings/rates", async (req, res) => {
+    try {
+      const { insertRateSettingsSchema } = await import("@shared/schema");
+      const validated = insertRateSettingsSchema.parse(req.body);
+      const created = await storage.createRateSettings(validated);
+      res.status(201).json(created);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid rate settings", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create rate settings" });
+      }
+    }
+  });
+
+  app.put("/api/settings/rates/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { insertRateSettingsSchema } = await import("@shared/schema");
+      const validated = insertRateSettingsSchema.partial().parse(req.body);
+      const updated = await storage.updateRateSettings(id, validated);
+      if (!updated) return res.status(404).json({ message: "Rate settings not found" });
+      res.json(updated);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid rate settings", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to update rate settings" });
+      }
+    }
+  });
+
   // Fetch and store rates from external API
-  // GET /api/rates/sync - fetches latest rates from BusinessMantra API and stores to Postgres
+  // GET /api/rates/sync - fetches latest 24k sale and silver sale, computes others via settings, stores to Postgres
   app.get("/api/rates/sync", async (_req, res) => {
     try {
       const apiUrl = "https://www.businessmantra.info/gold_rates/devi_gold_rate/api.php";
@@ -183,28 +231,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const data = await resp.json() as Record<string, number>;
 
-      // Map API fields to our InsertGoldRate schema.
-      // Assumption: API provides a single price per metal; we store the same value for sale and purchase.
+      // Only use 24k sale and silver sale from API
+      const gold24kSale = Number(data["24K Gold"]);
+      const silverSale = Number(data["Silver"]);
+
+      if (!Number.isFinite(gold24kSale) || !Number.isFinite(silverSale)) {
+        return res.status(400).json({ message: "API missing required fields: 24K Gold or Silver" });
+      }
+
+      // Load calculation settings (with defaults)
+      const calc = await storage.getRateSettings();
+      const perc_22k_sale = calc?.perc_22k_sale ?? 0.92;
+      const perc_22k_purchase = calc?.perc_22k_purchase ?? 0.90;
+      const perc_18k_sale = calc?.perc_18k_sale ?? 0.86;
+      const perc_18k_purchase = calc?.perc_18k_purchase ?? 0.80;
+      const silver_purchase_percent = calc?.silver_purchase_percent ?? 1.0;
+
       const payload = {
-        gold_24k_sale: Number(data["24K Gold"]),
-        gold_24k_purchase: Number(data["24K Gold"]),
-        gold_22k_sale: Number(data["22K Gold"]),
-        gold_22k_purchase: Number(data["22K Gold"]),
-        gold_18k_sale: Number(data["18K Gold"]),
-        gold_18k_purchase: Number(data["18K Gold"]),
-        silver_per_kg_sale: Number(data["Silver"]),
-        silver_per_kg_purchase: Number(data["Silver"]),
+        gold_24k_sale: gold24kSale,
+        gold_24k_purchase: gold24kSale, // purchase is same as sale base unless you want separate percent
+        gold_22k_sale: gold24kSale * perc_22k_sale,
+        gold_22k_purchase: gold24kSale * perc_22k_purchase,
+        gold_18k_sale: gold24kSale * perc_18k_sale,
+        gold_18k_purchase: gold24kSale * perc_18k_purchase,
+        silver_per_kg_sale: silverSale,
+        silver_per_kg_purchase: silverSale * silver_purchase_percent,
         is_active: true,
       };
 
-      // Validate against schema
       const validatedData = insertGoldRateSchema.parse(payload);
       const newRates = await storage.createGoldRate(validatedData);
 
       res.status(201).json({ message: "Rates synced", rates: newRates });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ message: "Invalid rate data from external API", errors: error.errors });
+        res.status(400).json({ message: "Invalid computed rate data", errors: error.errors });
       } else {
         res.status(500).json({ message: "Failed to sync rates", error: (error as Error).message });
       }
