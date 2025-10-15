@@ -75,28 +75,32 @@ async function performRateSync(): Promise<void> {
     const data = await resp.json() as Record<string, number>;
 
     const gold24kSale = Number(data["24K Gold"]);
-    const silverSale = Number(data["Silver"]);
-    if (!Number.isFinite(gold24kSale) || !Number.isFinite(silverSale)) {
+    const silverSalePerGram = Number(data["Silver"]);
+    if (!Number.isFinite(gold24kSale) || !Number.isFinite(silverSalePerGram)) {
       log("rate sync: API missing fields");
       return;
     }
 
     const calc = await storage.getRateSettings();
+    const perc_24k_purchase = calc?.perc_24k_purchase ?? 1.0;
     const perc_22k_sale = calc?.perc_22k_sale ?? 0.92;
     const perc_22k_purchase = calc?.perc_22k_purchase ?? 0.90;
     const perc_18k_sale = calc?.perc_18k_sale ?? 0.86;
     const perc_18k_purchase = calc?.perc_18k_purchase ?? 0.80;
     const silver_purchase_offset = calc?.silver_purchase_offset ?? -5000;
 
+    // Convert silver from per gram to per kg
+    const silverPerKgSale = silverSalePerGram * 1000;
+
     const payload = {
       gold_24k_sale: gold24kSale,
-      gold_24k_purchase: gold24kSale,
+      gold_24k_purchase: gold24kSale * perc_24k_purchase,
       gold_22k_sale: gold24kSale * perc_22k_sale,
       gold_22k_purchase: gold24kSale * perc_22k_purchase,
       gold_18k_sale: gold24kSale * perc_18k_sale,
       gold_18k_purchase: gold24kSale * perc_18k_purchase,
-      silver_per_kg_sale: silverSale,
-      silver_per_kg_purchase: silverSale + silver_purchase_offset,
+      silver_per_kg_sale: silverPerKgSale,
+      silver_per_kg_purchase: silverPerKgSale + silver_purchase_offset,
       is_active: true,
     };
 

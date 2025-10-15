@@ -20,6 +20,7 @@ import type { RateSettings } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 
 const rateSettingsSchema = z.object({
+  perc_24k_purchase: z.number().min(0).max(1),
   perc_22k_sale: z.number().min(0).max(1),
   perc_22k_purchase: z.number().min(0).max(1),
   perc_18k_sale: z.number().min(0).max(1),
@@ -45,6 +46,7 @@ export default function RateSync() {
   const form = useForm<z.infer<typeof rateSettingsSchema>>({
     resolver: zodResolver(rateSettingsSchema),
     defaultValues: {
+      perc_24k_purchase: 1.0,
       perc_22k_sale: 0.92,
       perc_22k_purchase: 0.90,
       perc_18k_sale: 0.86,
@@ -119,6 +121,19 @@ export default function RateSync() {
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="perc_24k_purchase"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>24K Purchase (% of 24K Sale)</FormLabel>
+                        <FormControl>
+                          <Input type="number" step="0.01" min="0" max="1" value={field.value ?? 1.0} onChange={(e) => field.onChange(Number(e.target.value))} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="perc_22k_sale"

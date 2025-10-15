@@ -177,11 +177,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const settings = await storage.getRateSettings();
       res.json(settings || {
+        perc_24k_purchase: 1.0,
         perc_22k_sale: 0.92,
         perc_22k_purchase: 0.90,
         perc_18k_sale: 0.86,
         perc_18k_purchase: 0.80,
-        silver_purchase_offset: -5000
+        silver_purchase_offset: -5000,
+        check_interval_minutes: 5
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch rate settings" });

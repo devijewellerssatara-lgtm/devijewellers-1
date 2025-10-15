@@ -72,6 +72,7 @@ export const bannerSettings = pgTable("banner_settings", {
 // Rate Calculation Settings
 export const rateSettings = pgTable("rate_settings", {
   id: serial("id").primaryKey(),
+  perc_24k_purchase: real("perc_24k_purchase").default(1.0),
   perc_22k_sale: real("perc_22k_sale").default(0.92),
   perc_22k_purchase: real("perc_22k_purchase").default(0.90),
   perc_18k_sale: real("perc_18k_sale").default(0.86),
