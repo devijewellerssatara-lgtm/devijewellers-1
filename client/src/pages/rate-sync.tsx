@@ -46,11 +46,11 @@ export default function RateSync() {
   const form = useForm<z.infer<typeof rateSettingsSchema>>({
     resolver: zodResolver(rateSettingsSchema),
     defaultValues: {
-      perc_24k_purchase: 1.0,
-      perc_22k_sale: 0.92,
-      perc_22k_purchase: 0.90,
-      perc_18k_sale: 0.86,
-      perc_18k_purchase: 0.80,
+      perc_24k_purchase: 0.985,
+      perc_22k_sale: 0.920,
+      perc_22k_purchase: 0.900,
+      perc_18k_sale: 0.860,
+      perc_18k_purchase: 0.800,
       silver_purchase_offset: -5000,
       check_interval_minutes: 5,
     },
@@ -59,10 +59,11 @@ export default function RateSync() {
   React.useEffect(() => {
     if (rateSettings) {
       form.reset({
-        perc_22k_sale: rateSettings.perc_22k_sale ?? 0.92,
-        perc_22k_purchase: rateSettings.perc_22k_purchase ?? 0.90,
-        perc_18k_sale: rateSettings.perc_18k_sale ?? 0.86,
-        perc_18k_purchase: rateSettings.perc_18k_purchase ?? 0.80,
+        perc_24k_purchase: rateSettings.perc_24k_purchase ?? 0.985,
+        perc_22k_sale: rateSettings.perc_22k_sale ?? 0.920,
+        perc_22k_purchase: rateSettings.perc_22k_purchase ?? 0.900,
+        perc_18k_sale: rateSettings.perc_18k_sale ?? 0.860,
+        perc_18k_purchase: rateSettings.perc_18k_purchase ?? 0.800,
         silver_purchase_offset: rateSettings.silver_purchase_offset ?? -5000,
         check_interval_minutes: rateSettings.check_interval_minutes ?? 5,
       });
@@ -128,7 +129,7 @@ export default function RateSync() {
                       <FormItem>
                         <FormLabel>24K Purchase (% of 24K Sale)</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" min="0" max="1" value={field.value ?? 1.0} onChange={(e) => field.onChange(Number(e.target.value))} />
+                          <Input type="number" step="0.001" min="0" max="1" value={field.value ?? 0.985} onChange={(e) => field.onChange(Number(e.target.value))} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -141,7 +142,7 @@ export default function RateSync() {
                       <FormItem>
                         <FormLabel>22K Sale (% of 24K Sale)</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" min="0" max="1" value={field.value ?? 0.92} onChange={(e) => field.onChange(Number(e.target.value))} />
+                          <Input type="number" step="0.001" min="0" max="1" value={field.value ?? 0.920} onChange={(e) => field.onChange(Number(e.target.value))} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -154,7 +155,8 @@ export default function RateSync() {
                       <FormItem>
                         <FormLabel>22K Purchase (% of 24K Sale)</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" min="0" max="1" value={field.value ?? 0.90} onChange={(e) => field.onChange(Number(e.target.value))} />
+                          <Input type="number" step="0.001" min="0" max="1" value={field.value ?? 0.900} onChange={(e) => field.onChange(Number(e.target.value))_code} new/</>
+>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -167,7 +169,7 @@ export default function RateSync() {
                       <FormItem>
                         <FormLabel>18K Sale (% of 24K Sale)</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" min="0" max="1" value={field.value ?? 0.86} onChange={(e) => field.onChange(Number(e.target.value))} />
+                          <Input type="number" step="0.001" min="0" max="1 value={field.value ?? 0.86} onChange={(e) => field.onChange(Number(e.target.value))} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -180,7 +182,7 @@ export default function RateSync() {
                       <FormItem>
                         <FormLabel>18K Purchase (% of 24K Sale)</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" min="0" max="1" value={field.value ?? 0.80} onChange={(e) => field.onChange(Number(e.target.value))} />
+                          <Input type="number" step="0.001" min="0" max="1" value={field.value ?? 0.800} onChange={(e) => field.onChange(Number(e.target.value))} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

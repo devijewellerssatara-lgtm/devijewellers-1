@@ -82,15 +82,15 @@ async function performRateSync(): Promise<void> {
     }
 
     const calc = await storage.getRateSettings();
-    const perc_24k_purchase = calc?.perc_24k_purchase ?? 1.0;
+    const perc_24k_purchase = calc?.perc_24k_purchase ?? 0.985;
     const perc_22k_sale = calc?.perc_22k_sale ?? 0.92;
     const perc_22k_purchase = calc?.perc_22k_purchase ?? 0.90;
     const perc_18k_sale = calc?.perc_18k_sale ?? 0.86;
     const perc_18k_purchase = calc?.perc_18k_purchase ?? 0.80;
     const silver_purchase_offset = calc?.silver_purchase_offset ?? -5000;
 
-    // Convert silver from per gram to per kg
-    const silverPerKgSale = silverSalePerGram * 1000;
+    // Silver from API is per 10 grams, convert to per kg (1000g / 10g = 100x)
+    const silverPerKgSale = silverSalePerGram * 100;
 
     const payload = {
       gold_24k_sale: gold24kSale,

@@ -243,21 +243,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Load calculation settings (with defaults)
       const calc = await storage.getRateSettings();
+      const perc_24k_purchase = calc?.perc_24k_purchase ?? 0.985;
       const perc_22k_sale = calc?.perc_22k_sale ?? 0.92;
       const perc_22k_purchase = calc?.perc_22k_purchase ?? 0.90;
       const perc_18k_sale = calc?.perc_18k_sale ?? 0.86;
       const perc_18k_purchase = calc?.perc_18k_purchase ?? 0.80;
       const silver_purchase_offset = calc?.silver_purchase_offset ?? -5000;
 
+      // Silver from API is per 10 grams, convert to per kg (1000g / 10g = 100x)
+      const silverPerKgSale = silverSale * 100;
+
       const payload = {
         gold_24k_sale: gold24kSale,
-        gold_24k_purchase: gold24kSale,
+        gold_24k_purchase: gold24kSale * perc_24k_purchase,
         gold_22k_sale: gold24kSale * perc_22k_sale,
         gold_22k_purchase: gold24kSale * perc_22k_purchase,
         gold_18k_sale: gold24kSale * perc_18k_sale,
         gold_18k_purchase: gold24kSale * perc_18k_purchase,
-        silver_per_kg_sale: silverSale,
-        silver_per_kg_purchase: silverSale + silver_purchase_offset,
+        silver_per_kg_sale: silverPerKgSale,
+        silver_per_kg_purchase: silverPerKgSale + silver_purchase_offset,
         is_active: true,
       };
 
