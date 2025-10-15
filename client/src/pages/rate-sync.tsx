@@ -155,8 +155,14 @@ export default function RateSync() {
                       <FormItem>
                         <FormLabel>22K Purchase (% of 24K Sale)</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.001" min="0" max="1" value={field.value ?? 0.900} onChange={(e) => field.onChange(Number(e.target.value))_code} new/</>
->
+                          <Input
+                            type="number"
+                            step="0.001"
+                            min="0"
+                            max="1"
+                            value={field.value ?? 0.900}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -169,7 +175,14 @@ export default function RateSync() {
                       <FormItem>
                         <FormLabel>18K Sale (% of 24K Sale)</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.001" min="0" max="1 value={field.value ?? 0.86} onChange={(e) => field.onChange(Number(e.target.value))} />
+                          <Input
+                            type="number"
+                            step="0.001"
+                            min="0"
+                            max="1"
+                            value={field.value ?? 0.860}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
