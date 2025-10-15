@@ -24,7 +24,7 @@ const rateSettingsSchema = z.object({
   perc_22k_purchase: z.number().min(0).max(1),
   perc_18k_sale: z.number().min(0).max(1),
   perc_18k_purchase: z.number().min(0).max(1),
-  silver_purchase_percent: z.number().min(0).max(1),
+  silver_purchase_offset: z.number(), // can be negative, e.g. -5000
 });
 
 export default function RateSync() {
@@ -48,7 +48,7 @@ export default function RateSync() {
       perc_22k_purchase: 0.90,
       perc_18k_sale: 0.86,
       perc_18k_purchase: 0.80,
-      silver_purchase_percent: 1.0,
+      silver_purchase_offset: -5000,
     },
   });
 
@@ -59,7 +59,7 @@ export default function RateSync() {
         perc_22k_purchase: rateSettings.perc_22k_purchase ?? 0.90,
         perc_18k_sale: rateSettings.perc_18k_sale ?? 0.86,
         perc_18k_purchase: rateSettings.perc_18k_purchase ?? 0.80,
-        silver_purchase_percent: rateSettings.silver_purchase_percent ?? 1.0,
+        silver_purchase_offset: rateSettings.silver_purchase_offset ?? -5000,
       });
     }
   }, [rateSettings, form]);
@@ -170,13 +170,14 @@ export default function RateSync() {
                   />
                   <FormField
                     control={form.control}
-                    name="silver_purchase_percent"
+                    name="silver_purchase_offset"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Silver Purchase (% of Silver Sale)</FormLabel>
+                        <FormLabel>Silver Purchase Offset (added to Silver Sale)</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" min="0" max="1" value={field.value ?? 1.0} onChange={(e) => field.onChange(Number(e.target.value))} />
+                          <Input type="number" step="1" value={field.value ?? -5000} onChange={(e) => field.onChange(Number(e.target.value))} />
                         </FormControl>
+                        <p className="text-xs text-gray-600">Example: -5000 means Silver purchase = Silver sale - 5000</p>
                         <FormMessage />
                       </FormItem>
                     )}

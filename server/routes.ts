@@ -181,7 +181,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         perc_22k_purchase: 0.90,
         perc_18k_sale: 0.86,
         perc_18k_purchase: 0.80,
-        silver_purchase_percent: 1.0
+        silver_purchase_offset: -5000
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch rate settings" });
@@ -245,17 +245,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const perc_22k_purchase = calc?.perc_22k_purchase ?? 0.90;
       const perc_18k_sale = calc?.perc_18k_sale ?? 0.86;
       const perc_18k_purchase = calc?.perc_18k_purchase ?? 0.80;
-      const silver_purchase_percent = calc?.silver_purchase_percent ?? 1.0;
+      const silver_purchase_offset = calc?.silver_purchase_offset ?? -5000;
 
       const payload = {
         gold_24k_sale: gold24kSale,
-        gold_24k_purchase: gold24kSale, // purchase is same as sale base unless you want separate percent
+        gold_24k_purchase: gold24kSale,
         gold_22k_sale: gold24kSale * perc_22k_sale,
         gold_22k_purchase: gold24kSale * perc_22k_purchase,
         gold_18k_sale: gold24kSale * perc_18k_sale,
         gold_18k_purchase: gold24kSale * perc_18k_purchase,
         silver_per_kg_sale: silverSale,
-        silver_per_kg_purchase: silverSale * silver_purchase_percent,
+        silver_per_kg_purchase: silverSale + silver_purchase_offset,
         is_active: true,
       };
 
