@@ -77,6 +77,7 @@ export const rateSettings = pgTable("rate_settings", {
   perc_18k_sale: real("perc_18k_sale").default(0.86),
   perc_18k_purchase: real("perc_18k_purchase").default(0.80),
   silver_purchase_offset: real("silver_purchase_offset").default(-5000), // purchase = sale + offset
+  check_interval_minutes: integer("check_interval_minutes").default(5), // auto sync interval
   created_date: timestamp("created_date").defaultNow()
 });
 

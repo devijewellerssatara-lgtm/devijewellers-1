@@ -2,6 +2,8 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import postgres from "postgres";
+import { storage } from "./storage";
+import { insertGoldRateSchema } from "@shared/schema";
 
 const app = express();
 app.use(express.json());
@@ -62,6 +64,76 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
+async function performRateSync(): Promise<void> {
+  try {
+    const apiUrl = "https://www.businessmantra.info/gold_rates/devi_gold_rate/api.php";
+    const resp = await fetch(apiUrl, { cache: "no-store" });
+    if (!resp.ok) {
+      log(`rate sync: external fetch failed (${resp.status})`);
+      return;
+    }
+    const data = await resp.json() as Record<string, number>;
+
+    const gold24kSale = Number(data["24K Gold"]);
+    const silverSale = Number(data["Silver"]);
+    if (!Number.isFinite(gold24kSale) || !Number.isFinite(silverSale)) {
+      log("rate sync: API missing fields");
+      return;
+    }
+
+    const calc = await storage.getRateSettings();
+    const perc_22k_sale = calc?.perc_22k_sale ?? 0.92;
+    const perc_22k_purchase = calc?.perc_22k_purchase ?? 0.90;
+    const perc_18k_sale = calc?.perc_18k_sale ?? 0.86;
+    const perc_18k_purchase = calc?.perc_18k_purchase ?? 0.80;
+    const silver_purchase_offset = calc?.silver_purchase_offset ?? -5000;
+
+    const payload = {
+      gold_24k_sale: gold24kSale,
+      gold_24k_purchase: gold24kSale,
+      gold_22k_sale: gold24kSale * perc_22k_sale,
+      gold_22k_purchase: gold24kSale * perc_22k_purchase,
+      gold_18k_sale: gold24kSale * perc_18k_sale,
+      gold_18k_purchase: gold24kSale * perc_18k_purchase,
+      silver_per_kg_sale: silverSale,
+      silver_per_kg_purchase: silverSale + silver_purchase_offset,
+      is_active: true,
+    };
+
+    const validated = insertGoldRateSchema.parse(payload);
+    await storage.createGoldRate(validated);
+    log("rate sync: stored new rates");
+  } catch (err) {
+    log(`rate sync error: ${(err as Error).message}`);
+  }
+}
+
+function scheduleRateSync() {
+  let cancelled = false;
+
+  const loop = async () => {
+    if (cancelled) return;
+
+    // read interval from settings each cycle to reflect updates
+    const calc = await storage.getRateSettings();
+    const minutes = calc?.check_interval_minutes ?? 5;
+    const intervalMs = Math.max(1, minutes) * 60_000;
+
+    // wait
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+
+    if (cancelled) return;
+    await performRateSync();
+
+    // repeat
+    loop();
+  };
+
+  loop();
+
+  return () => { cancelled = true; };
+}
+
 (async () => {
   const server = await registerRoutes(app);
 
@@ -81,6 +153,9 @@ app.get("/api/health", async (req, res) => {
   } else {
     serveStatic(app);
   }
+
+  // start periodic rate sync
+  scheduleRateSync();
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.
