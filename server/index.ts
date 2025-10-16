@@ -5,6 +5,14 @@ import postgres from "postgres";
 import { storage } from "./storage";
 import { insertGoldRateSchema } from "@shared/schema";
 
+// Robust global error handlers to prevent server crash on transient network failures
+process.on("unhandledRejection", (reason) => {
+  log(`unhandledRejection: ${(reason as Error)?.message || String(reason)}`);
+});
+process.on("uncaughtException", (err) => {
+  log(`uncaughtException: ${err.message}`);
+});
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -65,14 +73,24 @@ app.get("/api/health", async (req, res) => {
 });
 
 async function performRateSync(): Promise<void> {
+  const apiUrl = "https://www.businessmantra.info/gold_rates/devi_gold_rate/api.php";
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20000); // 20s timeout
+
   try {
-    const apiUrl = "https://www.businessmantra.info/gold_rates/devi_gold_rate/api.php";
-    const resp = await fetch(apiUrl, { cache: "no-store" });
+    const resp = await fetch(apiUrl, { cache: "no-store", signal: controller.signal });
     if (!resp.ok) {
       log(`rate sync: external fetch failed (${resp.status})`);
       return;
     }
-    const data = await resp.json() as Record<string, number>;
+
+    let data: Record<string, number>;
+    try {
+      data = await resp.json() as Record<string, number>;
+    } catch (parseErr) {
+      log(`rate sync: failed to parse JSON - ${(parseErr as Error).message}`);
+      return;
+    }
 
     const gold24kSale = Number(data["24K Gold"]);
     const silverSalePerGram = Number(data["Silver"]);
@@ -110,6 +128,16 @@ async function performRateSync(): Promise<void> {
     await storage.createGoldRate(validated);
     log("rate sync: stored new rates");
   } catch (err) {
+    const msg = (err as Error).message || String(err);
+    if (msg.includes("aborted")) {
+      log("rate sync: request aborted (timeout)");
+    } else {
+      log(`rate sync error: ${msg}`);
+    }
+  } finally {
+    clearTimeout(timeout);
+  }
+} catch (err) {
     log(`rate sync error: ${(err as Error).message}`);
   }
 }
