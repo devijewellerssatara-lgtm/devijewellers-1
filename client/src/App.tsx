@@ -11,6 +11,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import MediaManager from "@/pages/media-manager";
 import PromoManager from "@/pages/promo-manager";
 import RateSync from "@/pages/rate-sync";
+import SaleStatus from "@/pages/sale-status";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -24,6 +25,7 @@ function Router() {
         <Route path="/media" component={MediaManager} />
         <Route path="/promo" component={PromoManager} />
         <Route path="/rates-sync" component={RateSync} />
+        <Route path="/sale-status" component={SaleStatus} />
         <Route component={NotFound} />
       </Switch>
     </div>
