@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Navigation } from "@/components/navigation";
 import TVDisplay from "@/pages/tv-display";
+import CurrentRate from "@/pages/current-rate";
 import MobileControl from "@/pages/mobile-control";
 import AdminDashboard from "@/pages/admin-dashboard";
 import MediaManager from "@/pages/media-manager";
@@ -18,6 +19,7 @@ function Router() {
       <Navigation />
       <Switch>
         <Route path="/" component={TVDisplay} />
+        <Route path="/current" component={CurrentRate} />
         <Route path="/mobile" component={MobileControl} />
         <Route path="/admin" component={AdminDashboard} />
         <Route path="/media" component={MediaManager} />
