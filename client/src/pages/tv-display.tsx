@@ -129,11 +129,8 @@ export default function TVDisplay() {
 
   
 
-  // Enhanced responsive font sizing
+  // Use admin-configured font size consistently
   const getRateFontSize = () => {
-    if (screenSize === 'mobile') return "text-xl";
-    if (screenSize === 'tablet') return "text-3xl";
-    if (screenSize === 'tv') return "text-4xl";
     return settings?.rate_number_font_size || "text-4xl";
   };
   const rateFontSize = getRateFontSize();
