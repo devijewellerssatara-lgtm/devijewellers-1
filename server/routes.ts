@@ -253,15 +253,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Silver from API is per 10 grams, convert to per kg (1000g / 10g = 100x)
       const silverPerKgSale = silverSale * 100;
 
+      const round10 = (n: number) => Math.round(n / 10) * 10;
+
       const payload = {
-        gold_24k_sale: gold24kSale,
-        gold_24k_purchase: gold24kSale * perc_24k_purchase,
-        gold_22k_sale: gold24kSale * perc_22k_sale,
-        gold_22k_purchase: gold24kSale * perc_22k_purchase,
-        gold_18k_sale: gold24kSale * perc_18k_sale,
-        gold_18k_purchase: gold24kSale * perc_18k_purchase,
-        silver_per_kg_sale: silverPerKgSale,
-        silver_per_kg_purchase: silverPerKgSale + silver_purchase_offset,
+        gold_24k_sale: round10(gold24kSale),
+        gold_24k_purchase: round10(gold24kSale * perc_24k_purchase),
+        gold_22k_sale: round10(gold24kSale * perc_22k_sale),
+        gold_22k_purchase: round10(gold24kSale * perc_22k_purchase),
+        gold_18k_sale: round10(gold24kSale * perc_18k_sale),
+        gold_18k_purchase: round10(gold24kSale * perc_18k_purchase),
+        silver_per_kg_sale: round10(silverPerKgSale),
+        silver_per_kg_purchase: round10(silverPerKgSale + silver_purchase_offset),
         is_active: true,
       };
 
