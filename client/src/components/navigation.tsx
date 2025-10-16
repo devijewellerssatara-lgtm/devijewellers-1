@@ -9,6 +9,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { path: "/", label: "TV Display", icon: "fas fa-tv" },
+  { path: "/current", label: "Current Rate", icon: "fas fa-rupee-sign" },
   { path: "/mobile", label: "Mobile Control", icon: "fas fa-mobile-alt" },
   { path: "/admin", label: "Admin Dashboard", icon: "fas fa-cog" },
   { path: "/media", label: "Media Manager", icon: "fas fa-images" },
