@@ -143,19 +143,7 @@ async createDisplaySettings(settings: InsertDisplaySettings): Promise<DisplaySet
 
   async createMediaItem(item: InsertMediaItem): Promise<MediaItem> {
     const result = await db.insert(mediaItems).values(item).returning();
-    const created = result[0];
-
-    // Enforce cap for media items
-    const toDelete = await db
-      .select({ id: mediaItems.id })
-      .from(mediaItems)
-      .orderBy(desc(mediaItems.created_date))
-      .offset(ROW_CAP);
-    if (toDelete.length) {
-      await db.delete(mediaItems).where(inArray(mediaItems.id, toDelete.map(r => r.id)));
-    }
-
-    return created;
+    return result[0];
   }
 
   async updateMediaItem(id: number, item: Partial<InsertMediaItem>): Promise<MediaItem | undefined> {
@@ -185,19 +173,7 @@ async createDisplaySettings(settings: InsertDisplaySettings): Promise<DisplaySet
 
   async createPromoImage(image: InsertPromoImage): Promise<PromoImage> {
     const result = await db.insert(promoImages).values(image).returning();
-    const created = result[0];
-
-    // Enforce cap for promo images
-    const toDelete = await db
-      .select({ id: promoImages.id })
-      .from(promoImages)
-      .orderBy(desc(promoImages.created_date))
-      .offset(ROW_CAP);
-    if (toDelete.length) {
-      await db.delete(promoImages).where(inArray(promoImages.id, toDelete.map(r => r.id)));
-    }
-
-    return created;
+    return result[0];
   }
 
   async updatePromoImage(id: number, image: Partial<InsertPromoImage>): Promise<PromoImage | undefined> {
