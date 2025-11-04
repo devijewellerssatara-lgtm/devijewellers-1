@@ -17,7 +17,7 @@ import {
   type BannerSettings,
   type InsertBannerSettings
 } from "@shared/schema";
-import { eq, desc, asc } from "drizzle-orm";
+import { eq, desc, asc, inArray } from "drizzle-orm";
 import { mkdirSync } from "fs";
 import { join } from "path";
 
@@ -34,6 +34,9 @@ if (!connectionString) {
 // Create PostgreSQL client
 const client = postgres(connectionString);
 const db = drizzle(client);
+
+// Hard cap for rows to retain per table
+const ROW_CAP = 50;
 
 export interface IStorage {
   // Gold Rates
@@ -79,7 +82,19 @@ export class PostgresStorage implements IStorage {
     await db.update(goldRates).set({ is_active: false });
     
     const result = await db.insert(goldRates).values(rate).returning();
-    return result[0];
+    const created = result[0];
+
+    // Enforce cap: keep most recent ROW_CAP by created_date
+    const toDelete = await db
+      .select({ id: goldRates.id })
+      .from(goldRates)
+      .orderBy(desc(goldRates.created_date))
+      .offset(ROW_CAP);
+    if (toDelete.length) {
+      await db.delete(goldRates).where(inArray(goldRates.id, toDelete.map(r => r.id)));
+    }
+
+    return created;
   }
 
   async updateGoldRate(id: number, rate: Partial<InsertGoldRate>): Promise<GoldRate | undefined> {
