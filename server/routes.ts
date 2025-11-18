@@ -158,6 +158,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public endpoint for SALE rates only (CORS-enabled)
+  app.get("/public/sale-rates", async (req, res) => {
+    try {
+      const rates = await storage.getCurrentRates();
+      // Allow cross-origin GETs for this lightweight, read-only endpoint
+      const allowedOrigin = process.env.CORS_PUBLIC_ORIGIN || "*";
+      res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
+      res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+      res.setHeader("Cache-Control", "no-store");
+
+      if (!rates) {
+        return res.status(404).json({ message: "No rates available" });
+      }
+
+      const saleOnly = {
+        gold_24k_sale: rates.gold_24k_sale,
+        gold_22k_sale: rates.gold_22k_sale,
+        gold_18k_sale: rates.gold_18k_sale,
+        silver_per_kg_sale: rates.silver_per_kg_sale,
+        created_date: rates.created_date,
+      };
+
+      res.json(saleOnly);
+    } catch {
+      res.status(500).json({ message: "Failed to fetch sale rates" });
+    }
+  });
+
   app.post("/api/rates", async (req, res) => {
     try {
       const validatedData = insertGoldRateSchema.parse(req.body);

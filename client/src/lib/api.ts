@@ -6,7 +6,7 @@ import type {
   MediaItem,
   PromoImage,
   BannerSettings 
-} from "@shared/schema";
+} from "@/shared/schema";
 
 // Helper function for API requests
 const apiRequest = async (method: string, url: string, data?: any): Promise<Response> => {
@@ -52,6 +52,30 @@ export const ratesApi = {
   create: async (rates: InsertGoldRate): Promise<GoldRate> => {
     const response = await apiRequest("POST", "/api/rates", rates);
     return response.json();
+  }
+};
+
+// Public sale-only rates from external site (e.g., Vercel)
+export type PublicSaleRates = {
+  gold_24k_sale: number;
+  gold_22k_sale: number;
+  gold_18k_sale: number;
+  silver_per_kg_sale: number;
+  created_date?: string | null;
+};
+
+export const externalRatesApi = {
+  getPublicSale: async (): Promise<PublicSaleRates | null> => {
+    const url = (import.meta as any).env?.VITE_PUBLIC_SALE_RATES_URL as string | undefined;
+    if (!url) {
+      throw new Error("VITE_PUBLIC_SALE_RATES_URL is not configured");
+    }
+    const resp = await fetch(url, { cache: "no-store" });
+    if (!resp.ok) {
+      const txt = await resp.text();
+      throw new Error(`Failed to fetch public sale rates: ${resp.status} ${txt}`);
+    }
+    return resp.json();
   }
 };
 
