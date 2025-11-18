@@ -197,7 +197,11 @@ export default function AdminDashboard() {
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            id="admin-settings-form"
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-6 pb-24"
+          >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Display Settings Card */}
               <Card>
@@ -522,8 +526,8 @@ export default function AdminDashboard() {
               </Card>
             </div>
 
-            {/* Save Settings Button */}
-            <div className="text-center mt-6">
+            {/* Save Settings Button (Desktop/Tablet) */}
+            <div className="hidden md:block text-center mt-6">
               <Button
                 type="submit"
                 className="bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white px-8 py-4 text-lg"
@@ -538,6 +542,28 @@ export default function AdminDashboard() {
                   <>
                     <i className="fas fa-save mr-2"></i>
                     Save All Settings
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {/* Mobile Sticky Save Bar */}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t border-gray-200 p-3">
+              <Button
+                type="submit"
+                form="admin-settings-form"
+                className="w-full bg-gradient-to-r from-jewelry-primary to-jewelry-secondary text-white py-4 text-base"
+                disabled={updateSettingsMutation.isPending}
+              >
+                {updateSettingsMutation.isPending ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-save mr-2"></i>
+                    Save Settings
                   </>
                 )}
               </Button>
