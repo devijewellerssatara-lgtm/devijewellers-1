@@ -252,3 +252,27 @@ export const systemApi = {
     return response.json();
   }
 };
+
+// Music search API
+export interface MusicSearchResult {
+  id: string;
+  title: string;
+  channelTitle?: string;
+  thumbnail?: string;
+  publishedAt?: string;
+  source: "youtube" | "spotify" | "other";
+}
+
+export interface MusicSearchResponse {
+  source: string;
+  results: MusicSearchResult[];
+  nextPageToken?: string | null;
+}
+
+export const musicApi = {
+  search: async (q: string, source: "youtube" | "spotify" | "other" = "youtube"): Promise<MusicSearchResponse> => {
+    const params = new URLSearchParams({ q, source });
+    const response = await apiRequest("GET", `/api/music/search?${params.toString()}`);
+    return response.json();
+  }
+};

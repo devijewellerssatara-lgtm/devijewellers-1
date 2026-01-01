@@ -12,6 +12,8 @@ import MediaManager from "@/pages/media-manager";
 import PromoManager from "@/pages/promo-manager";
 import NotFound from "@/pages/not-found";
 
+import MusicPlayerPage from "@/pages/music-player";
+
 function Router() {
   return (
     <div className="min-h-screen bg-gold-50">
@@ -22,6 +24,7 @@ function Router() {
         <Route path="/admin" component={AdminDashboard} />
         <Route path="/media" component={MediaManager} />
         <Route path="/promo" component={PromoManager} />
+        <Route path="/music" component={MusicPlayerPage} />
         <Route component={NotFound} />
       </Switch>
     </div>
