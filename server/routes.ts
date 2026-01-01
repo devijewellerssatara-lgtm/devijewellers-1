@@ -547,6 +547,63 @@ app.put("/api/settings/display/:id?", async (req, res) => {
     }
   });
 
+  // Music search routes (YouTube + stubs for others)
+  app.get("/api/music/search", async (req, res) => {
+    try {
+      const query = (req.query.q as string) || "";
+      const source = ((req.query.source as string) || "youtube").toLowerCase();
+
+      if (!query.trim()) {
+        return res.status(400).json({ message: "Missing search query (?q=...)" });
+      }
+
+      if (source !== "youtube") {
+        return res.status(501).json({ message: `Search source '${source}' is not implemented yet. Use source=youtube.` });
+      }
+
+      const apiKey = process.env.YOUTUBE_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ message: "YOUTUBE_API_KEY is not configured on the server" });
+      }
+
+      const params = new URLSearchParams({
+        key: apiKey,
+        part: "snippet",
+        type: "video",
+        videoCategoryId: "10", // Music
+        maxResults: "20",
+        q: query,
+      });
+
+      const ytResponse = await fetch(`https://www.googleapis.com/youtube/v3/search?${params.toString()}`);
+      if (!ytResponse.ok) {
+        const text = await ytResponse.text();
+        console.error("YouTube API error:", ytResponse.status, text);
+        return res.status(502).json({ message: "Failed to query YouTube API" });
+      }
+
+      const data = await ytResponse.json() as any;
+
+      const results = (data.items || []).map((item: any) => ({
+        id: item.id?.videoId,
+        title: item.snippet?.title,
+        channelTitle: item.snippet?.channelTitle,
+        thumbnail: item.snippet?.thumbnails?.medium?.url || item.snippet?.thumbnails?.default?.url,
+        publishedAt: item.snippet?.publishedAt,
+        source: "youtube",
+      }));
+
+      res.json({
+        source: "youtube",
+        results,
+        nextPageToken: data.nextPageToken ?? null,
+      });
+    } catch (error) {
+      console.error("Music search error:", error);
+      res.status(500).json({ message: "Failed to search music" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
