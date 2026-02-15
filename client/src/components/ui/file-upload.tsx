@@ -2,13 +2,38 @@ import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { cn } from '@/lib/utils';
 
+type AcceptObject = Record<string, string[]>;
+type AcceptProp = string | string[] | AcceptObject | undefined;
+
 interface FileUploadProps {
   onDrop: (files: File[]) => void;
-  accept?: string;
+  accept?: AcceptProp;
   multiple?: boolean;
   maxSize?: number;
   className?: string;
   children?: React.ReactNode;
+}
+
+function buildAccept(accept?: AcceptProp): AcceptObject | undefined {
+  if (!accept) return undefined;
+
+  // If already an object (react-dropzone format), pass through.
+  if (typeof accept === 'object' && !Array.isArray(accept)) {
+    return accept as AcceptObject;
+  }
+
+  const types = Array.isArray(accept)
+    ? accept
+    : typeof accept === 'string'
+      ? accept.split(',').map((s) => s.trim()).filter(Boolean)
+      : [];
+
+  if (types.length === 0) return undefined;
+
+  return types.reduce<AcceptObject>((acc, mime) => {
+    acc[mime] = [];
+    return acc;
+  }, {});
 }
 
 export function FileUpload({
@@ -25,7 +50,7 @@ export function FileUpload({
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: handleDrop,
-    accept: accept ? { [accept]: [] } : undefined,
+    accept: buildAccept(accept),
     multiple,
     maxSize
   });
